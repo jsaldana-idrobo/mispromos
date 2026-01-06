@@ -1,0 +1,47 @@
+---
+import { BusinessType } from "@mispromos/shared";
+
+const initialVerticals = Object.values(BusinessType);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mispromos | Promos activas en tu ciudad</title>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <main class="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 px-6 py-12">
+      <header class="space-y-2">
+        <p class="text-sm font-medium uppercase tracking-wide text-indigo-600">
+          MVP en marcha
+        </p>
+        <h1 class="text-4xl font-bold leading-tight">mispromos</h1>
+        <p class="text-lg text-slate-700">
+          Centralizamos las promociones activas de negocios locales. Arrancamos en
+          Palmira, listos para escalar a más ciudades y verticales.
+        </p>
+      </header>
+
+      <section class="rounded-xl bg-white p-6 shadow-sm">
+        <h2 class="text-xl font-semibold">Verticales iniciales</h2>
+        <ul class="mt-4 grid grid-cols-2 gap-3 text-sm">
+          {initialVerticals.map((vertical) => (
+            <li class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 capitalize">
+              {vertical}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="rounded-xl border border-dashed border-indigo-200 bg-indigo-50 p-6 text-indigo-900">
+        <h2 class="text-lg font-semibold">Siguiente paso</h2>
+        <p class="mt-2">
+          Integraremos la API NestJS con Mongo y autenticación por cookies JWT, más
+          un dashboard para negocios que puedan autogestionar sus promociones.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
