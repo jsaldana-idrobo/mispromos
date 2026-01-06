@@ -11,9 +11,12 @@ let cachedHandler: ReturnType<typeof serverless> | null = null;
 
 const bootstrap = async () => {
   const expressApp = express();
+  expressApp.use(express.json());
+  expressApp.use(express.urlencoded({ extended: true }));
   const adapter = new ExpressAdapter(expressApp);
   const app = await NestFactory.create(AppModule, adapter, {
     logger: ["log", "warn", "error"],
+    bodyParser: false,
   });
 
   app.use(cookieParser());
