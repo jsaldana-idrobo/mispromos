@@ -17,6 +17,12 @@ if [ -z "$PREV" ] || [ -z "$CURR" ]; then
     exit 1
   fi
 fi
+if ! git cat-file -e "$PREV"^{commit} >/dev/null 2>&1; then
+  exit 1
+fi
+if ! git cat-file -e "$CURR"^{commit} >/dev/null 2>&1; then
+  exit 1
+fi
 
 if [ -d "apps/$APP" ]; then
   git diff --quiet "$PREV" "$CURR" -- "apps/$APP" "packages/shared" "pnpm-lock.yaml" "package.json"
