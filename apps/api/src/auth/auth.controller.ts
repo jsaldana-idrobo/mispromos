@@ -11,7 +11,6 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Response } from "express";
 import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -21,6 +20,20 @@ import { Roles } from "./roles.decorator";
 import { RolesGuard } from "./guards/roles.guard";
 import { UserRole } from "@mispromos/shared";
 import { UpdateUserRoleDto } from "./dto/update-user-role.dto";
+
+type ResponseWithCookies = {
+  cookie: (
+    name: string,
+    value: string,
+    options: {
+      httpOnly?: boolean;
+      sameSite?: "lax" | "strict" | "none";
+      secure?: boolean;
+      maxAge?: number;
+    }
+  ) => void;
+  clearCookie: (name: string) => void;
+};
 
 @Controller("auth")
 export class AuthController {
@@ -34,7 +47,7 @@ export class AuthController {
     return Number.isFinite(days) ? days * 24 * 60 * 60 * 1000 : undefined;
   }
 
-  private setAuthCookie(res: Response, token: string) {
+  private setAuthCookie(res: ResponseWithCookies, token: string) {
     const isProd = this.configService.get<string>("NODE_ENV") === "production";
     res.cookie("auth", token, {
       httpOnly: true,
@@ -45,7 +58,7 @@ export class AuthController {
   }
 
   @Post("register")
-  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
+  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: ResponseWithCookies) {
     const user = await this.authService.register(dto);
     const token = await this.authService.createAccessToken({
       id: user.id,
@@ -56,7 +69,7 @@ export class AuthController {
   }
 
   @Post("login")
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: ResponseWithCookies) {
     const user = await this.authService.validateLogin(dto);
     const token = await this.authService.createAccessToken({
       id: String(user._id),
@@ -68,7 +81,7 @@ export class AuthController {
 
   @Post("logout")
   @UseGuards(JwtAuthGuard)
-  logout(@Res({ passthrough: true }) res: Response) {
+  logout(@Res({ passthrough: true }) res: ResponseWithCookies) {
     res.clearCookie("auth");
     return { ok: true };
   }
