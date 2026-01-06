@@ -2,5 +2,5 @@
   "framework": "astro",
   "buildCommand": "pnpm --filter @mispromos/web build",
   "outputDirectory": "dist",
-  "ignoreCommand": "bash -c 'git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; git diff --quiet HEAD^ HEAD -- apps/web packages/shared pnpm-lock.yaml package.json'"
+  "ignoreCommand": "bash -c 'git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; if [ -d apps/web ]; then git diff --quiet HEAD^ HEAD -- apps/web packages/shared pnpm-lock.yaml package.json; else git diff --quiet HEAD^ HEAD -- . ../packages/shared ../pnpm-lock.yaml ../package.json; fi'"
 }
