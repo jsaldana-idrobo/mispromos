@@ -16,12 +16,16 @@ const parseErrorMessage = (payload) => {
 };
 
 const apiFetch = async (path, options) => {
+  const method = options && options.method ? options.method : "GET";
+  const headers = {
+    ...(options && options.headers ? options.headers : {}),
+  };
+  if (method !== "GET" && method !== "HEAD") {
+    headers["Content-Type"] = "application/json";
+  }
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options && options.headers ? options.headers : {}),
-    },
+    headers,
     ...options,
   });
 

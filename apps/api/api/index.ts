@@ -30,11 +30,16 @@ const bootstrap = async (): Promise<express.Express> => {
   app.use(cookieParser());
   app.useGlobalFilters(new MongoExceptionFilter());
   app.setGlobalPrefix("api/v1");
-  const rawOrigins = process.env.WEB_ORIGIN ?? "http://localhost:4321";
+  const rawOrigins = process.env.WEB_ORIGIN ?? "";
   const allowedOrigins = rawOrigins
     .split(",")
     .map((origin) => origin.trim().replace(/\/$/, ""))
     .filter(Boolean);
+  const defaultOrigins = [
+    "https://mispromos-web.vercel.app",
+    "https://mispromos-web-git-main-juansaldanas-projects.vercel.app",
+  ];
+  const originSet = new Set([...allowedOrigins, ...defaultOrigins]);
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) {
@@ -42,12 +47,16 @@ const bootstrap = async (): Promise<express.Express> => {
         return;
       }
       const normalized = origin.replace(/\/$/, "");
+      if (originSet.size === 0) {
+        callback(null, true);
+        return;
+      }
       const allowed =
-        allowedOrigins.includes(normalized) ||
+        originSet.has(normalized) ||
         (/^https:\/\/mispromos-web(-git-[a-z0-9-]+)?-juansaldanas-projects\.vercel\.app$/.test(
           normalized
         ) &&
-          allowedOrigins.some((entry) => entry.includes("mispromos-web")));
+          Array.from(originSet).some((entry) => entry.includes("mispromos-web")));
       callback(null, allowed);
     },
     credentials: true,
