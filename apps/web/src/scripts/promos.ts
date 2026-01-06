@@ -13,6 +13,7 @@ type Promotion = {
   daysOfWeek: string[];
   startHour: string;
   endHour: string;
+  active?: boolean;
 };
 
 const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
@@ -34,7 +35,7 @@ if (form && container) {
 
   const renderPromos = (promos: Promotion[]) => {
     if (promos.length === 0) {
-      renderMessage("No encontramos promos activas para esa ciudad.");
+      renderMessage("No encontramos promos activas con esos filtros.");
       return;
     }
 
@@ -69,6 +70,31 @@ if (form && container) {
       .join("");
   };
 
+  const isActiveNow = (promo: Promotion, atDate?: Date) => {
+    if (promo.active === false) {
+      return false;
+    }
+    const now = atDate ?? new Date();
+    const start = new Date(promo.startDate);
+    const end = new Date(promo.endDate);
+    if (Number.isNaN(start.valueOf()) || Number.isNaN(end.valueOf())) {
+      return false;
+    }
+    if (now < start || now > end) {
+      return false;
+    }
+    const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const day = dayNames[now.getDay()];
+    if (!promo.daysOfWeek.includes(day)) {
+      return false;
+    }
+    const hour = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(
+      2,
+      "0"
+    )}`;
+    return promo.startHour <= hour && promo.endHour >= hour;
+  };
+
   const loadPromos = async (formData: FormData) => {
     const city = String(formData.get("city") ?? "").trim();
     const atValue = String(formData.get("at") ?? "").trim();
@@ -76,32 +102,40 @@ if (form && container) {
     const category = String(formData.get("category") ?? "").trim();
     const businessType = String(formData.get("businessType") ?? "").trim();
     const queryText = String(formData.get("q") ?? "").trim();
-    if (!city) {
-      renderMessage("Ingresa una ciudad para continuar.");
+
+    renderMessage("Cargando promos...");
+    const atDate = atValue ? new Date(atValue) : undefined;
+    if (atDate && Number.isNaN(atDate.valueOf())) {
+      renderMessage("Formato de fecha inválido.");
       return;
     }
 
-    renderMessage("Cargando promos...");
-    const query = new URLSearchParams({ city });
-    if (atValue) {
-      query.set("at", new Date(atValue).toISOString());
-    }
-    if (promoType) {
-      query.set("promoType", promoType);
-    }
-    if (category) {
-      query.set("category", category);
-    }
-    if (businessType) {
-      query.set("businessType", businessType);
-    }
-    if (queryText) {
-      query.set("q", queryText);
-    }
-
     try {
-      const promos = await apiFetch<Promotion[]>(`/promotions/active?${query.toString()}`);
-      renderPromos(promos);
+      if (city) {
+        const query = new URLSearchParams({ city });
+        if (atDate) {
+          query.set("at", atDate.toISOString());
+        }
+        if (promoType) {
+          query.set("promoType", promoType);
+        }
+        if (category) {
+          query.set("category", category);
+        }
+        if (businessType) {
+          query.set("businessType", businessType);
+        }
+        if (queryText) {
+          query.set("q", queryText);
+        }
+        const promos = await apiFetch<Promotion[]>(`/promotions/active?${query.toString()}`);
+        renderPromos(promos);
+        return;
+      }
+
+      const promos = await apiFetch<Promotion[]>("/promotions");
+      const filtered = promos.filter((promo) => isActiveNow(promo, atDate));
+      renderPromos(filtered);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error consultando promociones";
       renderMessage(message);
@@ -113,10 +147,7 @@ if (form && container) {
     loadPromos(new FormData(form));
   });
 
-  const initialCity = (form.querySelector("input[name='city']") as HTMLInputElement | null)?.value;
-  if (initialCity) {
-    loadPromos(new FormData(form));
-  }
+  loadPromos(new FormData(form));
 }
 
 if (categorySelect) {

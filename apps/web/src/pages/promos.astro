@@ -12,12 +12,12 @@ const at = searchParams.get("at") ?? "";
     <div class="glass-panel rounded-3xl p-6">
       <h1 class="text-3xl font-display">Promociones activas</h1>
       <p class="mt-2 text-sm text-ink-900/60">
-        Busca por ciudad y mira lo que está vigente ahora mismo.
+        Mira promos activas y filtra por ciudad si quieres afinar resultados.
       </p>
       <form class="mt-6 grid gap-4" data-promos-form>
         <label class="grid gap-2 text-sm font-semibold">
           Ciudad
-          <input class="input-field" name="city" value={city} placeholder="Palmira" required />
+          <input class="input-field" name="city" value={city} placeholder="Palmira" />
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Tipo de promo (opcional)
@@ -62,7 +62,7 @@ const at = searchParams.get("at") ?? "";
       </p>
       <div class="mt-6 grid gap-4" data-promos-container>
         <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
-          Ingresa una ciudad para ver las promociones activas.
+          Mostrando promos activas. Agrega una ciudad para afinar resultados.
         </div>
       </div>
     </div>
