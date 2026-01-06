@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { businessTypes } from "../data/catalog";
-import promosScript from "../scripts/promos.ts?url";
 
 const { searchParams } = new URL(Astro.request.url);
 const city = searchParams.get("city") ?? "";
@@ -71,5 +70,5 @@ const at = searchParams.get("at") ?? "";
     </div>
   </section>
 
-  <script type="module" src={promosScript}></script>
+  <script type="module" src="/promos.js"></script>
 </BaseLayout>

@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { businessTypes } from "../data/catalog";
-import promosScript from "../scripts/promos.ts?url";
 ---
 
 <BaseLayout title="Mis promos | Promos activas">
@@ -66,5 +65,5 @@ import promosScript from "../scripts/promos.ts?url";
       </div>
     </div>
   </section>
-  <script type="module" src={promosScript}></script>
+  <script type="module" src="/promos.js"></script>
 </BaseLayout>
