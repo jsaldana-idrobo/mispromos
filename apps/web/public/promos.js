@@ -50,6 +50,14 @@ if (form && container) {
   const renderMessage = (message) => {
     container.innerHTML = `<div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">${message}</div>`;
   };
+  const renderLoading = (message) => {
+    container.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70 flex items-center gap-3">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>${message}</span>
+      </div>
+    `;
+  };
 
   const renderPromos = (promos) => {
     if (!Array.isArray(promos) || promos.length === 0) {
@@ -121,7 +129,7 @@ if (form && container) {
     const businessType = String(formData.get("businessType") || "").trim();
     const queryText = String(formData.get("q") || "").trim();
 
-    renderMessage("Cargando promos...");
+    renderLoading("Cargando promociones...");
     const atDate = atValue ? new Date(atValue) : undefined;
     if (atDate && Number.isNaN(atDate.valueOf())) {
       renderMessage("Formato de fecha invalido.");
@@ -169,20 +177,26 @@ if (form && container) {
 }
 
 if (categorySelect) {
+  categorySelect.disabled = true;
+  categorySelect.innerHTML = `<option value="">Cargando categorias...</option>`;
   apiFetch("/categories")
     .then((categories) => {
       categorySelect.innerHTML = [
         `<option value=\"\">Todas</option>`,
         ...categories.map((category) => `<option value=\"${category.slug}\">${category.name}</option>`),
       ].join("");
+      categorySelect.disabled = false;
     })
     .catch(() => {
       categorySelect.innerHTML = `<option value=\"\">Todas</option>`;
+      categorySelect.disabled = false;
     });
 }
 
 if (citySelect) {
   const initialCity = citySelect.dataset.initialCity || "";
+  citySelect.disabled = true;
+  citySelect.innerHTML = `<option value="">Cargando ciudades...</option>`;
   apiFetch("/cities")
     .then((cities) => {
       const options = cities.map((city) => `<option value=\"${city.name}\">${city.name}</option>`);
@@ -190,8 +204,10 @@ if (citySelect) {
       if (initialCity) {
         citySelect.value = initialCity;
       }
+      citySelect.disabled = false;
     })
     .catch(() => {
       citySelect.innerHTML = `<option value=\"\">Todas</option>`;
+      citySelect.disabled = false;
     });
 }
