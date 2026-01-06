@@ -19,11 +19,18 @@ type Promotion = {
 const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
 const container = document.querySelector<HTMLDivElement>("[data-promos-container]");
 const categorySelect = document.querySelector<HTMLSelectElement>("[data-category-select]");
+const citySelect = document.querySelector<HTMLSelectElement>("[data-city-select]");
 
 type Category = {
   _id: string;
   name: string;
   slug: string;
+};
+
+type City = {
+  _id: string;
+  name: string;
+  countryCode: string;
 };
 
 if (form && container) {
@@ -162,5 +169,22 @@ if (categorySelect) {
     })
     .catch(() => {
       categorySelect.innerHTML = `<option value=\"\">Todas</option>`;
+    });
+}
+
+if (citySelect) {
+  const initialCity = citySelect.dataset.initialCity ?? "";
+  apiFetch<City[]>("/cities")
+    .then((cities) => {
+      const options = cities.map(
+        (city) => `<option value=\"${city.name}\">${city.name}</option>`
+      );
+      citySelect.innerHTML = [`<option value=\"\">Todas</option>`, ...options].join("");
+      if (initialCity) {
+        citySelect.value = initialCity;
+      }
+    })
+    .catch(() => {
+      citySelect.innerHTML = `<option value=\"\">Todas</option>`;
     });
 }

@@ -1,9 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { businessTypes } from "../data/catalog";
+import promosScript from "../scripts/promos.ts?url";
 ---
 
-<BaseLayout title="mispromos | Promos activas">
+<BaseLayout title="Mis promos | Promos activas">
   <section class="grid gap-6 lg:grid-cols-[0.9fr,1.1fr]">
     <div class="glass-panel rounded-3xl p-6">
       <h1 class="text-3xl font-display">Promociones activas</h1>
@@ -13,7 +14,9 @@ import { businessTypes } from "../data/catalog";
       <form class="mt-6 grid gap-4" data-promos-form>
         <label class="grid gap-2 text-sm font-semibold">
           Ciudad
-          <input class="input-field" name="city" placeholder="Palmira" />
+          <select class="input-field" name="city" data-city-select>
+            <option value="">Todas</option>
+          </select>
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Tipo de promo (opcional)
@@ -63,5 +66,5 @@ import { businessTypes } from "../data/catalog";
       </div>
     </div>
   </section>
-  <script type="module" src={Astro.resolve("../scripts/promos.ts")}></script>
+  <script type="module" src={promosScript}></script>
 </BaseLayout>
