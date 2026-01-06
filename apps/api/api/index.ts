@@ -1,15 +1,15 @@
 import { NestFactory } from "@nestjs/core";
 import { ExpressAdapter } from "@nestjs/platform-express";
-import express, { type Response } from "express";
-import serverless from "serverless-http";
+import express, { type Request, type Response } from "express";
 import { ValidationPipe } from "@nestjs/common";
 import cookieParser from "cookie-parser";
 import { AppModule } from "../src/app.module";
 import { MongoExceptionFilter } from "../src/common/filters/mongo-exception.filter";
 
-let cachedHandler: ReturnType<typeof serverless> | null = null;
+let cachedServer: express.Express | null = null;
+let cachedInit: Promise<express.Express> | null = null;
 
-const bootstrap = async () => {
+const bootstrap = async (): Promise<express.Express> => {
   const expressApp = express();
   expressApp.use(express.json());
   expressApp.use(express.urlencoded({ extended: true }));
@@ -44,12 +44,13 @@ const bootstrap = async () => {
   );
 
   await app.init();
-  return serverless(expressApp);
+  return expressApp;
 };
 
-export default async function handler(...args: Parameters<ReturnType<typeof serverless>>) {
-  if (!cachedHandler) {
-    cachedHandler = await bootstrap();
+export default async function handler(req: Request, res: Response) {
+  if (!cachedServer) {
+    cachedInit = cachedInit ?? bootstrap();
+    cachedServer = await cachedInit;
   }
-  return cachedHandler(...args);
+  return cachedServer(req, res);
 }
