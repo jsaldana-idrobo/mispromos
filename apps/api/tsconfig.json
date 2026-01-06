@@ -11,8 +11,8 @@
     "outDir": "dist",
     "baseUrl": "./src",
     "paths": {
-      "@mispromos/shared": ["../../packages/shared/src/index.ts"],
-      "@mispromos/shared/*": ["../../packages/shared/src/*"]
+      "@mispromos/shared": ["../../../packages/shared/src/index.ts"],
+      "@mispromos/shared/*": ["../../../packages/shared/src/*"]
     },
     "incremental": true
   },
