@@ -1,5 +1,6 @@
 {
   "framework": "astro",
+  "installCommand": "bash ../../scripts/vercel-install.sh web",
   "buildCommand": "pnpm --filter @mispromos/web build",
   "outputDirectory": "dist",
   "ignoreCommand": "bash ../../scripts/vercel-ignore.sh web"

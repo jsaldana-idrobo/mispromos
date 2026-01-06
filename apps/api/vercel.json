@@ -2,5 +2,6 @@
   "version": 2,
   "builds": [{ "src": "api/index.ts", "use": "@vercel/node" }],
   "routes": [{ "src": "/(.*)", "dest": "api/index.ts" }],
+  "installCommand": "bash ../../scripts/vercel-install.sh api",
   "ignoreCommand": "bash ../../scripts/vercel-ignore.sh api"
 }
