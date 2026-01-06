@@ -1,0 +1,72 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { businessTypes } from "../data/catalog";
+
+const { searchParams } = new URL(Astro.request.url);
+const city = searchParams.get("city") ?? "";
+const at = searchParams.get("at") ?? "";
+---
+
+<BaseLayout title="mispromos | Promos activas">
+  <section class="grid gap-6 lg:grid-cols-[0.9fr,1.1fr]">
+    <div class="glass-panel rounded-3xl p-6">
+      <h1 class="text-3xl font-display">Promociones activas</h1>
+      <p class="mt-2 text-sm text-ink-900/60">
+        Busca por ciudad y mira lo que está vigente ahora mismo.
+      </p>
+      <form class="mt-6 grid gap-4" data-promos-form>
+        <label class="grid gap-2 text-sm font-semibold">
+          Ciudad
+          <input class="input-field" name="city" value={city} placeholder="Palmira" required />
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Tipo de promo (opcional)
+          <select class="input-field" name="promoType">
+            <option value="">Todas</option>
+            <option value="discount">Descuento</option>
+            <option value="2x1">2x1</option>
+            <option value="combo">Combo</option>
+            <option value="other">Otra</option>
+          </select>
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Tipo de negocio (opcional)
+          <select class="input-field" name="businessType">
+            <option value="">Todos</option>
+            {businessTypes.map((type) => (
+              <option value={type}>{type}</option>
+            ))}
+          </select>
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Categoría (opcional)
+          <select class="input-field" name="category" data-category-select>
+            <option value="">Todas</option>
+          </select>
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Buscar (opcional)
+          <input class="input-field" name="q" placeholder="2x1, combo, hamburguesa" />
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Fecha y hora (opcional)
+          <input class="input-field" type="datetime-local" name="at" value={at} />
+        </label>
+        <button class="button-primary" type="submit">Actualizar</button>
+      </form>
+    </div>
+    <div class="rounded-3xl border border-ink-900/10 bg-white/70 p-6">
+      <h2 class="text-lg font-semibold">Resultados</h2>
+      <p class="mt-2 text-sm text-ink-900/60">
+        Promos activas por sede o globales para todo el negocio.
+      </p>
+      <div class="mt-6 grid gap-4" data-promos-container>
+        <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+          Ingresa una ciudad para ver las promociones activas.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="../scripts/promos.ts"></script>
+</BaseLayout>

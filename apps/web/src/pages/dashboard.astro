@@ -1,0 +1,249 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { businessTypes, promoTypes, daysOfWeek } from "../data/catalog";
+
+const days = daysOfWeek;
+---
+
+<BaseLayout title="mispromos | Dashboard">
+  <section class="grid gap-8 lg:grid-cols-[1fr,1.1fr]">
+    <div class="space-y-6">
+      <div class="glass-panel rounded-3xl p-6">
+        <h1 class="text-3xl font-display">Dashboard de negocios</h1>
+        <p class="mt-2 text-sm text-ink-900/60">
+          Administra negocios, sedes y promociones. Necesitas rol BUSINESS_OWNER.
+        </p>
+        <div class="mt-4 rounded-2xl border border-ink-900/10 bg-white/70 p-4 text-sm" data-user-card>
+          Cargando usuario...
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-ink-900/10 bg-white/80 p-6">
+        <h2 class="text-lg font-semibold">Tus negocios</h2>
+        <div class="mt-4 grid gap-3" data-business-list>
+          <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+            Aun no hay negocios.
+          </div>
+        </div>
+        <div class="mt-4 grid gap-3">
+          <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
+            Sedes del negocio
+          </h3>
+          <div class="grid gap-3" data-branch-list>
+            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+              Selecciona un negocio para ver sedes.
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 grid gap-3">
+          <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
+            Promociones activas
+          </h3>
+          <div class="grid gap-3" data-promo-list>
+            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+              Selecciona un negocio para ver promociones.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-admin-panel hidden>
+        <h2 class="text-lg font-semibold">Panel admin</h2>
+        <p class="mt-2 text-sm text-ink-900/60">
+          Gestiona el catálogo de ciudades y categorías públicas.
+        </p>
+        <div class="mt-4 grid gap-6">
+          <div>
+            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
+              Ciudades
+            </h3>
+            <form class="mt-3 grid gap-3" data-city-form>
+              <div class="flex items-center justify-between text-xs text-ink-900/60">
+                <span data-city-mode>Modo crear</span>
+                <button class="underline" type="button" data-city-cancel hidden>
+                  Cancelar edición
+                </button>
+              </div>
+              <input class="input-field" name="name" placeholder="Palmira" required />
+              <input class="input-field" name="countryCode" placeholder="CO" required maxlength="2" />
+              <button class="button-secondary" type="submit">Agregar ciudad</button>
+              <p class="text-sm text-ink-900/60" data-city-message></p>
+            </form>
+            <div class="mt-4 grid gap-2 text-sm" data-city-list></div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
+              Categorías
+            </h3>
+            <form class="mt-3 grid gap-3" data-category-form>
+              <div class="flex items-center justify-between text-xs text-ink-900/60">
+                <span data-category-mode>Modo crear</span>
+                <button class="underline" type="button" data-category-cancel hidden>
+                  Cancelar edición
+                </button>
+              </div>
+              <input class="input-field" name="name" placeholder="Pizza" required />
+              <input class="input-field" name="slug" placeholder="pizza" required />
+              <button class="button-secondary" type="submit">Agregar categoría</button>
+              <p class="text-sm text-ink-900/60" data-category-message></p>
+            </form>
+            <div class="mt-4 grid gap-2 text-sm" data-category-list></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="glass-panel rounded-3xl p-6">
+        <h2 class="text-xl font-semibold">Crear negocio</h2>
+        <form class="mt-4 grid gap-4" data-business-form>
+          <div class="flex items-center justify-between text-xs text-ink-900/60">
+            <span data-business-mode>Modo crear</span>
+            <button class="underline" type="button" data-business-cancel hidden>
+              Cancelar edición
+            </button>
+          </div>
+          <label class="grid gap-2 text-sm font-semibold">
+            Nombre
+            <input class="input-field" name="name" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Slug
+            <input class="input-field" name="slug" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Tipo
+            <select class="input-field" name="type" required>
+              {businessTypes.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Categorías (separadas por coma)
+            <select class="input-field" name="categories" data-business-category-select multiple></select>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Descripción
+            <textarea class="input-field" name="description" rows={2}></textarea>
+          </label>
+          <p class="text-sm text-ink-900/60" data-business-message></p>
+          <button class="button-primary" type="submit">Guardar negocio</button>
+        </form>
+      </div>
+
+      <div class="glass-panel rounded-3xl p-6">
+        <h2 class="text-xl font-semibold">Crear sede</h2>
+        <form class="mt-4 grid gap-4" data-branch-form>
+          <div class="flex items-center justify-between text-xs text-ink-900/60">
+            <span data-branch-mode>Modo crear</span>
+            <button class="underline" type="button" data-branch-cancel hidden>
+              Cancelar edición
+            </button>
+          </div>
+          <label class="grid gap-2 text-sm font-semibold">
+            Negocio
+            <select class="input-field" name="businessId" data-business-select required></select>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Ciudad
+            <input class="input-field" name="city" placeholder="Palmira" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Dirección
+            <input class="input-field" name="address" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Zona (opcional)
+            <input class="input-field" name="zone" />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Teléfono (opcional)
+            <input class="input-field" name="phone" />
+          </label>
+          <p class="text-sm text-ink-900/60" data-branch-message></p>
+          <button class="button-primary" type="submit">Guardar sede</button>
+        </form>
+      </div>
+
+      <div class="glass-panel rounded-3xl p-6">
+        <h2 class="text-xl font-semibold">Crear promoción</h2>
+        <form class="mt-4 grid gap-4" data-promo-form>
+          <div class="flex items-center justify-between text-xs text-ink-900/60">
+            <span data-promo-mode>Modo crear</span>
+            <button class="underline" type="button" data-promo-cancel hidden>
+              Cancelar edición
+            </button>
+          </div>
+          <label class="grid gap-2 text-sm font-semibold">
+            Negocio
+            <select class="input-field" name="businessId" data-business-select required></select>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Sede (opcional)
+            <select class="input-field" name="branchId" data-branch-select>
+              <option value="">Global</option>
+            </select>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Título
+            <input class="input-field" name="title" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Descripción (opcional)
+            <textarea class="input-field" name="description" rows={2}></textarea>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Tipo de promo
+            <select class="input-field" name="promoType" required>
+              {promoTypes.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Valor (opcional)
+            <input class="input-field" name="value" placeholder="50% / 2x1" />
+          </label>
+          <div class="grid gap-2">
+            <span class="text-sm font-semibold">Días de la semana</span>
+            <div class="flex flex-wrap gap-2 text-sm">
+              {days.map((day) => (
+                <label class="flex items-center gap-2 rounded-full border border-ink-900/10 bg-sand-100 px-3 py-1">
+                  <input type="checkbox" name="daysOfWeek" value={day} checked />
+                  <span class="capitalize">{day}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="grid gap-2 text-sm font-semibold">
+              Inicio (fecha)
+              <input class="input-field" type="date" name="startDate" required />
+            </label>
+            <label class="grid gap-2 text-sm font-semibold">
+              Fin (fecha)
+              <input class="input-field" type="date" name="endDate" required />
+            </label>
+            <label class="grid gap-2 text-sm font-semibold">
+              Hora inicio
+              <input class="input-field" type="time" name="startHour" required />
+            </label>
+            <label class="grid gap-2 text-sm font-semibold">
+              Hora fin
+              <input class="input-field" type="time" name="endHour" required />
+            </label>
+          </div>
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="active" checked />
+            Activa
+          </label>
+          <p class="text-sm text-ink-900/60" data-promo-message></p>
+          <button class="button-primary" type="submit">Guardar promoción</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="../scripts/dashboard.ts"></script>
+</BaseLayout>

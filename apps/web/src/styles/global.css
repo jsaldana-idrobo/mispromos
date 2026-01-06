@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600&display=swap");
+
+@import "./components.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink-900: 26 23 22;
+  --sand-100: 250 247 242;
+  --copper-500: 207 110 75;
+  --sage-500: 86 129 109;
+  --violet-400: 129 112 180;
+}
+
+body {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+.bg-radiant {
+  background:
+    radial-gradient(1000px circle at 10% 10%, rgba(207, 110, 75, 0.15), transparent 55%),
+    radial-gradient(800px circle at 90% 15%, rgba(86, 129, 109, 0.2), transparent 45%),
+    radial-gradient(900px circle at 40% 80%, rgba(129, 112, 180, 0.12), transparent 50%),
+    rgb(250 247 242);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(26, 23, 22, 0.08);
+  box-shadow: 0 24px 70px rgba(26, 23, 22, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.input-field {
+  @apply w-full rounded-2xl border border-ink-900/10 bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-ink-900/40;
+}
+
+.button-primary {
+  @apply inline-flex items-center justify-center rounded-full bg-ink-900 px-6 py-3 text-sm font-semibold text-sand-100 transition hover:bg-ink-900/90;
+}
+
+.button-secondary {
+  @apply inline-flex items-center justify-center rounded-full border border-ink-900/20 px-6 py-3 text-sm font-semibold text-ink-900 transition hover:border-ink-900/50;
+}

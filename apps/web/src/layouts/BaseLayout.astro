@@ -1,0 +1,52 @@
+---
+import "../styles/global.css";
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? "http://localhost:3000/api/v1";
+const title = Astro.props.title ?? "mispromos";
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-sand-100 text-ink-900" data-api-base={apiBase}>
+    <div class="min-h-screen bg-radiant">
+      <header class="border-b border-ink-900/10 bg-sand-100/70 backdrop-blur">
+        <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="/" class="flex items-center gap-3">
+            <span class="text-xl font-display font-bold tracking-tight">mispromos</span>
+            <span class="rounded-full bg-ink-900/5 px-2 py-1 text-xs uppercase tracking-[0.2em]">
+              beta
+            </span>
+          </a>
+          <nav class="flex items-center gap-4 text-sm font-medium">
+            <a href="/promos" class="transition hover:text-ink-700">Promos</a>
+            <a href="/dashboard" class="transition hover:text-ink-700">Negocios</a>
+            <a
+              href="/login"
+              class="rounded-full border border-ink-900/20 px-4 py-2 transition hover:border-ink-900/50"
+            >
+              Entrar
+            </a>
+          </nav>
+        </div>
+      </header>
+      <main class="mx-auto w-full max-w-6xl px-6 py-10">
+        <slot />
+      </main>
+      <footer class="border-t border-ink-900/10 bg-sand-100/80">
+        <div
+          class="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-6 text-sm text-ink-700 md:flex-row md:items-center md:justify-between"
+        >
+          <p>mispromos · promos locales en tiempo real.</p>
+          <div class="flex gap-4">
+            <a href="/register" class="underline-offset-4 hover:underline">Crea tu cuenta</a>
+            <a href="/promos" class="underline-offset-4 hover:underline">Explorar promos</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

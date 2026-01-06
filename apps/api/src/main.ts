@@ -2,6 +2,7 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
+import { MongoExceptionFilter } from "./common/filters/mongo-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -9,7 +10,13 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+  app.useGlobalFilters(new MongoExceptionFilter());
   app.setGlobalPrefix("api/v1");
+  const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:4321";
+  app.enableCors({
+    origin: webOrigin,
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

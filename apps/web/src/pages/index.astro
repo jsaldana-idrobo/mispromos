@@ -1,47 +1,100 @@
 ---
-import { BusinessType } from "@mispromos/shared";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { businessTypes } from "../data/catalog";
 
-const initialVerticals = Object.values(BusinessType);
+const verticals = businessTypes;
 ---
 
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>mispromos | Promos activas en tu ciudad</title>
-  </head>
-  <body class="bg-slate-50 text-slate-900">
-    <main class="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 px-6 py-12">
-      <header class="space-y-2">
-        <p class="text-sm font-medium uppercase tracking-wide text-indigo-600">
-          MVP en marcha
-        </p>
-        <h1 class="text-4xl font-bold leading-tight">mispromos</h1>
-        <p class="text-lg text-slate-700">
-          Centralizamos las promociones activas de negocios locales. Arrancamos en
-          Palmira, listos para escalar a más ciudades y verticales.
-        </p>
-      </header>
+<BaseLayout title="mispromos | Promos activas ahora">
+  <section class="grid gap-10 lg:grid-cols-[1.1fr,0.9fr]">
+    <div class="space-y-6">
+      <p class="text-sm uppercase tracking-[0.3em] text-ink-900/60">
+        Promos locales en tiempo real
+      </p>
+      <h1 class="text-4xl font-display text-ink-900 sm:text-5xl">
+        Encuentra lo que quieres comer o comprar sin perder tiempo.
+      </h1>
+      <p class="text-lg text-ink-900/70">
+        mispromos reúne promociones activas de negocios locales, filtradas por ciudad,
+        día y hora. Entra, elige tu ciudad y descubre lo que está vigente ahora mismo.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a class="button-primary" href="/promos?city=Palmira">Ver promos hoy</a>
+        <a class="button-secondary" href="/register">Soy un negocio</a>
+      </div>
+      <div class="flex flex-wrap gap-4 text-sm text-ink-900/70">
+        <span class="rounded-full border border-ink-900/10 px-4 py-2">Palmira primero</span>
+        <span class="rounded-full border border-ink-900/10 px-4 py-2">Escalable global</span>
+        <span class="rounded-full border border-ink-900/10 px-4 py-2">Promos verificadas</span>
+      </div>
+    </div>
 
-      <section class="rounded-xl bg-white p-6 shadow-sm">
-        <h2 class="text-xl font-semibold">Verticales iniciales</h2>
-        <ul class="mt-4 grid grid-cols-2 gap-3 text-sm">
-          {initialVerticals.map((vertical) => (
-            <li class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 capitalize">
-              {vertical}
-            </li>
-          ))}
-        </ul>
-      </section>
+    <div class="glass-panel rounded-3xl p-6">
+      <h2 class="text-xl font-semibold">Explora por ciudad</h2>
+      <p class="mt-2 text-sm text-ink-900/60">
+        Escribe tu ciudad y te mostramos las promociones activas ahora mismo.
+      </p>
+      <form class="mt-6 grid gap-4" action="/promos" method="get">
+        <label class="grid gap-2 text-sm font-semibold">
+          Ciudad
+          <input class="input-field" name="city" placeholder="Palmira" required />
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Fecha y hora (opcional)
+          <input class="input-field" type="datetime-local" name="at" />
+        </label>
+        <button class="button-primary w-full" type="submit">Buscar promos</button>
+      </form>
+      <div class="mt-6 grid gap-4">
+        <div class="rounded-2xl border border-ink-900/10 bg-white/70 p-4">
+          <p class="text-xs uppercase tracking-[0.3em] text-ink-900/40">Ahora mismo</p>
+          <p class="mt-2 text-sm text-ink-900/70">
+            Promos con horarios vigentes, días de la semana y rango de fechas.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-ink-900/10 bg-white/70 p-4">
+          <p class="text-xs uppercase tracking-[0.3em] text-ink-900/40">Negocios</p>
+          <p class="mt-2 text-sm text-ink-900/70">
+            Los dueños administran sus sedes y promociones desde un dashboard simple.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      <section class="rounded-xl border border-dashed border-indigo-200 bg-indigo-50 p-6 text-indigo-900">
-        <h2 class="text-lg font-semibold">Siguiente paso</h2>
-        <p class="mt-2">
-          Integraremos la API NestJS con Mongo y autenticación por cookies JWT, más
-          un dashboard para negocios que puedan autogestionar sus promociones.
+  <section class="mt-14 grid gap-6 lg:grid-cols-[0.8fr,1.2fr]">
+    <div class="rounded-3xl border border-ink-900/10 bg-white/70 p-6">
+      <h2 class="text-2xl font-display">Verticales iniciales</h2>
+      <p class="mt-2 text-sm text-ink-900/60">
+        Empezamos con restaurantes, pero la plataforma está lista para más categorías.
+      </p>
+      <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
+        {verticals.map((vertical) => (
+          <span class="rounded-2xl border border-ink-900/10 bg-sand-100 px-3 py-2 capitalize">
+            {vertical}
+          </span>
+        ))}
+      </div>
+    </div>
+    <div class="grid gap-4">
+      <div class="glass-panel rounded-3xl p-6">
+        <h3 class="text-lg font-semibold">Cómo funciona</h3>
+        <ol class="mt-4 grid gap-3 text-sm text-ink-900/70">
+          <li>1. Elige tu ciudad y momento.</li>
+          <li>2. Filtramos promos activas por día y hora.</li>
+          <li>3. Te llevamos directo a lo que se antoja.</li>
+        </ol>
+      </div>
+      <div class="rounded-3xl border border-ink-900/10 bg-ink-900 px-6 py-8 text-sand-100">
+        <h3 class="text-xl font-display">¿Eres negocio?</h3>
+        <p class="mt-2 text-sm text-sand-100/80">
+          Gestiona múltiples sedes y promociones con control total sobre fechas y horarios.
         </p>
-      </section>
-    </main>
-  </body>
-</html>
+        <a href="/dashboard" class="mt-5 inline-flex rounded-full bg-sand-100 px-5 py-2 text-sm font-semibold text-ink-900">
+          Ir al dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+  <script type="module" src="../scripts/seo.ts"></script>
+</BaseLayout>
