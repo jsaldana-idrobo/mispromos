@@ -1,4 +1,5 @@
-import { IsDateString, IsOptional, IsString, MinLength, IsEnum } from "class-validator";
+import { IsDateString, IsOptional, IsString, MinLength, IsEnum, IsInt, Min, Max } from "class-validator";
+import { Type } from "class-transformer";
 import { PromotionType, BusinessType } from "@mispromos/shared";
 
 export class ActivePromotionsQueryDto {
@@ -26,4 +27,17 @@ export class ActivePromotionsQueryDto {
   @IsString()
   @IsOptional()
   q?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(50)
+  limit?: number;
 }

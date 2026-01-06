@@ -48,7 +48,9 @@ export class PromotionController {
       query.promoType,
       query.category,
       query.businessType,
-      query.q
+      query.q,
+      query.offset,
+      query.limit
     );
   }
 

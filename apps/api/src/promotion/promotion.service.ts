@@ -97,7 +97,9 @@ export class PromotionService {
     promoType?: string,
     category?: string,
     businessType?: string,
-    q?: string
+    q?: string,
+    offset?: number,
+    limit?: number
   ) {
     const now = at ? new Date(at) : new Date();
     if (Number.isNaN(now.valueOf())) {
@@ -162,6 +164,9 @@ export class PromotionService {
         }
       : {};
 
+    const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
+    const safeOffset = Math.max(offset ?? 0, 0);
+
     return this.promotionModel
       .find({
         ...branchFilter,
@@ -175,6 +180,9 @@ export class PromotionService {
         startHour: { $lte: time },
         endHour: { $gte: time },
       })
+      .sort({ createdAt: -1 })
+      .skip(safeOffset)
+      .limit(safeLimit)
       .exec();
   }
 
