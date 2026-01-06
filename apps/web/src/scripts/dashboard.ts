@@ -93,6 +93,7 @@ const ownerSections = Array.from(document.querySelectorAll<HTMLElement>("[data-o
 const authGate = document.querySelector<HTMLElement>("[data-auth-gate]");
 const authGateText = document.querySelector<HTMLElement>("[data-auth-gate-text]");
 const branchCitySelect = document.querySelector<HTMLSelectElement>("[data-branch-city-select]");
+const dashboardHero = document.querySelector<HTMLElement>("[data-dashboard-hero]");
 
 let businesses: Business[] = [];
 let branches: Branch[] = [];
@@ -351,6 +352,9 @@ const renderUser = () => {
     setFormsEnabled(false);
     setOwnerSectionsVisible(false);
     setAuthGateVisible(true);
+    if (dashboardHero) {
+      dashboardHero.hidden = true;
+    }
     if (authGateText) {
       authGateText.textContent =
         "Inicia sesión con una cuenta de negocio para administrar promociones.";
@@ -380,6 +384,9 @@ const renderUser = () => {
   setFormsEnabled(ownerAccess);
   setOwnerSectionsVisible(ownerAccess);
   setAuthGateVisible(!ownerAccess);
+  if (dashboardHero) {
+    dashboardHero.hidden = !ownerAccess;
+  }
   if (!ownerAccess && authGateText) {
     authGateText.textContent =
       "Tu usuario es de tipo visitante. Necesitas una cuenta de negocio para administrar promociones.";
