@@ -2,5 +2,5 @@
   "version": 2,
   "builds": [{ "src": "api/index.ts", "use": "@vercel/node" }],
   "routes": [{ "src": "/(.*)", "dest": "api/index.ts" }],
-  "ignoreCommand": "bash -c 'git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; if [ -d apps/api ]; then git diff --quiet HEAD^ HEAD -- apps/api packages/shared pnpm-lock.yaml package.json; else git diff --quiet HEAD^ HEAD -- . ../packages/shared ../pnpm-lock.yaml ../package.json; fi'"
+  "ignoreCommand": "bash -c 'set -e; PREV=${VERCEL_GIT_PREVIOUS_SHA:-}; CURR=${VERCEL_GIT_COMMIT_SHA:-}; if [ -z \"$PREV\" ] || [ -z \"$CURR\" ]; then git rev-parse HEAD^ >/dev/null 2>&1 || exit 1; PREV=HEAD^; CURR=HEAD; fi; if [ -d apps/api ]; then git diff --quiet \"$PREV\" \"$CURR\" -- apps/api packages/shared pnpm-lock.yaml package.json; else git diff --quiet \"$PREV\" \"$CURR\" -- . ../packages/shared ../pnpm-lock.yaml ../package.json; fi'"
 }
