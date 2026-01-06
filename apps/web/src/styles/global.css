@@ -8,10 +8,10 @@
 
 :root {
   --ink-900: 26 23 22;
-  --sand-100: 250 247 242;
-  --copper-500: 207 110 75;
-  --sage-500: 86 129 109;
-  --violet-400: 129 112 180;
+  --sand-100: 252 248 243;
+  --copper-500: 233 120 82;
+  --sage-500: 76 146 128;
+  --sunset-400: 244 189 120;
 }
 
 body {
@@ -20,27 +20,31 @@ body {
 
 .bg-radiant {
   background:
-    radial-gradient(1000px circle at 10% 10%, rgba(207, 110, 75, 0.15), transparent 55%),
-    radial-gradient(800px circle at 90% 15%, rgba(86, 129, 109, 0.2), transparent 45%),
-    radial-gradient(900px circle at 40% 80%, rgba(129, 112, 180, 0.12), transparent 50%),
-    rgb(250 247 242);
+    radial-gradient(900px circle at 12% 8%, rgba(233, 120, 82, 0.22), transparent 55%),
+    radial-gradient(800px circle at 88% 18%, rgba(76, 146, 128, 0.24), transparent 50%),
+    radial-gradient(1000px circle at 45% 85%, rgba(244, 189, 120, 0.18), transparent 55%),
+    rgb(252 248 243);
 }
 
 .glass-panel {
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(26, 23, 22, 0.08);
-  box-shadow: 0 24px 70px rgba(26, 23, 22, 0.08);
+  box-shadow: 0 24px 70px rgba(26, 23, 22, 0.1);
   backdrop-filter: blur(10px);
 }
 
 .input-field {
-  @apply w-full rounded-2xl border border-ink-900/10 bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-ink-900/40;
+  @apply w-full rounded-2xl border border-ink-900/10 bg-white/85 px-4 py-3 text-sm outline-none transition focus:border-ink-900/40;
+  box-shadow: 0 0 0 0 transparent;
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center rounded-full bg-ink-900 px-6 py-3 text-sm font-semibold text-sand-100 transition hover:bg-ink-900/90;
+  @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-white transition;
+  background: linear-gradient(135deg, rgb(var(--copper-500)), rgb(var(--sage-500)));
+  box-shadow: 0 10px 24px rgba(26, 23, 22, 0.18);
 }
 
 .button-secondary {
-  @apply inline-flex items-center justify-center rounded-full border border-ink-900/20 px-6 py-3 text-sm font-semibold text-ink-900 transition hover:border-ink-900/50;
+  @apply inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-semibold text-ink-900 transition hover:border-ink-900/50;
+  border-color: rgba(233, 120, 82, 0.35);
 }

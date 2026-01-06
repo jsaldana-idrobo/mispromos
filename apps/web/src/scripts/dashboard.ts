@@ -89,6 +89,10 @@ const categoryCancel = document.querySelector<HTMLButtonElement>("[data-category
 const categorySuggestions = document.querySelector<HTMLSelectElement>(
   "[data-business-category-select]"
 );
+const ownerSections = Array.from(document.querySelectorAll<HTMLElement>("[data-owner-only]"));
+const authGate = document.querySelector<HTMLElement>("[data-auth-gate]");
+const authGateText = document.querySelector<HTMLElement>("[data-auth-gate-text]");
+const branchCitySelect = document.querySelector<HTMLSelectElement>("[data-branch-city-select]");
 
 let businesses: Business[] = [];
 let branches: Branch[] = [];
@@ -291,10 +295,52 @@ const setFormsEnabled = (enabled: boolean) => {
   [businessForm, branchForm, promoForm].forEach((form) => {
     if (!form) return;
     Array.from(form.elements).forEach((element) => {
-      if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
+      if (
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLSelectElement ||
+        element instanceof HTMLTextAreaElement
+      ) {
         element.disabled = !enabled;
       }
     });
+  });
+};
+
+const setOwnerSectionsVisible = (visible: boolean) => {
+  ownerSections.forEach((section) => {
+    section.hidden = !visible;
+  });
+};
+
+const setAuthGateVisible = (visible: boolean) => {
+  if (authGate) {
+    authGate.hidden = !visible;
+  }
+};
+
+const setBranchFormEnabled = (enabled: boolean) => {
+  if (!branchForm) return;
+  Array.from(branchForm.elements).forEach((element) => {
+    if (
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLSelectElement ||
+      element instanceof HTMLTextAreaElement
+    ) {
+      element.disabled = !enabled;
+    }
+  });
+};
+
+const setPromoFormEnabled = (enabled: boolean) => {
+  if (!promoForm) return;
+  Array.from(promoForm.elements).forEach((element) => {
+    if (
+      element instanceof HTMLInputElement ||
+      element instanceof HTMLSelectElement ||
+      element instanceof HTMLTextAreaElement
+    ) {
+      element.disabled = !enabled;
+    }
   });
 };
 
@@ -303,6 +349,12 @@ const renderUser = () => {
   if (!currentUser) {
     userCard.innerHTML = "Inicia sesión para administrar tus negocios.";
     setFormsEnabled(false);
+    setOwnerSectionsVisible(false);
+    setAuthGateVisible(true);
+    if (authGateText) {
+      authGateText.textContent =
+        "Inicia sesión con una cuenta de negocio para administrar promociones.";
+    }
     return;
   }
 
@@ -326,6 +378,12 @@ const renderUser = () => {
 
   const ownerAccess = currentUser.role === "BUSINESS_OWNER" || currentUser.role === "ADMIN";
   setFormsEnabled(ownerAccess);
+  setOwnerSectionsVisible(ownerAccess);
+  setAuthGateVisible(!ownerAccess);
+  if (!ownerAccess && authGateText) {
+    authGateText.textContent =
+      "Tu usuario es de tipo visitante. Necesitas una cuenta de negocio para administrar promociones.";
+  }
   if (adminPanel) {
     adminPanel.hidden = currentUser.role !== "ADMIN";
   }
@@ -497,6 +555,9 @@ const loadBusinesses = async () => {
   businesses = response;
   renderBusinesses();
   populateBusinessSelects();
+  const hasBusinesses = businesses.length > 0;
+  setBranchFormEnabled(hasBusinesses);
+  setPromoFormEnabled(hasBusinesses);
   if (businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
     await loadBranches(currentBusinessId);
@@ -572,6 +633,12 @@ const renderCategories = () => {
 const loadCities = async () => {
   cities = await apiFetch<City[]>("/cities");
   renderCities();
+  if (branchCitySelect) {
+    branchCitySelect.innerHTML = [
+      `<option value=\"\">Selecciona una ciudad</option>`,
+      ...cities.map((city) => `<option value=\"${city.name}\">${city.name}</option>`),
+    ].join("");
+  }
 };
 
 const loadCategories = async () => {
@@ -906,6 +973,8 @@ const wireSelectors = () => {
     select.addEventListener("change", async () => {
       if (select.value) {
         currentBusinessId = select.value;
+        setBranchFormEnabled(true);
+        setPromoFormEnabled(true);
         await loadBranches(select.value);
         const promos = await loadPromotions(select.value);
         renderPromotions(promos);
@@ -1068,6 +1137,8 @@ const wireCancelButtons = () => {
   await loadUser();
   if (currentUser) {
     await loadBusinesses();
+    await loadCities();
+    await loadCategories();
   }
   renderBusinesses();
   populateBusinessSelects();
@@ -1083,8 +1154,6 @@ const wireCancelButtons = () => {
   handleBranchForm();
   handlePromoForm();
   if (currentUser?.role === "ADMIN") {
-    await loadCities();
-    await loadCategories();
     handleCityForm();
     handleCategoryForm();
     wireAdminActions();

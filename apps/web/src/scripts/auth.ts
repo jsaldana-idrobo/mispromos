@@ -34,7 +34,7 @@ if (form) {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      showToast("Listo", "Bienvenido a mispromos.", "success");
+      showToast("Listo", "Bienvenido a Mis promos.", "success");
       window.location.href = "/dashboard";
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al autenticar";
