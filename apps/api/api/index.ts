@@ -1,6 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { ExpressAdapter } from "@nestjs/platform-express";
-import express from "express";
+import express, { type Response } from "express";
 import serverless from "serverless-http";
 import { ValidationPipe } from "@nestjs/common";
 import cookieParser from "cookie-parser";
@@ -13,6 +13,14 @@ const bootstrap = async () => {
   const expressApp = express();
   expressApp.use(express.json());
   expressApp.use(express.urlencoded({ extended: true }));
+  expressApp.get("/", (_, res: Response) => {
+    const port = process.env.PORT ?? "3000";
+    res.json({
+      status: "ok",
+      service: "api",
+      message: `mispromos API running on port ${port}`,
+    });
+  });
   const adapter = new ExpressAdapter(expressApp);
   const app = await NestFactory.create(AppModule, adapter, {
     logger: ["log", "warn", "error"],
