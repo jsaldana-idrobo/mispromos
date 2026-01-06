@@ -92,17 +92,13 @@ export class PromotionService {
   }
 
   async findActiveByCity(
-    city: string,
+    city?: string,
     at?: string,
     promoType?: string,
     category?: string,
     businessType?: string,
     q?: string
   ) {
-    if (!city) {
-      throw new BadRequestException("city es requerido");
-    }
-
     const now = at ? new Date(at) : new Date();
     if (Number.isNaN(now.valueOf())) {
       throw new BadRequestException("Formato de fecha inválido");
@@ -111,26 +107,29 @@ export class PromotionService {
     const day = this.getDayOfWeek(now);
     const time = this.formatTime(now);
 
-    const branchIds = await this.branchModel
-      .find({ city })
-      .select("_id")
-      .lean()
-      .exec();
+    let branchFilter: Record<string, unknown> = {};
+    if (city) {
+      const branchIds = await this.branchModel
+        .find({ city })
+        .select("_id")
+        .lean()
+        .exec();
 
-    const branchIdStrings = branchIds.map((branch) => String(branch._id));
+      const branchIdStrings = branchIds.map((branch) => String(branch._id));
 
-    const branchFilter =
-      branchIdStrings.length > 0
-        ? {
-            $or: [
-              { branchId: null },
-              { branchId: { $exists: false } },
-              { branchId: { $in: branchIdStrings } },
-            ],
-          }
-        : {
-            $or: [{ branchId: null }, { branchId: { $exists: false } }],
-          };
+      branchFilter =
+        branchIdStrings.length > 0
+          ? {
+              $or: [
+                { branchId: null },
+                { branchId: { $exists: false } },
+                { branchId: { $in: branchIdStrings } },
+              ],
+            }
+          : {
+              $or: [{ branchId: null }, { branchId: { $exists: false } }],
+            };
+    }
 
     let businessFilter: Record<string, unknown> = {};
     if (category || businessType) {

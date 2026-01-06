@@ -2,9 +2,10 @@ import { IsDateString, IsOptional, IsString, MinLength, IsEnum } from "class-val
 import { PromotionType, BusinessType } from "@mispromos/shared";
 
 export class ActivePromotionsQueryDto {
+  @IsOptional()
   @IsString()
   @MinLength(1)
-  city!: string;
+  city?: string;
 
   @IsDateString()
   @IsOptional()

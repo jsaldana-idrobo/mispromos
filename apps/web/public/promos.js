@@ -96,31 +96,6 @@ if (form && container) {
       .join("");
   };
 
-  const isActiveNow = (promo, atDate) => {
-    if (promo.active === false) {
-      return false;
-    }
-    const now = atDate || new Date();
-    const start = new Date(promo.startDate);
-    const end = new Date(promo.endDate);
-    if (Number.isNaN(start.valueOf()) || Number.isNaN(end.valueOf())) {
-      return false;
-    }
-    if (now < start || now > end) {
-      return false;
-    }
-    const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    const day = dayNames[now.getDay()];
-    if (!promo.daysOfWeek.includes(day)) {
-      return false;
-    }
-    const hour = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(
-      2,
-      "0"
-    )}`;
-    return promo.startHour <= hour && promo.endHour >= hour;
-  };
-
   const loadPromos = async (formData) => {
     const city = String(formData.get("city") || "").trim();
     const atValue = String(formData.get("at") || "").trim();
@@ -137,31 +112,30 @@ if (form && container) {
     }
 
     try {
+      const query = new URLSearchParams();
       if (city) {
-        const query = new URLSearchParams({ city });
-        if (atDate) {
-          query.set("at", atDate.toISOString());
-        }
-        if (promoType) {
-          query.set("promoType", promoType);
-        }
-        if (category) {
-          query.set("category", category);
-        }
-        if (businessType) {
-          query.set("businessType", businessType);
-        }
-        if (queryText) {
-          query.set("q", queryText);
-        }
-        const promos = await apiFetch(`/promotions/active?${query.toString()}`);
-        renderPromos(promos);
-        return;
+        query.set("city", city);
       }
-
-      const promos = await apiFetch("/promotions");
-      const filtered = promos.filter((promo) => isActiveNow(promo, atDate));
-      renderPromos(filtered);
+      if (atDate) {
+        query.set("at", atDate.toISOString());
+      }
+      if (promoType) {
+        query.set("promoType", promoType);
+      }
+      if (category) {
+        query.set("category", category);
+      }
+      if (businessType) {
+        query.set("businessType", businessType);
+      }
+      if (queryText) {
+        query.set("q", queryText);
+      }
+      const queryString = query.toString();
+      const promos = await apiFetch(
+        `/promotions/active${queryString ? `?${queryString}` : ""}`
+      );
+      renderPromos(promos);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error consultando promociones";
       renderMessage(message);
