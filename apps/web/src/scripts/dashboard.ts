@@ -133,6 +133,32 @@ const renderSkeleton = (container: HTMLElement | null, count = 3) => {
     .join("");
 };
 
+const renderLoadingMessage = (container: HTMLElement | null, message: string) => {
+  if (!container) return;
+  container.innerHTML = `
+    <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70 flex items-center gap-3">
+      <span class="spinner" aria-hidden="true"></span>
+      <span>${message}</span>
+    </div>
+  `;
+};
+
+const setSelectLoading = (select: HTMLSelectElement | null, message: string) => {
+  if (!select) return;
+  select.disabled = true;
+  select.innerHTML = `<option value="">${message}</option>`;
+};
+
+const setSelectReady = (
+  select: HTMLSelectElement | null,
+  optionsHtml: string,
+  keepDisabled = false
+) => {
+  if (!select) return;
+  select.innerHTML = optionsHtml;
+  select.disabled = keepDisabled;
+};
+
 const withLoading = async (form: HTMLFormElement | null, action: () => Promise<void>) => {
   if (!form) {
     await action();
@@ -462,6 +488,7 @@ const populateBranchSelect = (businessId: string) => {
     option.textContent = `${branch.city} · ${branch.address}`;
     branchSelect.append(option);
   });
+  branchSelect.disabled = filtered.length === 0;
 };
 
 const renderBranches = () => {
@@ -547,6 +574,9 @@ const renderPromotions = (promos: Promotion[]) => {
 };
 
 const loadUser = async () => {
+  if (userCard) {
+    userCard.innerHTML = "Cargando usuario...";
+  }
   try {
     currentUser = await apiFetch<User>("/auth/me");
   } catch {
@@ -557,7 +587,8 @@ const loadUser = async () => {
 
 const loadBusinesses = async () => {
   if (!currentUser) return;
-  renderSkeleton(businessList, 3);
+  renderLoadingMessage(businessList, "Cargando negocios...");
+  businessSelects.forEach((select) => setSelectLoading(select, "Cargando negocios..."));
   const response = await apiFetch<Business[]>("/businesses/mine");
   businesses = response;
   renderBusinesses();
@@ -565,6 +596,9 @@ const loadBusinesses = async () => {
   const hasBusinesses = businesses.length > 0;
   setBranchFormEnabled(hasBusinesses);
   setPromoFormEnabled(hasBusinesses);
+  if (!hasBusinesses) {
+    setSelectLoading(branchSelect, "Sin sedes");
+  }
   if (businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
     await loadBranches(currentBusinessId);
@@ -574,7 +608,8 @@ const loadBusinesses = async () => {
 };
 
 const loadBranches = async (businessId: string) => {
-  renderSkeleton(branchList, 2);
+  renderLoadingMessage(branchList, "Cargando sedes...");
+  setSelectLoading(branchSelect, "Cargando sedes...");
   const response = await apiFetch<Branch[]>(`/branches?businessId=${businessId}`);
   branches = response;
   populateBranchSelect(businessId);
@@ -583,7 +618,7 @@ const loadBranches = async (businessId: string) => {
 
 const loadPromotions = async (businessId: string): Promise<Promotion[]> => {
   if (!businessId) return [];
-  renderSkeleton(promoList, 2);
+  renderLoadingMessage(promoList, "Cargando promociones...");
   const response = await apiFetch<Promotion[]>(`/promotions?businessId=${businessId}`);
   promotions = response;
   return response;
@@ -638,23 +673,34 @@ const renderCategories = () => {
 };
 
 const loadCities = async () => {
+  renderLoadingMessage(cityList, "Cargando ciudades...");
+  setSelectLoading(branchCitySelect, "Cargando ciudades...");
   cities = await apiFetch<City[]>("/cities");
   renderCities();
   if (branchCitySelect) {
-    branchCitySelect.innerHTML = [
-      `<option value=\"\">Selecciona una ciudad</option>`,
-      ...cities.map((city) => `<option value=\"${city.name}\">${city.name}</option>`),
-    ].join("");
+    setSelectReady(
+      branchCitySelect,
+      [
+        `<option value=\"\">Selecciona una ciudad</option>`,
+        ...cities.map((city) => `<option value=\"${city.name}\">${city.name}</option>`),
+      ].join("")
+    );
   }
 };
 
 const loadCategories = async () => {
+  renderLoadingMessage(categoryList, "Cargando categorías...");
+  setSelectLoading(categorySuggestions, "Cargando categorías...");
   categories = await apiFetch<Category[]>("/categories");
   renderCategories();
   if (categorySuggestions) {
-    categorySuggestions.innerHTML = categories
-      .map((category) => `<option value="${category.slug}">${category.name}</option>`)
-      .join("");
+    setSelectReady(
+      categorySuggestions,
+      categories.map((category) => `<option value="${category.slug}">${category.name}</option>`).join(
+        ""
+      ),
+      false
+    );
   }
 };
 
