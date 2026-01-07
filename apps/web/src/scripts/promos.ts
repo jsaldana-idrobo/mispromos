@@ -143,7 +143,11 @@ if (form && container) {
       return;
     }
     loading = true;
-    updateLoadMore("Cargando más promociones...");
+    if (append) {
+      updateLoadMore("Cargando más promociones...");
+    } else {
+      updateLoadMore("");
+    }
 
     try {
       const query = new URLSearchParams(baseQuery);
@@ -189,6 +193,7 @@ if (form && container) {
     offset = 0;
     totalLoaded = 0;
     renderMessage("Cargando promociones...");
+    updateLoadMore("");
     fetchPromos(false);
   });
 
@@ -196,6 +201,7 @@ if (form && container) {
   if (initialQuery) {
     baseQuery = initialQuery;
   }
+  updateLoadMore("");
   fetchPromos(false);
 
   if (loadMore) {
