@@ -1,7 +1,8 @@
 import { MongoClient, type Collection, type Filter, type ObjectId } from "mongodb";
 import { config } from "dotenv";
 import path from "node:path";
-import { BusinessType, PromotionType, type DayOfWeek } from "@mispromos/shared";
+import bcrypt from "bcryptjs";
+import { BusinessType, PromotionType, UserRole, type DayOfWeek } from "@mispromos/shared";
 
 config({ path: path.resolve(__dirname, "..", ".env") });
 
@@ -42,6 +43,11 @@ const defaultCategories = [
   { name: "Ensaladas", slug: "ensaladas" },
   { name: "Desayunos", slug: "desayunos" },
 ];
+
+const seedBusinessOwner = {
+  email: "negocio@demo.com",
+  password: "NegocioDemo2025!",
+};
 
 type SeedBusiness = {
   name: string;
@@ -599,6 +605,13 @@ const seedBusinesses: SeedBusiness[] = [
 
 type CityDoc = { _id?: ObjectId; name: string; countryCode: string; createdAt: Date };
 type CategoryDoc = { _id?: ObjectId; name: string; slug: string; createdAt: Date };
+type UserDoc = {
+  _id?: ObjectId;
+  email: string;
+  password: string;
+  role: string;
+  createdAt: Date;
+};
 type BusinessDoc = {
   _id?: ObjectId;
   name: string;
@@ -661,12 +674,44 @@ const upsertCategory = async (collection: Collection<CategoryDoc>, category: Cat
   return found;
 };
 
+const upsertUser = async (
+  collection: Collection<UserDoc>,
+  payload: { email: string; password: string; role: UserRole }
+) => {
+  const existing = await collection.findOne({ email: payload.email });
+  if (existing) {
+    if (existing.role !== payload.role) {
+      await collection.updateOne({ _id: existing._id }, { $set: { role: payload.role } });
+    }
+    return existing;
+  }
+  const hashed = await bcrypt.hash(payload.password, 10);
+  const created: UserDoc = {
+    email: payload.email,
+    password: hashed,
+    role: payload.role,
+    createdAt: new Date(),
+  };
+  await collection.insertOne(created);
+  const inserted = await collection.findOne({ email: payload.email });
+  if (!inserted) {
+    throw new Error("No se pudo insertar el usuario");
+  }
+  return inserted;
+};
+
 const upsertBusiness = async (collection: Collection<BusinessDoc>, business: BusinessDoc) => {
-  const insertDoc = { ...business };
+  const { instagram, ownerId, ...insertDoc } = business;
   const update: Record<string, unknown> = { $setOnInsert: insertDoc };
-  if (business.instagram) {
-    update.$set = { instagram: business.instagram };
-    delete insertDoc.instagram;
+  const setDoc: Record<string, unknown> = {};
+  if (instagram) {
+    setDoc.instagram = instagram;
+  }
+  if (ownerId) {
+    setDoc.ownerId = ownerId;
+  }
+  if (Object.keys(setDoc).length > 0) {
+    update.$set = setDoc;
   }
   await collection.updateOne({ slug: business.slug }, update, { upsert: true });
   const found = await collection.findOne({ slug: business.slug });
@@ -696,6 +741,7 @@ const run = async () => {
 
   const cities = db.collection<CityDoc>("cities");
   const categories = db.collection<CategoryDoc>("categories");
+  const users = db.collection<UserDoc>("users");
   const businesses = db.collection<BusinessDoc>("businesses");
   const branches = db.collection<BranchDoc>("branches");
   const promotions = db.collection<PromotionDoc>("promotions");
@@ -708,7 +754,12 @@ const run = async () => {
     await upsertCategory(categories, { ...category, createdAt: new Date() });
   }
 
-  const ownerId = "seed-owner-palmira";
+  const seedOwner = await upsertUser(users, {
+    email: seedBusinessOwner.email,
+    password: seedBusinessOwner.password,
+    role: UserRole.BUSINESS_OWNER,
+  });
+  const ownerId = seedOwner?._id ? String(seedOwner._id) : "seed-owner-palmira";
   const today = new Date();
   const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
   const endDate = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
