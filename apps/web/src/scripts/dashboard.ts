@@ -55,6 +55,8 @@ type Category = {
   slug: string;
 };
 
+const isMobileDevice = () => /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
 const userCard = document.querySelector<HTMLElement>("[data-user-card]");
 const businessList = document.querySelector<HTMLElement>("[data-business-list]");
 const branchList = document.querySelector<HTMLElement>("[data-branch-list]");
@@ -555,6 +557,12 @@ const renderPromotions = (promos: Promotion[]) => {
     `;
     return;
   }
+  const business = businesses.find((item) => item._id === currentBusinessId);
+  const instagramHandle = (business?.instagram ?? "").replace("@", "").trim();
+  const instagramLink = instagramHandle
+    ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
+    : "";
+
   promoList.innerHTML = promos
     .map(
       (promo) => `
@@ -563,6 +571,7 @@ const renderPromotions = (promos: Promotion[]) => {
             <div>
               <p class="text-sm font-semibold">${promo.title}</p>
               <p class="text-xs text-ink-900/60">${promo._id}</p>
+              ${instagramLink ? `<div class="mt-2 text-xs text-ink-900/60">${instagramLink}</div>` : ""}
             </div>
             <div class="flex gap-2 text-xs">
               <button class="underline" data-promo-edit="${promo._id}">Editar</button>
@@ -1127,6 +1136,19 @@ const wirePromoActions = () => {
   if (!promoList) return;
   promoList.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
+    const instagramLink = target.closest<HTMLAnchorElement>("[data-instagram-link]");
+    if (instagramLink) {
+      const handle = instagramLink.dataset.instagramHandle ?? "";
+      if (handle && isMobileDevice()) {
+        event.preventDefault();
+        const deepLink = `instagram://user?username=${handle}`;
+        window.location.href = deepLink;
+        window.setTimeout(() => {
+          window.open(`https://instagram.com/${handle}`, "_blank", "noopener");
+        }, 500);
+      }
+      return;
+    }
     const editId = target.dataset.promoEdit;
     const deleteId = target.dataset.promoDelete;
     if (editId) {
