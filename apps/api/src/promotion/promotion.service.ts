@@ -87,6 +87,48 @@ export class PromotionService {
     return `${hours}:${minutes}`;
   }
 
+  private getDayOfWeekByIndex(index: number): DayOfWeek {
+    const days: DayOfWeek[] = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
+    return days[index];
+  }
+
+  private getTimePartsInZone(date: Date, timeZone: string) {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(date);
+    const values: Record<string, string> = {};
+    for (const part of parts) {
+      values[part.type] = part.value;
+    }
+    const year = Number(values.year);
+    const month = Number(values.month);
+    const day = Number(values.day);
+    const hour = Number(values.hour);
+    const minute = Number(values.minute);
+    const second = Number(values.second);
+    const zonedDate = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+    return {
+      day: this.getDayOfWeekByIndex(zonedDate.getUTCDay()),
+      time: `${values.hour}:${values.minute}`,
+    };
+  }
+
   private escapeRegex(input: string) {
     return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
@@ -106,8 +148,7 @@ export class PromotionService {
       throw new BadRequestException("Formato de fecha inválido");
     }
 
-    const day = this.getDayOfWeek(now);
-    const time = this.formatTime(now);
+    const { day, time } = this.getTimePartsInZone(now, "America/Bogota");
 
     let branchFilter: Record<string, unknown> = {};
     if (city) {
