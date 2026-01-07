@@ -1682,7 +1682,13 @@ const upsertCategory = async (collection: Collection<CategoryDoc>, category: Cat
 };
 
 const upsertBusiness = async (collection: Collection<BusinessDoc>, business: BusinessDoc) => {
-  await collection.updateOne({ slug: business.slug }, { $setOnInsert: business }, { upsert: true });
+  const insertDoc = { ...business };
+  const update: Record<string, unknown> = { $setOnInsert: insertDoc };
+  if (business.instagram) {
+    update.$set = { instagram: business.instagram };
+    delete insertDoc.instagram;
+  }
+  await collection.updateOne({ slug: business.slug }, update, { upsert: true });
   const found = await collection.findOne({ slug: business.slug });
   if (!found) {
     throw new Error("No se pudo insertar el negocio");
