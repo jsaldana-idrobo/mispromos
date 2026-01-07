@@ -210,6 +210,13 @@ body {
   transform: translateY(0);
 }
 
+.promo-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
 @media (max-width: 640px) {
   .promo-card {
     padding: 1rem;

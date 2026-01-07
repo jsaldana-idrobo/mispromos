@@ -223,10 +223,15 @@ if (form && container) {
     counter.textContent = totalLoaded > 0 ? `${totalLoaded} promociones cargadas` : "";
   };
 
-  const updateLoadMore = (message) => {
-    if (loadMore) {
-      loadMore.textContent = message;
+  const updateLoadMore = (message, loadingState) => {
+    if (!loadMore) return;
+    if (!message) {
+      loadMore.textContent = "";
+      return;
     }
+    loadMore.innerHTML = loadingState
+      ? `<span class="promo-loader"><span class="spinner" aria-hidden="true"></span>${message}</span>`
+      : message;
   };
 
   const fetchPromos = async (append) => {
@@ -235,7 +240,7 @@ if (form && container) {
     }
     loading = true;
     if (append) {
-      updateLoadMore("Cargando más promociones...");
+      updateLoadMore("Cargando más promociones...", true);
     } else {
       updateLoadMore("");
     }
