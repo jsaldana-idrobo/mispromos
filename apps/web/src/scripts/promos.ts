@@ -121,7 +121,7 @@ if (form && container) {
     }
   };
 
-  const renderPromos = (promos: Promotion[], append = false, startIndex = 0) => {
+  const renderPromos = (promos: Promotion[], append = false) => {
     if (promos.length === 0 && !append) {
       renderMessage("No encontramos promos activas con esos filtros.");
       return;
@@ -148,8 +148,9 @@ if (form && container) {
         const instagramLink = instagramHandle
           ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
           : "";
+        const delay = Math.min(index * 60, 360);
         return `
-          <article class="promo-card" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${(startIndex + index) * 60}ms">
+          <article class="promo-card" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
             <div class="promo-media ${visual.tone}">
               <span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>
             </div>
@@ -259,8 +260,7 @@ if (form && container) {
         hasMore = false;
         return;
       }
-      const startIndex = append ? totalLoaded : 0;
-      renderPromos(promos, append, startIndex);
+      renderPromos(promos, append);
       totalLoaded += promos.length;
       offset += promos.length;
       updateCounter();
