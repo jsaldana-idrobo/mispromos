@@ -25,6 +25,7 @@ export const businessSchema = z.object({
   type: z.nativeEnum(BusinessType),
   categories: z.array(z.string()).default([]),
   description: z.string().optional(),
+  instagram: z.string().optional(),
   ownerId: idSchema,
   verified: z.boolean().default(false),
   createdAt: timestampSchema,

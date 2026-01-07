@@ -15,6 +15,7 @@ type Business = {
   type: string;
   categories?: string[];
   description?: string;
+  instagram?: string;
 };
 
 type Branch = {
@@ -236,6 +237,7 @@ const setBusinessForm = (business?: Business) => {
     });
   }
   setInputValue(businessForm, "description", business.description ?? "");
+  setInputValue(businessForm, "instagram", business.instagram ?? "");
 };
 
 const setBranchForm = (branch?: Branch) => {
@@ -774,6 +776,7 @@ const handleBusinessForm = () => {
           type: data.get("type"),
           categories: categoryValues,
           description: data.get("description"),
+          instagram: data.get("instagram"),
         };
         if (businessForm.dataset.mode === "edit" && businessForm.dataset.editId) {
           await apiFetch<Business>(`/businesses/${businessForm.dataset.editId}`, {

@@ -1,5 +1,13 @@
 import { apiFetch } from "./api";
 
+type BusinessSummary = {
+  _id: string;
+  name: string;
+  slug: string;
+  categories?: string[];
+  instagram?: string;
+};
+
 type Promotion = {
   _id: string;
   businessId: string;
@@ -14,6 +22,7 @@ type Promotion = {
   startHour: string;
   endHour: string;
   active?: boolean;
+  business?: BusinessSummary | null;
 };
 
 const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
@@ -43,6 +52,65 @@ if (form && container) {
   let offset = 0;
   let totalLoaded = 0;
   let baseQuery = new URLSearchParams();
+  const toastHost = document.createElement("div");
+  toastHost.className = "toast-host";
+  toastHost.setAttribute("aria-live", "polite");
+  document.body.appendChild(toastHost);
+
+  const promoTypeLabels: Record<string, string> = {
+    discount: "Descuento",
+    "2x1": "2x1",
+    combo: "Combo",
+    other: "Otra",
+  };
+
+  const toneMap: Record<
+    string,
+    { emoji: string; tone: string }
+  > = {
+    pizza: { emoji: "🍕", tone: "promo-tone-sunset" },
+    hamburguesas: { emoji: "🍔", tone: "promo-tone-berry" },
+    sushi: { emoji: "🍣", tone: "promo-tone-sage" },
+    tacos: { emoji: "🌮", tone: "promo-tone-sunrise" },
+    parrilla: { emoji: "🥩", tone: "promo-tone-ember" },
+    pollo: { emoji: "🍗", tone: "promo-tone-honey" },
+    "comidas-rapidas": { emoji: "🍟", tone: "promo-tone-sunset" },
+    asiatica: { emoji: "🥢", tone: "promo-tone-sage" },
+    mexicana: { emoji: "🌶️", tone: "promo-tone-ember" },
+    cafeteria: { emoji: "☕️", tone: "promo-tone-honey" },
+    postres: { emoji: "🍰", tone: "promo-tone-berry" },
+    panaderia: { emoji: "🥐", tone: "promo-tone-honey" },
+    bebidas: { emoji: "🥤", tone: "promo-tone-sky" },
+    arepas: { emoji: "🫓", tone: "promo-tone-sunrise" },
+    mariscos: { emoji: "🦐", tone: "promo-tone-sky" },
+    helados: { emoji: "🍦", tone: "promo-tone-berry" },
+    vegana: { emoji: "🥗", tone: "promo-tone-lime" },
+    ensaladas: { emoji: "🥬", tone: "promo-tone-lime" },
+    desayunos: { emoji: "🥞", tone: "promo-tone-honey" },
+  };
+
+  const defaultTone = { emoji: "✨", tone: "promo-tone-sunrise" };
+
+  const getPromoVisual = (category?: string) => {
+    if (!category) return defaultTone;
+    return toneMap[category] ?? defaultTone;
+  };
+
+  const formatPromoType = (type: string) => promoTypeLabels[type] ?? type;
+
+  const showToast = (message: string) => {
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    toastHost.appendChild(toast);
+    requestAnimationFrame(() => {
+      toast.classList.add("toast-visible");
+    });
+    window.setTimeout(() => {
+      toast.classList.remove("toast-visible");
+      window.setTimeout(() => toast.remove(), 300);
+    }, 2800);
+  };
 
   const renderMessage = (message: string) => {
     container.innerHTML = `
@@ -53,36 +121,55 @@ if (form && container) {
     }
   };
 
-  const renderPromos = (promos: Promotion[], append = false) => {
+  const renderPromos = (promos: Promotion[], append = false, startIndex = 0) => {
     if (promos.length === 0 && !append) {
       renderMessage("No encontramos promos activas con esos filtros.");
       return;
     }
 
     const html = promos
-      .map((promo) => {
+      .map((promo, index) => {
+        const businessName = promo.business?.name ?? "Negocio local";
+        const instagramHandle = (promo.business?.instagram ?? "").replace("@", "").trim();
+        const categories = promo.business?.categories ?? [];
+        const category = categories[0];
+        const visual = getPromoVisual(category);
+        const promoTypeLabel = formatPromoType(promo.promoType);
         const dateRange = `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
           promo.endDate
         ).toLocaleDateString()}`;
         const hours = `${promo.startHour} - ${promo.endHour}`;
         const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" · ");
         const value = promo.value ? `<span>${promo.value}</span>` : "";
+        const categoryTags = categories
+          .slice(0, 3)
+          .map((item) => `<span class="promo-pill">#${item}</span>`)
+          .join("");
+        const instagramLink = instagramHandle
+          ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
+          : "";
         return `
-          <article class="rounded-3xl border border-ink-900/10 bg-white/80 p-4 shadow-sm">
-            <div class="flex flex-wrap items-start justify-between gap-3">
+          <article class="promo-card" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${(startIndex + index) * 60}ms">
+            <div class="promo-media ${visual.tone}">
+              <span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>
+            </div>
+            <div class="mt-4 flex flex-wrap items-start justify-between gap-3">
               <div>
+                <p class="text-xs uppercase tracking-wide text-ink-900/50">${businessName}</p>
                 <h3 class="text-lg font-semibold">${promo.title}</h3>
                 <p class="text-sm text-ink-900/60">${promo.description ?? "Promoción vigente"}</p>
               </div>
-              <span class="rounded-full border border-ink-900/10 px-3 py-1 text-xs uppercase">
-                ${promo.promoType}
-              </span>
+              <span class="promo-badge">${promoTypeLabel}</span>
             </div>
-            <div class="mt-3 flex flex-wrap gap-3 text-xs text-ink-900/60">
-              <span class="rounded-full border border-ink-900/10 px-3 py-1">${days}</span>
-              <span class="rounded-full border border-ink-900/10 px-3 py-1">${hours}</span>
-              <span class="rounded-full border border-ink-900/10 px-3 py-1">${dateRange}</span>
-              ${value ? `<span class="rounded-full border border-ink-900/10 px-3 py-1">${value}</span>` : ""}
+            <div class="mt-3 flex flex-wrap gap-2 text-xs text-ink-900/60">
+              <span class="promo-chip">${days}</span>
+              <span class="promo-chip">${hours}</span>
+              <span class="promo-chip">${dateRange}</span>
+              ${value ? `<span class="promo-chip">${value}</span>` : ""}
+            </div>
+            <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-900/60">
+              <div class="flex flex-wrap gap-2">${categoryTags}</div>
+              ${instagramLink}
             </div>
           </article>
         `;
@@ -167,7 +254,8 @@ if (form && container) {
         hasMore = false;
         return;
       }
-      renderPromos(promos, append);
+      const startIndex = append ? totalLoaded : 0;
+      renderPromos(promos, append, startIndex);
       totalLoaded += promos.length;
       offset += promos.length;
       updateCounter();
@@ -215,6 +303,25 @@ if (form && container) {
     );
     observer.observe(loadMore);
   }
+
+  container.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    if (target.closest("a")) {
+      return;
+    }
+    const card = target.closest<HTMLElement>("[data-promo-title]");
+    if (!card) return;
+    const title = card.dataset.promoTitle ?? "Promo";
+    const business = card.dataset.promoBusiness ?? "tu negocio favorito";
+    const messages = [
+      `¡Buen provecho! ${title} te espera en ${business}.`,
+      `Plan perfecto: ${title}. Encuéntralo en ${business}.`,
+      `Hoy toca antojo: ${title}. Dale un vistazo a ${business}.`,
+      `Promo activada: ${title}. ${business} te espera.`,
+    ];
+    const message = messages[Math.floor(Math.random() * messages.length)];
+    showToast(message);
+  });
 }
 
 if (categorySelect) {

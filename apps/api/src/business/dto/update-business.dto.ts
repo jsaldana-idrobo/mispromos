@@ -24,4 +24,8 @@ export class UpdateBusinessDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  instagram?: string;
 }

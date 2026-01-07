@@ -21,6 +21,9 @@ export class Business {
   @Prop()
   description?: string;
 
+  @Prop({ trim: true })
+  instagram?: string;
+
   @Prop({ required: true })
   ownerId!: string;
 

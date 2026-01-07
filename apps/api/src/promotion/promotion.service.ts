@@ -167,7 +167,7 @@ export class PromotionService {
     const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
     const safeOffset = Math.max(offset ?? 0, 0);
 
-    return this.promotionModel
+    const promos = await this.promotionModel
       .find({
         ...branchFilter,
         ...businessFilter,
@@ -183,7 +183,25 @@ export class PromotionService {
       .sort({ createdAt: -1 })
       .skip(safeOffset)
       .limit(safeLimit)
+      .lean()
       .exec();
+
+    const businessIds = Array.from(
+      new Set(promos.map((promo) => promo.businessId).filter(Boolean))
+    );
+    const businesses = businessIds.length
+      ? await this.businessModel
+          .find({ _id: { $in: businessIds } })
+          .select("_id name slug categories instagram")
+          .lean()
+          .exec()
+      : [];
+    const businessMap = new Map(businesses.map((business) => [String(business._id), business]));
+
+    return promos.map((promo) => ({
+      ...promo,
+      business: businessMap.get(promo.businessId) ?? null,
+    }));
   }
 
   async findOne(id: string) {

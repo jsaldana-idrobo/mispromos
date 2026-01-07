@@ -12,6 +12,12 @@
   --copper-500: 233 120 82;
   --sage-500: 76 146 128;
   --sunset-400: 244 189 120;
+  --berry-500: 215 90 125;
+  --sky-500: 86 155 210;
+  --lime-500: 122 182 98;
+  --ember-500: 228 114 66;
+  --sunrise-500: 246 160 92;
+  --honey-500: 242 196 120;
 }
 
 body {
@@ -59,8 +65,176 @@ body {
   animation: spin 0.9s linear infinite;
 }
 
+.promo-card {
+  position: relative;
+  border: 1px solid rgba(26, 23, 22, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 1.25rem;
+  box-shadow: 0 18px 45px rgba(26, 23, 22, 0.12);
+  overflow: hidden;
+  transform: translateY(10px);
+  opacity: 0;
+  animation: promo-fade 0.6s ease forwards;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.promo-card::before {
+  content: "";
+  position: absolute;
+  inset: -40% -20% auto auto;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent 70%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.promo-card:hover {
+  transform: translateY(0);
+  box-shadow: 0 24px 60px rgba(26, 23, 22, 0.18);
+}
+
+.promo-media {
+  height: 120px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  color: rgba(26, 23, 22, 0.9);
+}
+
+.promo-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.2), transparent 60%);
+  opacity: 0.6;
+}
+
+.promo-emoji {
+  font-size: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.promo-badge {
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  background: rgba(26, 23, 22, 0.06);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.promo-chip {
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid rgba(26, 23, 22, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.promo-pill {
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  background: rgba(26, 23, 22, 0.06);
+  font-weight: 600;
+}
+
+.promo-link {
+  color: rgba(26, 23, 22, 0.75);
+  text-decoration: underline;
+  text-decoration-color: rgba(26, 23, 22, 0.3);
+}
+
+.promo-link:hover {
+  color: rgba(26, 23, 22, 0.95);
+}
+
+.promo-tone-sunset {
+  background: linear-gradient(135deg, rgba(246, 160, 92, 0.9), rgba(233, 120, 82, 0.65));
+}
+
+.promo-tone-sunrise {
+  background: linear-gradient(135deg, rgba(246, 160, 92, 0.9), rgba(244, 189, 120, 0.75));
+}
+
+.promo-tone-ember {
+  background: linear-gradient(135deg, rgba(228, 114, 66, 0.9), rgba(233, 120, 82, 0.7));
+}
+
+.promo-tone-berry {
+  background: linear-gradient(135deg, rgba(215, 90, 125, 0.9), rgba(244, 189, 120, 0.7));
+}
+
+.promo-tone-sage {
+  background: linear-gradient(135deg, rgba(76, 146, 128, 0.9), rgba(122, 182, 98, 0.7));
+}
+
+.promo-tone-sky {
+  background: linear-gradient(135deg, rgba(86, 155, 210, 0.9), rgba(244, 189, 120, 0.6));
+}
+
+.promo-tone-lime {
+  background: linear-gradient(135deg, rgba(122, 182, 98, 0.9), rgba(244, 189, 120, 0.6));
+}
+
+.promo-tone-honey {
+  background: linear-gradient(135deg, rgba(242, 196, 120, 0.95), rgba(233, 120, 82, 0.5));
+}
+
+.toast-host {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: grid;
+  gap: 8px;
+  z-index: 50;
+}
+
+.toast {
+  background: rgba(26, 23, 22, 0.92);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  box-shadow: 0 12px 30px rgba(26, 23, 22, 0.2);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .promo-card {
+    padding: 1rem;
+  }
+
+  .promo-media {
+    height: 110px;
+  }
+
+  .toast-host {
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+  }
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes promo-fade {
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }

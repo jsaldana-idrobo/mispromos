@@ -49,6 +49,7 @@ type SeedBusiness = {
   type: (typeof BusinessType)[keyof typeof BusinessType];
   categories: string[];
   description: string;
+  instagram?: string;
   branches: Array<{
     city: string;
     zone?: string;
@@ -76,6 +77,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["parrilla", "pollo"],
     description: "Parrilla criolla y pollo asado con combos familiares.",
+    instagram: "labrasapalmira",
     branches: [
       {
         city: "Palmira",
@@ -149,6 +151,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["hamburguesas", "comidas-rapidas"],
     description: "Hamburguesas artesanales y papas cargadas.",
+    instagram: "superburger24",
     branches: [
       {
         city: "Palmira",
@@ -222,6 +225,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["sushi", "asiatica"],
     description: "Rolls frescos y bowls con ingredientes locales.",
+    instagram: "sushitama",
     branches: [
       {
         city: "Palmira",
@@ -295,6 +299,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["tacos", "mexicana"],
     description: "Tacos callejeros con salsas caseras.",
+    instagram: "tacoexpresspalmira",
     branches: [
       {
         city: "Palmira",
@@ -368,6 +373,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["pizza"],
     description: "Pizzas al horno de leña con masa madre.",
+    instagram: "pizzeriatorino",
     branches: [
       {
         city: "Cali",
@@ -467,6 +473,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["parrilla"],
     description: "Cortes premium y guarniciones clásicas.",
+    instagram: "parrilla93",
     branches: [
       {
         city: "Bogotá",
@@ -522,6 +529,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["pollo", "comidas-rapidas"],
     description: "Pollo apanado y broaster con salsas caseras.",
+    instagram: "pollodoradocali",
     branches: [
       {
         city: "Cali",
@@ -577,6 +585,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["tacos", "mexicana"],
     description: "Tacos y burritos con recetas del norte.",
+    instagram: "tacosdelsur",
     branches: [
       {
         city: "Cali",
@@ -650,6 +659,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["sushi", "asiatica"],
     description: "Rolls creativos y bowls frescos.",
+    instagram: "sushisakura",
     branches: [
       {
         city: "Medellín",
@@ -705,6 +715,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["cafeteria", "postres", "bebidas"],
     description: "Café de especialidad y postres artesanales.",
+    instagram: "cafecentral",
     branches: [
       {
         city: "Bogotá",
@@ -760,6 +771,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["panaderia", "cafeteria"],
     description: "Panadería artesanal con hornos tradicionales.",
+    instagram: "pandelvalle",
     branches: [
       {
         city: "Palmira",
@@ -841,6 +853,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["bebidas", "comidas-rapidas"],
     description: "Cócteles clásicos y snacks para compartir.",
+    instagram: "barla66",
     branches: [
       {
         city: "Medellín",
@@ -896,6 +909,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["postres", "cafeteria"],
     description: "Postres por porción y tortas personalizadas.",
+    instagram: "dulcemomento",
     branches: [
       {
         city: "Barranquilla",
@@ -943,6 +957,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["comidas-rapidas"],
     description: "Menús corporativos y eventos rápidos.",
+    instagram: "cateringexpress",
     branches: [
       {
         city: "Cali",
@@ -998,6 +1013,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["arepas", "desayunos"],
     description: "Arepas rellenas y desayunos típicos.",
+    instagram: "arepahouse",
     branches: [
       {
         city: "Medellín",
@@ -1079,6 +1095,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["mariscos"],
     description: "Mariscos frescos y cocina costeña.",
+    instagram: "marazul",
     branches: [
       {
         city: "Cartagena",
@@ -1152,6 +1169,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["helados", "postres", "bebidas"],
     description: "Helados artesanales y malteadas.",
+    instagram: "heladosnube",
     branches: [
       {
         city: "Bogotá",
@@ -1233,6 +1251,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["vegana", "ensaladas"],
     description: "Cocina vegana y bowls nutritivos.",
+    instagram: "verdevital",
     branches: [
       {
         city: "Bogotá",
@@ -1306,6 +1325,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["desayunos", "cafeteria"],
     description: "Desayunos rápidos y café colombiano.",
+    instagram: "desayunos7am",
     branches: [
       {
         city: "Barranquilla",
@@ -1379,6 +1399,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["ensaladas", "vegana"],
     description: "Ensaladas frescas y wraps ligeros.",
+    instagram: "lahuerta",
     branches: [
       {
         city: "Pereira",
@@ -1452,6 +1473,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["arepas", "cafeteria", "desayunos"],
     description: "Arepas tradicionales y café recién molido.",
+    instagram: "arepacafe",
     branches: [
       {
         city: "Bucaramanga",
@@ -1525,6 +1547,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["bebidas", "postres", "ensaladas"],
     description: "Bowls frutales y smoothies.",
+    instagram: "tropicalbowl",
     branches: [
       {
         city: "Cali",
@@ -1603,6 +1626,7 @@ type BusinessDoc = {
   type: string;
   categories: string[];
   description?: string;
+  instagram?: string;
   ownerId: string;
   verified: boolean;
   createdAt: Date;
@@ -1710,6 +1734,7 @@ const run = async () => {
       type: business.type,
       categories: business.categories,
       description: business.description,
+      instagram: business.instagram,
       ownerId,
       verified: true,
       createdAt: new Date(),
