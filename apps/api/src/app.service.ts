@@ -6,6 +6,7 @@ export class AppService {
     return {
       status: "ok",
       service: "api",
+      build: "redeploy-1",
       timestamp: new Date().toISOString(),
     };
   }
