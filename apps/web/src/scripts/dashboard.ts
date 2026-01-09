@@ -101,8 +101,14 @@ const dashboardMenu = document.querySelector<HTMLElement>("[data-dashboard-menu]
 const dashboardOverlay = document.querySelector<HTMLElement>("[data-dashboard-overlay]");
 const dashboardToggle = document.querySelector<HTMLButtonElement>("[data-dashboard-toggle]");
 const dashboardClose = document.querySelector<HTMLButtonElement>("[data-dashboard-close]");
-const dashboardLinks = Array.from(
-  document.querySelectorAll<HTMLAnchorElement>("[data-dashboard-link]")
+const dashboardTabs = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("[data-dashboard-tab]")
+);
+const dashboardPanels = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-dashboard-panel]")
+);
+const dashboardCreateButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("[data-dashboard-create]")
 );
 
 let businesses: Business[] = [];
@@ -112,6 +118,7 @@ let cities: City[] = [];
 let categories: Category[] = [];
 let currentBusinessId = "";
 let promotions: Promotion[] = [];
+let activeDashboardTab = "promos";
 
 type FormMode = "create" | "edit";
 
@@ -350,6 +357,20 @@ const setOwnerSectionsVisible = (visible: boolean) => {
   });
 };
 
+const setActiveDashboardTab = (tab: string) => {
+  activeDashboardTab = tab;
+  dashboardPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.dashboardPanel !== tab;
+  });
+  dashboardTabs.forEach((button) => {
+    const isActive = button.dataset.dashboardTab === tab;
+    button.classList.toggle("bg-ink-900", isActive);
+    button.classList.toggle("text-white", isActive);
+    button.classList.toggle("text-ink-900/70", !isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+};
+
 const setDashboardMenuVisible = (visible: boolean) => {
   if (dashboardMenu) {
     dashboardMenu.hidden = !visible;
@@ -373,6 +394,27 @@ const setDashboardMenuOpen = (open: boolean) => {
   dashboardOverlay.hidden = !open;
   dashboardMenu.classList.toggle("translate-x-0", open);
   dashboardMenu.classList.toggle("translate-x-full", !open);
+};
+
+const scrollToForm = (selector: string) => {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+
+const focusCreateForm = (target: string) => {
+  if (target === "promo") {
+    setActiveDashboardTab("promos");
+    scrollToForm("[data-promo-form]");
+  }
+  if (target === "branch") {
+    setActiveDashboardTab("branches");
+    scrollToForm("[data-branch-form]");
+  }
+  if (target === "business") {
+    setActiveDashboardTab("business");
+    scrollToForm("[data-business-form]");
+  }
 };
 
 const setAuthGateVisible = (visible: boolean) => {
@@ -447,6 +489,9 @@ const renderUser = () => {
   setOwnerSectionsVisible(ownerAccess);
   setAuthGateVisible(!ownerAccess);
   setDashboardMenuVisible(ownerAccess);
+  if (ownerAccess) {
+    setActiveDashboardTab(activeDashboardTab);
+  }
   if (dashboardHero) {
     dashboardHero.hidden = !ownerAccess;
   }
@@ -1209,25 +1254,11 @@ const wirePromoActions = () => {
 };
 
 const wireEmptyStateActions = () => {
-  const scrollToForm = (selector: string) => {
-    const el = document.querySelector(selector);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
-
   document.body.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
     const action = target.dataset.emptyAction;
     if (!action) return;
-    if (action === "business") {
-      scrollToForm("[data-business-form]");
-    }
-    if (action === "branch") {
-      scrollToForm("[data-branch-form]");
-    }
-    if (action === "promo") {
-      scrollToForm("[data-promo-form]");
-    }
+    focusCreateForm(action);
   });
 };
 
@@ -1239,17 +1270,39 @@ const wireCancelButtons = () => {
   categoryCancel?.addEventListener("click", () => setCategoryForm());
 };
 
+const wireDashboardTabs = () => {
+  if (dashboardTabs.length === 0) return;
+  dashboardTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.dashboardTab ?? "promos";
+      setActiveDashboardTab(tab);
+      setDashboardMenuOpen(false);
+    });
+  });
+  setActiveDashboardTab(activeDashboardTab);
+};
+
 const wireDashboardMenu = () => {
   if (!dashboardMenu || !dashboardOverlay || !dashboardToggle) return;
   const closeMenu = () => setDashboardMenuOpen(false);
   dashboardToggle.addEventListener("click", () => setDashboardMenuOpen(true));
   dashboardClose?.addEventListener("click", closeMenu);
   dashboardOverlay.addEventListener("click", closeMenu);
-  dashboardLinks.forEach((link) => link.addEventListener("click", closeMenu));
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeMenu();
     }
+  });
+};
+
+const wireDashboardCreateButtons = () => {
+  if (dashboardCreateButtons.length === 0) return;
+  dashboardCreateButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.dashboardCreate;
+      if (!target) return;
+      focusCreateForm(target);
+    });
   });
 };
 
@@ -1275,6 +1328,8 @@ const wireDashboardMenu = () => {
   wirePromoActions();
   wireEmptyStateActions();
   wireCancelButtons();
+  wireDashboardTabs();
+  wireDashboardCreateButtons();
   wireDashboardMenu();
   handleBusinessForm();
   handleBranchForm();

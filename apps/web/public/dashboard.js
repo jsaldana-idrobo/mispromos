@@ -132,8 +132,14 @@ var dashboardMenu = document.querySelector("[data-dashboard-menu]");
 var dashboardOverlay = document.querySelector("[data-dashboard-overlay]");
 var dashboardToggle = document.querySelector("[data-dashboard-toggle]");
 var dashboardClose = document.querySelector("[data-dashboard-close]");
-var dashboardLinks = Array.from(
-  document.querySelectorAll("[data-dashboard-link]")
+var dashboardTabs = Array.from(
+  document.querySelectorAll("[data-dashboard-tab]")
+);
+var dashboardPanels = Array.from(
+  document.querySelectorAll("[data-dashboard-panel]")
+);
+var dashboardCreateButtons = Array.from(
+  document.querySelectorAll("[data-dashboard-create]")
 );
 var businesses = [];
 var branches = [];
@@ -142,6 +148,7 @@ var cities = [];
 var categories = [];
 var currentBusinessId = "";
 var promotions = [];
+var activeDashboardTab = "promos";
 var setMessage = (el, text) => {
   if (el) {
     el.textContent = text;
@@ -327,6 +334,19 @@ var setOwnerSectionsVisible = (visible) => {
     section.hidden = !visible;
   });
 };
+var setActiveDashboardTab = (tab) => {
+  activeDashboardTab = tab;
+  dashboardPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.dashboardPanel !== tab;
+  });
+  dashboardTabs.forEach((button) => {
+    const isActive = button.dataset.dashboardTab === tab;
+    button.classList.toggle("bg-ink-900", isActive);
+    button.classList.toggle("text-white", isActive);
+    button.classList.toggle("text-ink-900/70", !isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+};
 var setDashboardMenuVisible = (visible) => {
   if (dashboardMenu) {
     dashboardMenu.hidden = !visible;
@@ -349,6 +369,25 @@ var setDashboardMenuOpen = (open) => {
   dashboardOverlay.hidden = !open;
   dashboardMenu.classList.toggle("translate-x-0", open);
   dashboardMenu.classList.toggle("translate-x-full", !open);
+};
+var scrollToForm = (selector) => {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+};
+var focusCreateForm = (target) => {
+  if (target === "promo") {
+    setActiveDashboardTab("promos");
+    scrollToForm("[data-promo-form]");
+  }
+  if (target === "branch") {
+    setActiveDashboardTab("branches");
+    scrollToForm("[data-branch-form]");
+  }
+  if (target === "business") {
+    setActiveDashboardTab("business");
+    scrollToForm("[data-business-form]");
+  }
 };
 var setAuthGateVisible = (visible) => {
   if (authGate) {
@@ -407,6 +446,9 @@ var renderUser = () => {
   setOwnerSectionsVisible(ownerAccess);
   setAuthGateVisible(!ownerAccess);
   setDashboardMenuVisible(ownerAccess);
+  if (ownerAccess) {
+    setActiveDashboardTab(activeDashboardTab);
+  }
   if (dashboardHero) {
     dashboardHero.hidden = !ownerAccess;
   }
@@ -1117,24 +1159,11 @@ var wirePromoActions = () => {
   });
 };
 var wireEmptyStateActions = () => {
-  const scrollToForm = (selector) => {
-    const el = document.querySelector(selector);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-  };
   document.body.addEventListener("click", (event) => {
     const target = event.target;
     const action = target.dataset.emptyAction;
     if (!action) return;
-    if (action === "business") {
-      scrollToForm("[data-business-form]");
-    }
-    if (action === "branch") {
-      scrollToForm("[data-branch-form]");
-    }
-    if (action === "promo") {
-      scrollToForm("[data-promo-form]");
-    }
+    focusCreateForm(action);
   });
 };
 var wireCancelButtons = () => {
@@ -1144,17 +1173,37 @@ var wireCancelButtons = () => {
   cityCancel?.addEventListener("click", () => setCityForm());
   categoryCancel?.addEventListener("click", () => setCategoryForm());
 };
+var wireDashboardTabs = () => {
+  if (dashboardTabs.length === 0) return;
+  dashboardTabs.forEach((button) => {
+    button.addEventListener("click", () => {
+      const tab = button.dataset.dashboardTab ?? "promos";
+      setActiveDashboardTab(tab);
+      setDashboardMenuOpen(false);
+    });
+  });
+  setActiveDashboardTab(activeDashboardTab);
+};
 var wireDashboardMenu = () => {
   if (!dashboardMenu || !dashboardOverlay || !dashboardToggle) return;
   const closeMenu = () => setDashboardMenuOpen(false);
   dashboardToggle.addEventListener("click", () => setDashboardMenuOpen(true));
   dashboardClose?.addEventListener("click", closeMenu);
   dashboardOverlay.addEventListener("click", closeMenu);
-  dashboardLinks.forEach((link) => link.addEventListener("click", closeMenu));
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeMenu();
     }
+  });
+};
+var wireDashboardCreateButtons = () => {
+  if (dashboardCreateButtons.length === 0) return;
+  dashboardCreateButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.dashboardCreate;
+      if (!target) return;
+      focusCreateForm(target);
+    });
   });
 };
 (async () => {
@@ -1179,6 +1228,8 @@ var wireDashboardMenu = () => {
   wirePromoActions();
   wireEmptyStateActions();
   wireCancelButtons();
+  wireDashboardTabs();
+  wireDashboardCreateButtons();
   wireDashboardMenu();
   handleBusinessForm();
   handleBranchForm();

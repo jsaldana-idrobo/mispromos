@@ -6,10 +6,14 @@ const days = daysOfWeek;
 ---
 
 <BaseLayout title="Mis promos | Dashboard">
-  <div class="mb-6 flex items-center justify-between rounded-3xl border border-ink-900/10 bg-white/80 p-4" data-owner-only hidden>
+  <div
+    class="mb-6 flex items-center justify-between rounded-3xl border border-ink-900/10 bg-white/80 p-4 lg:hidden"
+    data-owner-only
+    hidden
+  >
     <div>
       <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Panel de negocio</p>
-      <h2 class="text-xl font-semibold">Administra tu cuenta</h2>
+      <h2 class="text-lg font-semibold">Dashboard</h2>
     </div>
     <button class="button-secondary" type="button" data-dashboard-toggle>
       Menú
@@ -17,35 +21,60 @@ const days = daysOfWeek;
   </div>
 
   <div
-    class="fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm"
+    class="fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm lg:hidden"
     data-dashboard-overlay
     hidden
   ></div>
   <aside
-    class="fixed right-0 top-0 z-50 flex h-full w-72 translate-x-full flex-col gap-6 border-l border-ink-900/10 bg-white p-6 shadow-2xl transition"
+    class="fixed right-0 top-0 z-50 flex h-full w-72 translate-x-full flex-col gap-6 border-l border-ink-900/10 bg-white p-6 shadow-2xl transition lg:hidden"
     data-dashboard-menu
     hidden
   >
     <div class="flex items-center justify-between">
       <p class="text-sm font-semibold">Tu panel</p>
-      <button class="rounded-full border border-ink-900/20 px-3 py-1 text-xs" type="button" data-dashboard-close>
+      <button
+        class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+        type="button"
+        data-dashboard-close
+      >
         Cerrar
       </button>
     </div>
-    <nav class="grid gap-3 text-sm">
-      <a class="underline" href="#perfil" data-dashboard-link>Perfil</a>
-      <a class="underline" href="#negocios" data-dashboard-link>Mis negocios</a>
-      <a class="underline" href="#sucursales" data-dashboard-link>Mis sucursales</a>
-      <a class="underline" href="#promos" data-dashboard-link>Mis promos</a>
-      <a class="underline" href="#crear-negocio" data-dashboard-link>Crear negocio</a>
-      <a class="underline" href="#crear-sede" data-dashboard-link>Crear sede</a>
-      <a class="underline" href="#crear-promo" data-dashboard-link>Crear promo</a>
+    <nav class="grid gap-2 text-sm">
+      <button class="rounded-2xl px-4 py-2 text-left text-ink-900/70" data-dashboard-tab="promos">
+        Mis promociones
+      </button>
+      <button class="rounded-2xl px-4 py-2 text-left text-ink-900/70" data-dashboard-tab="branches">
+        Mis sucursales
+      </button>
+      <button class="rounded-2xl px-4 py-2 text-left text-ink-900/70" data-dashboard-tab="business">
+        Mi negocio
+      </button>
     </nav>
   </aside>
 
-  <section class="grid gap-8 lg:grid-cols-[1fr,1.1fr]">
+  <section class="grid gap-8 lg:grid-cols-[240px,1fr]">
+    <aside
+      class="hidden rounded-3xl border border-ink-900/10 bg-white/80 p-5 lg:block"
+      data-owner-only
+      hidden
+    >
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Navegación</p>
+      <nav class="mt-4 grid gap-2 text-sm">
+        <button class="rounded-2xl px-4 py-2 text-left text-ink-900/70" data-dashboard-tab="promos">
+          Mis promociones
+        </button>
+        <button class="rounded-2xl px-4 py-2 text-left text-ink-900/70" data-dashboard-tab="branches">
+          Mis sucursales
+        </button>
+        <button class="rounded-2xl px-4 py-2 text-left text-ink-900/70" data-dashboard-tab="business">
+          Mi negocio
+        </button>
+      </nav>
+    </aside>
+
     <div class="space-y-6">
-      <div class="glass-panel rounded-3xl p-6" data-dashboard-hero id="perfil" hidden>
+      <div class="glass-panel rounded-3xl p-6" data-dashboard-hero hidden>
         <h1 class="text-3xl font-display">Dashboard de negocios</h1>
         <p class="mt-2 text-sm text-ink-900/60">
           Administra negocios, sedes y promociones desde un solo lugar.
@@ -66,240 +95,262 @@ const days = daysOfWeek;
         </div>
       </div>
 
-      <div
-        class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
-        data-owner-only
-        id="negocios"
-        hidden
-      >
-        <h2 class="text-lg font-semibold">Tus negocios</h2>
-        <div class="mt-4 grid gap-3" data-business-list>
-          <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
-            Aun no hay negocios.
-          </div>
-        </div>
-        <div class="mt-4 grid gap-3">
-          <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
-            Sedes del negocio
-          </h3>
-          <div class="grid gap-3" data-branch-list id="sucursales">
-            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
-              Selecciona un negocio para ver sedes.
+      <div class="space-y-6" data-owner-only hidden>
+        <section class="rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-dashboard-panel="promos">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-semibold">Mis promociones</h2>
+              <p class="text-sm text-ink-900/60">Gestiona las promos activas de tu negocio.</p>
             </div>
+            <button class="button-primary" type="button" data-dashboard-create="promo">
+              Crear nueva promoción
+            </button>
           </div>
-        </div>
-        <div class="mt-4 grid gap-3">
-          <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
-            Promociones activas
-          </h3>
-          <div class="grid gap-3" data-promo-list id="promos">
+          <div class="mt-4 grid gap-3" data-promo-list>
             <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
               Selecciona un negocio para ver promociones.
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-admin-panel hidden>
-        <h2 class="text-lg font-semibold">Panel admin</h2>
-        <p class="mt-2 text-sm text-ink-900/60">
-          Gestiona el catálogo de ciudades y categorías públicas.
-        </p>
-        <div class="mt-4 grid gap-6">
-          <div>
-            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
-              Ciudades
-            </h3>
-            <form class="mt-3 grid gap-3" data-city-form>
+          <div class="mt-6 glass-panel rounded-3xl p-6" id="crear-promo">
+            <h3 class="text-lg font-semibold">Crear o editar promoción</h3>
+            <form class="mt-4 grid gap-4" data-promo-form>
               <div class="flex items-center justify-between text-xs text-ink-900/60">
-                <span data-city-mode>Modo crear</span>
-                <button class="underline" type="button" data-city-cancel hidden>
+                <span data-promo-mode>Modo crear</span>
+                <button class="underline" type="button" data-promo-cancel hidden>
                   Cancelar edición
                 </button>
               </div>
-              <input class="input-field" name="name" placeholder="Palmira" required />
-              <input class="input-field" name="countryCode" placeholder="CO" required maxlength="2" />
-              <button class="button-secondary" type="submit">Agregar ciudad</button>
-              <p class="text-sm text-ink-900/60" data-city-message></p>
-            </form>
-            <div class="mt-4 grid gap-2 text-sm" data-city-list></div>
-          </div>
-          <div>
-            <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
-              Categorías
-            </h3>
-            <form class="mt-3 grid gap-3" data-category-form>
-              <div class="flex items-center justify-between text-xs text-ink-900/60">
-                <span data-category-mode>Modo crear</span>
-                <button class="underline" type="button" data-category-cancel hidden>
-                  Cancelar edición
-                </button>
+              <label class="grid gap-2 text-sm font-semibold">
+                Negocio
+                <select class="input-field" name="businessId" data-business-select required></select>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Sede (opcional)
+                <select class="input-field" name="branchId" data-branch-select>
+                  <option value="">Global</option>
+                </select>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Título
+                <input class="input-field" name="title" required />
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Descripción (opcional)
+                <textarea class="input-field" name="description" rows={2}></textarea>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Tipo de promo
+                <select class="input-field" name="promoType" required>
+                  {promoTypes.map((type) => (
+                    <option value={type}>{type}</option>
+                  ))}
+                </select>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Valor (opcional)
+                <input class="input-field" name="value" placeholder="50% / 2x1" />
+              </label>
+              <div class="grid gap-2">
+                <span class="text-sm font-semibold">Días de la semana</span>
+                <div class="flex flex-wrap gap-2 text-sm">
+                  {days.map((day) => (
+                    <label class="flex items-center gap-2 rounded-full border border-ink-900/10 bg-sand-100 px-3 py-1">
+                      <input type="checkbox" name="daysOfWeek" value={day} checked />
+                      <span class="capitalize">{day}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-              <input class="input-field" name="name" placeholder="Pizza" required />
-              <input class="input-field" name="slug" placeholder="pizza" required />
-              <button class="button-secondary" type="submit">Agregar categoría</button>
-              <p class="text-sm text-ink-900/60" data-category-message></p>
-            </form>
-            <div class="mt-4 grid gap-2 text-sm" data-category-list></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="space-y-6" data-owner-only hidden>
-      <div class="glass-panel rounded-3xl p-6" id="crear-negocio">
-        <h2 class="text-xl font-semibold">Crear negocio</h2>
-        <form class="mt-4 grid gap-4" data-business-form>
-          <div class="flex items-center justify-between text-xs text-ink-900/60">
-            <span data-business-mode>Modo crear</span>
-            <button class="underline" type="button" data-business-cancel hidden>
-              Cancelar edición
-            </button>
-          </div>
-          <label class="grid gap-2 text-sm font-semibold">
-            Nombre
-            <input class="input-field" name="name" required />
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Slug
-            <input class="input-field" name="slug" required />
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Tipo
-            <select class="input-field" name="type" required>
-              {businessTypes.map((type) => (
-                <option value={type}>{type}</option>
-              ))}
-            </select>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Categorías (separadas por coma)
-            <select class="input-field" name="categories" data-business-category-select multiple></select>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Descripción
-            <textarea class="input-field" name="description" rows={2}></textarea>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Instagram (opcional)
-            <input class="input-field" name="instagram" placeholder="tu_negocio" />
-          </label>
-          <p class="text-sm text-ink-900/60" data-business-message></p>
-          <button class="button-primary" type="submit">Guardar negocio</button>
-        </form>
-      </div>
-
-      <div class="glass-panel rounded-3xl p-6" id="crear-sede">
-        <h2 class="text-xl font-semibold">Crear sede</h2>
-        <form class="mt-4 grid gap-4" data-branch-form>
-          <div class="flex items-center justify-between text-xs text-ink-900/60">
-            <span data-branch-mode>Modo crear</span>
-            <button class="underline" type="button" data-branch-cancel hidden>
-              Cancelar edición
-            </button>
-          </div>
-          <label class="grid gap-2 text-sm font-semibold">
-            Negocio
-            <select class="input-field" name="businessId" data-business-select required></select>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Ciudad
-            <select class="input-field" name="city" data-branch-city-select required>
-              <option value="">Selecciona una ciudad</option>
-            </select>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Dirección
-            <input class="input-field" name="address" required />
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Zona (opcional)
-            <input class="input-field" name="zone" />
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Teléfono (opcional)
-            <input class="input-field" name="phone" />
-          </label>
-          <p class="text-sm text-ink-900/60" data-branch-message></p>
-          <button class="button-primary" type="submit">Guardar sede</button>
-        </form>
-      </div>
-
-      <div class="glass-panel rounded-3xl p-6" id="crear-promo">
-        <h2 class="text-xl font-semibold">Crear promoción</h2>
-        <form class="mt-4 grid gap-4" data-promo-form>
-          <div class="flex items-center justify-between text-xs text-ink-900/60">
-            <span data-promo-mode>Modo crear</span>
-            <button class="underline" type="button" data-promo-cancel hidden>
-              Cancelar edición
-            </button>
-          </div>
-          <label class="grid gap-2 text-sm font-semibold">
-            Negocio
-            <select class="input-field" name="businessId" data-business-select required></select>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Sede (opcional)
-            <select class="input-field" name="branchId" data-branch-select>
-              <option value="">Global</option>
-            </select>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Título
-            <input class="input-field" name="title" required />
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Descripción (opcional)
-            <textarea class="input-field" name="description" rows={2}></textarea>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Tipo de promo
-            <select class="input-field" name="promoType" required>
-              {promoTypes.map((type) => (
-                <option value={type}>{type}</option>
-              ))}
-            </select>
-          </label>
-          <label class="grid gap-2 text-sm font-semibold">
-            Valor (opcional)
-            <input class="input-field" name="value" placeholder="50% / 2x1" />
-          </label>
-          <div class="grid gap-2">
-            <span class="text-sm font-semibold">Días de la semana</span>
-            <div class="flex flex-wrap gap-2 text-sm">
-              {days.map((day) => (
-                <label class="flex items-center gap-2 rounded-full border border-ink-900/10 bg-sand-100 px-3 py-1">
-                  <input type="checkbox" name="daysOfWeek" value={day} checked />
-                  <span class="capitalize">{day}</span>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <label class="grid gap-2 text-sm font-semibold">
+                  Inicio (fecha)
+                  <input class="input-field" type="date" name="startDate" required />
                 </label>
-              ))}
+                <label class="grid gap-2 text-sm font-semibold">
+                  Fin (fecha)
+                  <input class="input-field" type="date" name="endDate" required />
+                </label>
+                <label class="grid gap-2 text-sm font-semibold">
+                  Hora inicio
+                  <input class="input-field" type="time" name="startHour" required />
+                </label>
+                <label class="grid gap-2 text-sm font-semibold">
+                  Hora fin
+                  <input class="input-field" type="time" name="endHour" required />
+                </label>
+              </div>
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="active" checked />
+                Activa
+              </label>
+              <p class="text-sm text-ink-900/60" data-promo-message></p>
+              <button class="button-primary" type="submit">Guardar promoción</button>
+            </form>
+          </div>
+        </section>
+
+        <section
+          class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+          data-dashboard-panel="branches"
+          hidden
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-semibold">Mis sucursales</h2>
+              <p class="text-sm text-ink-900/60">Administra las sedes activas de tu negocio.</p>
+            </div>
+            <button class="button-primary" type="button" data-dashboard-create="branch">
+              Crear nueva sede
+            </button>
+          </div>
+          <div class="mt-4 grid gap-3" data-branch-list>
+            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+              Selecciona un negocio para ver sedes.
             </div>
           </div>
-          <div class="grid gap-4 sm:grid-cols-2">
-            <label class="grid gap-2 text-sm font-semibold">
-              Inicio (fecha)
-              <input class="input-field" type="date" name="startDate" required />
-            </label>
-            <label class="grid gap-2 text-sm font-semibold">
-              Fin (fecha)
-              <input class="input-field" type="date" name="endDate" required />
-            </label>
-            <label class="grid gap-2 text-sm font-semibold">
-              Hora inicio
-              <input class="input-field" type="time" name="startHour" required />
-            </label>
-            <label class="grid gap-2 text-sm font-semibold">
-              Hora fin
-              <input class="input-field" type="time" name="endHour" required />
-            </label>
+          <div class="mt-6 glass-panel rounded-3xl p-6" id="crear-sede">
+            <h3 class="text-lg font-semibold">Crear o editar sede</h3>
+            <form class="mt-4 grid gap-4" data-branch-form>
+              <div class="flex items-center justify-between text-xs text-ink-900/60">
+                <span data-branch-mode>Modo crear</span>
+                <button class="underline" type="button" data-branch-cancel hidden>
+                  Cancelar edición
+                </button>
+              </div>
+              <label class="grid gap-2 text-sm font-semibold">
+                Negocio
+                <select class="input-field" name="businessId" data-business-select required></select>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Ciudad
+                <select class="input-field" name="city" data-branch-city-select required>
+                  <option value="">Selecciona una ciudad</option>
+                </select>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Dirección
+                <input class="input-field" name="address" required />
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Zona (opcional)
+                <input class="input-field" name="zone" />
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Teléfono (opcional)
+                <input class="input-field" name="phone" />
+              </label>
+              <p class="text-sm text-ink-900/60" data-branch-message></p>
+              <button class="button-primary" type="submit">Guardar sede</button>
+            </form>
           </div>
-          <label class="flex items-center gap-2 text-sm">
-            <input type="checkbox" name="active" checked />
-            Activa
-          </label>
-          <p class="text-sm text-ink-900/60" data-promo-message></p>
-          <button class="button-primary" type="submit">Guardar promoción</button>
-        </form>
+        </section>
+
+        <section
+          class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+          data-dashboard-panel="business"
+          hidden
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-semibold">Mi negocio</h2>
+              <p class="text-sm text-ink-900/60">Gestiona la información de tus negocios.</p>
+            </div>
+            <button class="button-primary" type="button" data-dashboard-create="business">
+              Crear nuevo negocio
+            </button>
+          </div>
+          <div class="mt-4 grid gap-3" data-business-list>
+            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+              Aun no hay negocios.
+            </div>
+          </div>
+          <div class="mt-6 glass-panel rounded-3xl p-6" id="crear-negocio">
+            <h3 class="text-lg font-semibold">Crear o editar negocio</h3>
+            <form class="mt-4 grid gap-4" data-business-form>
+              <div class="flex items-center justify-between text-xs text-ink-900/60">
+                <span data-business-mode>Modo crear</span>
+                <button class="underline" type="button" data-business-cancel hidden>
+                  Cancelar edición
+                </button>
+              </div>
+              <label class="grid gap-2 text-sm font-semibold">
+                Nombre
+                <input class="input-field" name="name" required />
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Slug
+                <input class="input-field" name="slug" required />
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Tipo
+                <select class="input-field" name="type" required>
+                  {businessTypes.map((type) => (
+                    <option value={type}>{type}</option>
+                  ))}
+                </select>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Categorías (separadas por coma)
+                <select class="input-field" name="categories" data-business-category-select multiple></select>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Descripción
+                <textarea class="input-field" name="description" rows={2}></textarea>
+              </label>
+              <label class="grid gap-2 text-sm font-semibold">
+                Instagram (opcional)
+                <input class="input-field" name="instagram" placeholder="tu_negocio" />
+              </label>
+              <p class="text-sm text-ink-900/60" data-business-message></p>
+              <button class="button-primary" type="submit">Guardar negocio</button>
+            </form>
+          </div>
+
+          <div class="mt-6 rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-admin-panel hidden>
+            <h2 class="text-lg font-semibold">Panel admin</h2>
+            <p class="mt-2 text-sm text-ink-900/60">
+              Gestiona el catálogo de ciudades y categorías públicas.
+            </p>
+            <div class="mt-4 grid gap-6">
+              <div>
+                <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
+                  Ciudades
+                </h3>
+                <form class="mt-3 grid gap-3" data-city-form>
+                  <div class="flex items-center justify-between text-xs text-ink-900/60">
+                    <span data-city-mode>Modo crear</span>
+                    <button class="underline" type="button" data-city-cancel hidden>
+                      Cancelar edición
+                    </button>
+                  </div>
+                  <input class="input-field" name="name" placeholder="Palmira" required />
+                  <input class="input-field" name="countryCode" placeholder="CO" required maxlength="2" />
+                  <button class="button-secondary" type="submit">Agregar ciudad</button>
+                  <p class="text-sm text-ink-900/60" data-city-message></p>
+                </form>
+                <div class="mt-4 grid gap-2 text-sm" data-city-list></div>
+              </div>
+              <div>
+                <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
+                  Categorías
+                </h3>
+                <form class="mt-3 grid gap-3" data-category-form>
+                  <div class="flex items-center justify-between text-xs text-ink-900/60">
+                    <span data-category-mode>Modo crear</span>
+                    <button class="underline" type="button" data-category-cancel hidden>
+                      Cancelar edición
+                    </button>
+                  </div>
+                  <input class="input-field" name="name" placeholder="Pizza" required />
+                  <input class="input-field" name="slug" placeholder="pizza" required />
+                  <button class="button-secondary" type="submit">Agregar categoría</button>
+                  <p class="text-sm text-ink-900/60" data-category-message></p>
+                </form>
+                <div class="mt-4 grid gap-2 text-sm" data-category-list></div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </section>
