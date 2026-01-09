@@ -69,15 +69,8 @@ const title = Astro.props.title ?? "Mis promos";
       } catch {
         // localStorage might be blocked; ignore.
       }
-      const fetchWithTimeout = (url, options, timeoutMs = 4000) => {
-        const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
-        return fetch(url, { ...options, signal: controller.signal }).finally(() => {
-          window.clearTimeout(timeout);
-        });
-      };
       if (dashboardLink || loginLink || registerLink) {
-        fetchWithTimeout(`${apiBase}/auth/me`, { credentials: "include" })
+        fetch(`${apiBase}/auth/me`, { credentials: "include" })
           .then((response) => (response.ok ? response.json() : null))
           .then((user) => {
             if (user) {
