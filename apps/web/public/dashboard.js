@@ -1462,6 +1462,23 @@ var wireDashboardCreateButtons = () => {
     });
   });
 };
+var wireDashboardDelegates = () => {
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    const tabButton = target.closest("[data-dashboard-tab]");
+    if (tabButton?.dataset.dashboardTab) {
+      event.preventDefault();
+      setActiveDashboardTab(tabButton.dataset.dashboardTab);
+      setDashboardMenuOpen(false);
+      return;
+    }
+    const createButton = target.closest("[data-dashboard-create]");
+    if (createButton?.dataset.dashboardCreate) {
+      event.preventDefault();
+      focusCreateForm(createButton.dataset.dashboardCreate);
+    }
+  });
+};
 var wireDashboardModal = () => {
   const wireModal = (overlay, closeButton) => {
     if (!overlay) return;
@@ -1704,6 +1721,7 @@ var wireDemoFill = () => {
   wireCancelButtons();
   wireDashboardTabs();
   wireDashboardCreateButtons();
+  wireDashboardDelegates();
   wireDashboardMenu();
   wireDashboardModal();
   wirePromoFilters();

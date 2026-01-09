@@ -1589,6 +1589,24 @@ const wireDashboardCreateButtons = () => {
   });
 };
 
+const wireDashboardDelegates = () => {
+  document.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    const tabButton = target.closest<HTMLElement>("[data-dashboard-tab]");
+    if (tabButton?.dataset.dashboardTab) {
+      event.preventDefault();
+      setActiveDashboardTab(tabButton.dataset.dashboardTab);
+      setDashboardMenuOpen(false);
+      return;
+    }
+    const createButton = target.closest<HTMLElement>("[data-dashboard-create]");
+    if (createButton?.dataset.dashboardCreate) {
+      event.preventDefault();
+      focusCreateForm(createButton.dataset.dashboardCreate);
+    }
+  });
+};
+
 const wireDashboardModal = () => {
   const wireModal = (
     overlay: HTMLElement | null,
@@ -1850,6 +1868,7 @@ const wireDemoFill = () => {
   wireCancelButtons();
   wireDashboardTabs();
   wireDashboardCreateButtons();
+  wireDashboardDelegates();
   wireDashboardMenu();
   wireDashboardModal();
   wirePromoFilters();
