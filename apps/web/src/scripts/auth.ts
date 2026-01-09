@@ -50,6 +50,7 @@ if (form) {
         method: "POST",
         body: JSON.stringify(payload),
       });
+      localStorage.setItem("auth", "true");
       showToast("Listo", "Bienvenido a Mis promos.", "success");
       window.location.href = "/dashboard";
     } catch (error) {

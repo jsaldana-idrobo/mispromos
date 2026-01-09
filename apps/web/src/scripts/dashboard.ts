@@ -568,6 +568,7 @@ const renderUser = () => {
   if (logoutButton) {
     logoutButton.addEventListener("click", async () => {
       await apiFetch("/auth/logout", { method: "POST" });
+      localStorage.removeItem("auth");
       window.location.href = "/login";
     });
   }
