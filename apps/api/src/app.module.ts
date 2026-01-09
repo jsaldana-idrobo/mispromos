@@ -23,7 +23,11 @@ import { CategoryModule } from "./category/category.module";
         if (!uri) {
           throw new Error("MONGODB_URI no está configurado");
         }
-        return { uri };
+        return {
+          uri,
+          serverSelectionTimeoutMS: 3000,
+          connectTimeoutMS: 3000,
+        };
       },
     }),
     BusinessModule,
