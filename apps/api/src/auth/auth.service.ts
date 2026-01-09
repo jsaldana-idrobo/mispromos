@@ -26,6 +26,7 @@ export class AuthService {
     const created = await this.userModel.create({
       email: dto.email,
       password: hashed,
+      role: UserRole.BUSINESS_OWNER,
     });
 
     return { id: created.id, email: created.email, role: created.role };
