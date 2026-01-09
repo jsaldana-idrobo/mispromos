@@ -106,6 +106,43 @@ const days = daysOfWeek;
               Crear nueva promoción
             </button>
           </div>
+          <div class="mt-5 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total</p>
+              <p class="text-2xl font-semibold" data-promo-kpi-total>0</p>
+            </div>
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Activas</p>
+              <p class="text-2xl font-semibold" data-promo-kpi-active>0</p>
+            </div>
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Inactivas</p>
+              <p class="text-2xl font-semibold" data-promo-kpi-inactive>0</p>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.4fr,1fr,1fr]">
+            <label class="grid gap-2 text-sm font-semibold">
+              Buscar promo
+              <input class="input-field" name="search" placeholder="Ej: 2x1, almuerzo..." data-promo-search />
+            </label>
+            <label class="grid gap-2 text-sm font-semibold">
+              Estado
+              <select class="input-field" name="status" data-promo-status>
+                <option value="all">Todas</option>
+                <option value="active">Activas</option>
+                <option value="inactive">Inactivas</option>
+              </select>
+            </label>
+            <label class="grid gap-2 text-sm font-semibold">
+              Tipo
+              <select class="input-field" name="promoType" data-promo-type>
+                <option value="all">Todos</option>
+                {promoTypes.map((type) => (
+                  <option value={type}>{type}</option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div class="mt-4 grid gap-3" data-promo-list>
             <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
               Selecciona un negocio para ver promociones.
@@ -127,6 +164,18 @@ const days = daysOfWeek;
               Crear nueva sede
             </button>
           </div>
+          <div class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.4fr,1fr]">
+            <label class="grid gap-2 text-sm font-semibold">
+              Buscar sede
+              <input class="input-field" name="search" placeholder="Ej: Centro, Calle 10..." data-branch-search />
+            </label>
+            <label class="grid gap-2 text-sm font-semibold">
+              Ciudad
+              <select class="input-field" name="city" data-branch-city-filter>
+                <option value="all">Todas</option>
+              </select>
+            </label>
+          </div>
           <div class="mt-4 grid gap-3" data-branch-list>
             <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
               Selecciona un negocio para ver sedes.
@@ -147,6 +196,21 @@ const days = daysOfWeek;
             <button class="button-primary" type="button" data-dashboard-create="business">
               Crear nuevo negocio
             </button>
+          </div>
+          <div class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.4fr,1fr]">
+            <label class="grid gap-2 text-sm font-semibold">
+              Buscar negocio
+              <input class="input-field" name="search" placeholder="Ej: Mis promos, pizza..." data-business-search />
+            </label>
+            <label class="grid gap-2 text-sm font-semibold">
+              Tipo
+              <select class="input-field" name="type" data-business-type-filter>
+                <option value="all">Todos</option>
+                {businessTypes.map((type) => (
+                  <option value={type}>{type}</option>
+                ))}
+              </select>
+            </label>
           </div>
           <div class="mt-4 grid gap-3" data-business-list>
             <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
@@ -222,6 +286,17 @@ const days = daysOfWeek;
         </div>
         <button class="rounded-full border border-ink-900/20 px-3 py-1 text-xs" type="button" data-dashboard-modal-close>
           Cerrar
+        </button>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="promo">
+          Usar datos demo promo
+        </button>
+        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="branch">
+          Usar datos demo sede
+        </button>
+        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="business">
+          Usar datos demo negocio
         </button>
       </div>
 

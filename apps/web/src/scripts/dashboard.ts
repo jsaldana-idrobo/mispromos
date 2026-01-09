@@ -78,6 +78,16 @@ const promoForm = document.querySelector<HTMLFormElement>("[data-promo-form]");
 const promoMessage = document.querySelector<HTMLElement>("[data-promo-message]");
 const promoMode = document.querySelector<HTMLElement>("[data-promo-mode]");
 const promoCancel = document.querySelector<HTMLButtonElement>("[data-promo-cancel]");
+const promoSearchInput = document.querySelector<HTMLInputElement>("[data-promo-search]");
+const promoStatusSelect = document.querySelector<HTMLSelectElement>("[data-promo-status]");
+const promoTypeSelect = document.querySelector<HTMLSelectElement>("[data-promo-type]");
+const promoKpiTotal = document.querySelector<HTMLElement>("[data-promo-kpi-total]");
+const promoKpiActive = document.querySelector<HTMLElement>("[data-promo-kpi-active]");
+const promoKpiInactive = document.querySelector<HTMLElement>("[data-promo-kpi-inactive]");
+const branchSearchInput = document.querySelector<HTMLInputElement>("[data-branch-search]");
+const branchCityFilter = document.querySelector<HTMLSelectElement>("[data-branch-city-filter]");
+const businessSearchInput = document.querySelector<HTMLInputElement>("[data-business-search]");
+const businessTypeFilter = document.querySelector<HTMLSelectElement>("[data-business-type-filter]");
 const adminPanel = document.querySelector<HTMLElement>("[data-admin-panel]");
 const cityForm = document.querySelector<HTMLFormElement>("[data-city-form]");
 const cityMessage = document.querySelector<HTMLElement>("[data-city-message]");
@@ -118,6 +128,9 @@ const dashboardModalClose = document.querySelector<HTMLButtonElement>("[data-das
 const dashboardModalPanels = Array.from(
   document.querySelectorAll<HTMLElement>("[data-modal-panel]")
 );
+const demoFillButtons = Array.from(
+  document.querySelectorAll<HTMLButtonElement>("[data-demo-fill]")
+);
 
 let businesses: Business[] = [];
 let branches: Branch[] = [];
@@ -128,6 +141,19 @@ let currentBusinessId = "";
 let promotions: Promotion[] = [];
 let activeDashboardTab = "promos";
 let activeModalPanel = "promo";
+let promoFilters = {
+  search: "",
+  status: "all",
+  type: "all",
+};
+let branchFilters = {
+  search: "",
+  city: "all",
+};
+let businessFilters = {
+  search: "",
+  type: "all",
+};
 
 type FormMode = "create" | "edit";
 
@@ -227,6 +253,13 @@ const setInputValue = (form: HTMLFormElement | null, name: string, value: string
   if (input) {
     input.value = value;
   }
+};
+
+const setMultiSelectValues = (select: HTMLSelectElement | null, values: string[]) => {
+  if (!select) return;
+  Array.from(select.options).forEach((option) => {
+    option.selected = values.includes(option.value);
+  });
 };
 
 const formatDateInput = (value: string) => {
@@ -545,15 +578,36 @@ const renderUser = () => {
   }
 };
 
-const renderBusinesses = () => {
+const getFilteredBusinesses = () => {
+  const searchValue = businessFilters.search.trim().toLowerCase();
+  return businesses.filter((business) => {
+    const typeMatch = businessFilters.type === "all" || business.type === businessFilters.type;
+    const textMatch =
+      searchValue.length === 0 ||
+      business.name.toLowerCase().includes(searchValue) ||
+      business.slug.toLowerCase().includes(searchValue) ||
+      (business.description ?? "").toLowerCase().includes(searchValue);
+    return typeMatch && textMatch;
+  });
+};
+
+const renderBusinesses = (list: Business[], total: number) => {
   if (!businessList) return;
-  if (businesses.length === 0) {
+  if (total === 0) {
     businessList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         Aun no hay negocios.
         <button class="mt-3 inline-flex text-xs underline" data-empty-action="business">
           Crear mi primer negocio
         </button>
+      </div>
+    `;
+    return;
+  }
+  if (list.length === 0) {
+    businessList.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+        No hay negocios que coincidan con los filtros.
       </div>
     `;
     return;
@@ -565,7 +619,7 @@ const renderBusinesses = () => {
       <span>Tipo</span>
       <span>Acciones</span>
     </div>
-    ${businesses
+    ${list
       .map(
         (business) => `
           <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
@@ -620,7 +674,21 @@ const populateBranchSelect = (businessId: string) => {
   branchSelect.disabled = filtered.length === 0;
 };
 
-const renderBranches = () => {
+const getFilteredBranches = () => {
+  const searchValue = branchFilters.search.trim().toLowerCase();
+  return branches.filter((branch) => {
+    const cityMatch = branchFilters.city === "all" || branch.city === branchFilters.city;
+    const textMatch =
+      searchValue.length === 0 ||
+      branch.city.toLowerCase().includes(searchValue) ||
+      branch.address.toLowerCase().includes(searchValue) ||
+      (branch.zone ?? "").toLowerCase().includes(searchValue) ||
+      (branch.phone ?? "").toLowerCase().includes(searchValue);
+    return cityMatch && textMatch;
+  });
+};
+
+const renderBranches = (list: Branch[], total: number) => {
   if (!branchList) return;
   if (!currentBusinessId) {
     branchList.innerHTML = `
@@ -630,13 +698,21 @@ const renderBranches = () => {
     `;
     return;
   }
-  if (branches.length === 0) {
+  if (total === 0) {
     branchList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         No hay sedes para este negocio.
         <button class="mt-3 inline-flex text-xs underline" data-empty-action="branch">
           Crear sede
         </button>
+      </div>
+    `;
+    return;
+  }
+  if (list.length === 0) {
+    branchList.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+        No hay sedes que coincidan con los filtros.
       </div>
     `;
     return;
@@ -648,7 +724,7 @@ const renderBranches = () => {
       <span>Contacto</span>
       <span>Acciones</span>
     </div>
-    ${branches
+    ${list
       .map(
         (branch) => `
           <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
@@ -671,7 +747,38 @@ const renderBranches = () => {
   `;
 };
 
-const renderPromotions = (promos: Promotion[]) => {
+const updatePromoKpis = () => {
+  const total = promotions.length;
+  const activeCount = promotions.filter((promo) => promo.active ?? true).length;
+  const inactiveCount = total - activeCount;
+  if (promoKpiTotal) {
+    promoKpiTotal.textContent = String(total);
+  }
+  if (promoKpiActive) {
+    promoKpiActive.textContent = String(activeCount);
+  }
+  if (promoKpiInactive) {
+    promoKpiInactive.textContent = String(inactiveCount);
+  }
+};
+
+const getFilteredPromotions = () => {
+  const searchValue = promoFilters.search.trim().toLowerCase();
+  return promotions.filter((promo) => {
+    const statusMatch =
+      promoFilters.status === "all" ||
+      (promoFilters.status === "active" && (promo.active ?? true)) ||
+      (promoFilters.status === "inactive" && !(promo.active ?? true));
+    const typeMatch = promoFilters.type === "all" || promo.promoType === promoFilters.type;
+    const textMatch =
+      searchValue.length === 0 ||
+      promo.title.toLowerCase().includes(searchValue) ||
+      (promo.description ?? "").toLowerCase().includes(searchValue);
+    return statusMatch && typeMatch && textMatch;
+  });
+};
+
+const renderPromotions = (promos: Promotion[], total: number) => {
   if (!promoList) return;
   if (!currentBusinessId) {
     promoList.innerHTML = `
@@ -681,13 +788,21 @@ const renderPromotions = (promos: Promotion[]) => {
     `;
     return;
   }
-  if (promos.length === 0) {
+  if (total === 0) {
     promoList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         No hay promociones creadas.
         <button class="mt-3 inline-flex text-xs underline" data-empty-action="promo">
           Crear promoción
         </button>
+      </div>
+    `;
+    return;
+  }
+  if (promos.length === 0) {
+    promoList.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+        No hay promociones que coincidan con los filtros.
       </div>
     `;
     return;
@@ -735,6 +850,35 @@ const renderPromotions = (promos: Promotion[]) => {
   `;
 };
 
+const updatePromotionsView = () => {
+  updatePromoKpis();
+  renderPromotions(getFilteredPromotions(), promotions.length);
+};
+
+const updateBranchCityFilterOptions = () => {
+  if (!branchCityFilter) return;
+  const cities = Array.from(new Set(branches.map((branch) => branch.city))).sort();
+  const currentValue = branchCityFilter.value;
+  branchCityFilter.innerHTML = `
+    <option value="all">Todas</option>
+    ${cities.map((city) => `<option value="${city}">${city}</option>`).join("")}
+  `;
+  if (cities.includes(currentValue)) {
+    branchCityFilter.value = currentValue;
+  } else {
+    branchCityFilter.value = "all";
+    branchFilters.city = "all";
+  }
+};
+
+const updateBranchesView = () => {
+  renderBranches(getFilteredBranches(), branches.length);
+};
+
+const updateBusinessesView = () => {
+  renderBusinesses(getFilteredBusinesses(), businesses.length);
+};
+
 const loadUser = async () => {
   if (userCard) {
     userCard.innerHTML = "Cargando usuario...";
@@ -753,7 +897,14 @@ const loadBusinesses = async () => {
   businessSelects.forEach((select) => setSelectLoading(select, "Cargando negocios..."));
   const response = await apiFetch<Business[]>("/businesses/mine");
   businesses = response;
-  renderBusinesses();
+  businessFilters = { search: "", type: "all" };
+  if (businessSearchInput) {
+    businessSearchInput.value = "";
+  }
+  if (businessTypeFilter) {
+    businessTypeFilter.value = "all";
+  }
+  updateBusinessesView();
   populateBusinessSelects();
   const hasBusinesses = businesses.length > 0;
   setBranchFormEnabled(hasBusinesses);
@@ -764,8 +915,8 @@ const loadBusinesses = async () => {
   if (businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
     await loadBranches(currentBusinessId);
-    const promos = await loadPromotions(currentBusinessId);
-    renderPromotions(promos);
+    await loadPromotions(currentBusinessId);
+    updatePromotionsView();
   }
 };
 
@@ -774,8 +925,16 @@ const loadBranches = async (businessId: string) => {
   setSelectLoading(branchSelect, "Cargando sedes...");
   const response = await apiFetch<Branch[]>(`/branches?businessId=${businessId}`);
   branches = response;
+  branchFilters = { search: "", city: "all" };
+  if (branchSearchInput) {
+    branchSearchInput.value = "";
+  }
   populateBranchSelect(businessId);
-  renderBranches();
+  updateBranchCityFilterOptions();
+  if (branchCityFilter) {
+    branchCityFilter.value = "all";
+  }
+  updateBranchesView();
 };
 
 const loadPromotions = async (businessId: string): Promise<Promotion[]> => {
@@ -1009,8 +1168,8 @@ const handleBranchForm = () => {
         if (businessId) {
           currentBusinessId = businessId;
           await loadBranches(businessId);
-          const promos = await loadPromotions(businessId);
-          renderPromotions(promos);
+          await loadPromotions(businessId);
+          updatePromotionsView();
         }
         showToast("Listo", branchEditing ? "Sede actualizada." : "Sede creada.", "success");
         setModalOpen(false);
@@ -1086,8 +1245,8 @@ const handlePromoForm = () => {
         setMessage(promoMessage, promoEditing ? "Promoción actualizada." : "Promoción creada.");
         setPromoForm();
         if (currentBusinessId) {
-          const promos = await loadPromotions(currentBusinessId);
-          renderPromotions(promos);
+          await loadPromotions(currentBusinessId);
+          updatePromotionsView();
         }
         showToast(
           "Listo",
@@ -1195,8 +1354,8 @@ const wireSelectors = () => {
         setBranchFormEnabled(true);
         setPromoFormEnabled(true);
         await loadBranches(select.value);
-        const promos = await loadPromotions(select.value);
-        renderPromotions(promos);
+        await loadPromotions(select.value);
+        updatePromotionsView();
       }
     });
   });
@@ -1216,8 +1375,8 @@ const wireBusinessActions = () => {
         select.value = selectId;
       });
       await loadBranches(selectId);
-      const promos = await loadPromotions(selectId);
-      renderPromotions(promos);
+      await loadPromotions(selectId);
+      updatePromotionsView();
     }
 
     if (editId) {
@@ -1232,8 +1391,8 @@ const wireBusinessActions = () => {
           select.value = business._id;
         });
         await loadBranches(business._id);
-        const promos = await loadPromotions(business._id);
-        renderPromotions(promos);
+        await loadPromotions(business._id);
+        updatePromotionsView();
       }
     }
 
@@ -1241,19 +1400,22 @@ const wireBusinessActions = () => {
       const confirmed = window.confirm("¿Eliminar este negocio? También perderás sus sedes y promos.");
       if (!confirmed) return;
       businesses = businesses.filter((business) => business._id !== deleteId);
-      renderBusinesses();
+      updateBusinessesView();
       await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
       showToast("Listo", "Negocio eliminado.", "success");
       await loadBusinesses();
       if (businesses.length > 0) {
         currentBusinessId = businesses[0]._id;
         await loadBranches(currentBusinessId);
-        const promos = await loadPromotions(currentBusinessId);
-        renderPromotions(promos);
+        await loadPromotions(currentBusinessId);
+        updatePromotionsView();
       } else {
         currentBusinessId = "";
-        renderBranches();
-        renderPromotions([]);
+        branches = [];
+        updateBranchCityFilterOptions();
+        updateBranchesView();
+        promotions = [];
+        updatePromotionsView();
       }
     }
   });
@@ -1283,7 +1445,7 @@ const wireBranchActions = () => {
     const confirmed = window.confirm("¿Eliminar esta sede?");
     if (!confirmed) return;
     branches = branches.filter((branch) => branch._id !== deleteId);
-    renderBranches();
+    updateBranchesView();
     await apiFetch(`/branches/${deleteId}`, { method: "DELETE" });
     showToast("Listo", "Sede eliminada.", "success");
     if (currentBusinessId) {
@@ -1328,12 +1490,12 @@ const wirePromoActions = () => {
     const confirmed = window.confirm("¿Eliminar esta promoción?");
     if (!confirmed) return;
     promotions = promotions.filter((promo) => promo._id !== deleteId);
-    renderPromotions(promotions);
+    updatePromotionsView();
     await apiFetch(`/promotions/${deleteId}`, { method: "DELETE" });
     showToast("Listo", "Promoción eliminada.", "success");
     if (currentBusinessId) {
-      const promos = await loadPromotions(currentBusinessId);
-      renderPromotions(promos);
+      await loadPromotions(currentBusinessId);
+      updatePromotionsView();
     }
   });
 };
@@ -1416,6 +1578,136 @@ const wireDashboardModal = () => {
   });
 };
 
+const wirePromoFilters = () => {
+  if (!promoSearchInput || !promoStatusSelect || !promoTypeSelect) return;
+  const updateFilters = () => {
+    promoFilters = {
+      search: promoSearchInput.value,
+      status: promoStatusSelect.value,
+      type: promoTypeSelect.value,
+    };
+    updatePromotionsView();
+  };
+  promoSearchInput.addEventListener("input", updateFilters);
+  promoStatusSelect.addEventListener("change", updateFilters);
+  promoTypeSelect.addEventListener("change", updateFilters);
+};
+
+const wireBranchFilters = () => {
+  if (!branchSearchInput || !branchCityFilter) return;
+  const updateFilters = () => {
+    branchFilters = {
+      search: branchSearchInput.value,
+      city: branchCityFilter.value,
+    };
+    updateBranchesView();
+  };
+  branchSearchInput.addEventListener("input", updateFilters);
+  branchCityFilter.addEventListener("change", updateFilters);
+};
+
+const wireBusinessFilters = () => {
+  if (!businessSearchInput || !businessTypeFilter) return;
+  const updateFilters = () => {
+    businessFilters = {
+      search: businessSearchInput.value,
+      type: businessTypeFilter.value,
+    };
+    updateBusinessesView();
+  };
+  businessSearchInput.addEventListener("input", updateFilters);
+  businessTypeFilter.addEventListener("change", updateFilters);
+};
+
+const formatDateFromDate = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const fillDemoPromo = () => {
+  if (!promoForm) return;
+  if (businesses.length === 0) {
+    showToast("Primero crea un negocio", "Necesitas un negocio para asociar la promo.", "info");
+    return;
+  }
+  const businessId = currentBusinessId || businesses[0]._id;
+  const today = new Date();
+  const nextWeek = new Date();
+  nextWeek.setDate(today.getDate() + 7);
+  setInputValue(promoForm, "businessId", businessId);
+  setInputValue(promoForm, "branchId", branches[0]?._id ?? "");
+  setInputValue(promoForm, "title", "Promo demo 2x1");
+  setInputValue(promoForm, "description", "Promoción de prueba para el horario de almuerzo.");
+  setInputValue(promoForm, "promoType", "2x1");
+  setInputValue(promoForm, "value", "2x1");
+  setInputValue(promoForm, "startDate", formatDateFromDate(today));
+  setInputValue(promoForm, "endDate", formatDateFromDate(nextWeek));
+  setInputValue(promoForm, "startHour", "12:00");
+  setInputValue(promoForm, "endHour", "18:00");
+  promoForm.querySelectorAll<HTMLInputElement>('input[name="daysOfWeek"]').forEach((input) => {
+    input.checked = ["monday", "tuesday", "wednesday", "thursday", "friday"].includes(input.value);
+  });
+};
+
+const fillDemoBranch = () => {
+  if (!branchForm) return;
+  if (businesses.length === 0) {
+    showToast("Primero crea un negocio", "Necesitas un negocio para crear la sede.", "info");
+    return;
+  }
+  if (cities.length === 0) {
+    showToast("Agrega una ciudad", "Necesitas una ciudad disponible para la sede.", "info");
+    return;
+  }
+  const businessId = currentBusinessId || businesses[0]._id;
+  setInputValue(branchForm, "businessId", businessId);
+  setInputValue(branchForm, "city", cities[0].name);
+  setInputValue(branchForm, "address", "Calle 10 # 25-30");
+  setInputValue(branchForm, "zone", "Centro");
+  setInputValue(branchForm, "phone", "3001234567");
+};
+
+const fillDemoBusiness = () => {
+  if (!businessForm) return;
+  setInputValue(businessForm, "name", "Negocio demo");
+  setInputValue(businessForm, "slug", "negocio-demo");
+  setInputValue(businessForm, "type", "restaurant");
+  setInputValue(
+    businessForm,
+    "description",
+    "Negocio de prueba para validar el flujo administrativo."
+  );
+  setInputValue(businessForm, "instagram", "negocio_demo");
+  const categorySelect = businessForm.querySelector<HTMLSelectElement>("[name='categories']");
+  if (categories.length > 0) {
+    setMultiSelectValues(
+      categorySelect,
+      categories.slice(0, 2).map((category) => category.slug)
+    );
+  }
+};
+
+const wireDemoFill = () => {
+  if (demoFillButtons.length === 0) return;
+  demoFillButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.demoFill;
+      if (!target) return;
+      setActiveModalPanel(target);
+      setModalOpen(true);
+      if (target === "promo") {
+        fillDemoPromo();
+      } else if (target === "branch") {
+        fillDemoBranch();
+      } else if (target === "business") {
+        fillDemoBusiness();
+      }
+    });
+  });
+};
+
 (async () => {
   setBusinessForm();
   setBranchForm();
@@ -1428,10 +1720,10 @@ const wireDashboardModal = () => {
     await loadCities();
     await loadCategories();
   }
-  renderBusinesses();
+  updateBusinessesView();
   populateBusinessSelects();
-  renderBranches();
-  renderPromotions([]);
+  updateBranchesView();
+  updatePromotionsView();
   wireSelectors();
   wireBusinessActions();
   wireBranchActions();
@@ -1442,6 +1734,10 @@ const wireDashboardModal = () => {
   wireDashboardCreateButtons();
   wireDashboardMenu();
   wireDashboardModal();
+  wirePromoFilters();
+  wireBranchFilters();
+  wireBusinessFilters();
+  wireDemoFill();
   handleBusinessForm();
   handleBranchForm();
   handlePromoForm();

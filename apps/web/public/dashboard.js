@@ -109,6 +109,16 @@ var promoForm = document.querySelector("[data-promo-form]");
 var promoMessage = document.querySelector("[data-promo-message]");
 var promoMode = document.querySelector("[data-promo-mode]");
 var promoCancel = document.querySelector("[data-promo-cancel]");
+var promoSearchInput = document.querySelector("[data-promo-search]");
+var promoStatusSelect = document.querySelector("[data-promo-status]");
+var promoTypeSelect = document.querySelector("[data-promo-type]");
+var promoKpiTotal = document.querySelector("[data-promo-kpi-total]");
+var promoKpiActive = document.querySelector("[data-promo-kpi-active]");
+var promoKpiInactive = document.querySelector("[data-promo-kpi-inactive]");
+var branchSearchInput = document.querySelector("[data-branch-search]");
+var branchCityFilter = document.querySelector("[data-branch-city-filter]");
+var businessSearchInput = document.querySelector("[data-business-search]");
+var businessTypeFilter = document.querySelector("[data-business-type-filter]");
 var adminPanel = document.querySelector("[data-admin-panel]");
 var cityForm = document.querySelector("[data-city-form]");
 var cityMessage = document.querySelector("[data-city-message]");
@@ -149,6 +159,9 @@ var dashboardModalClose = document.querySelector("[data-dashboard-modal-close]")
 var dashboardModalPanels = Array.from(
   document.querySelectorAll("[data-modal-panel]")
 );
+var demoFillButtons = Array.from(
+  document.querySelectorAll("[data-demo-fill]")
+);
 var businesses = [];
 var branches = [];
 var currentUser = null;
@@ -158,6 +171,19 @@ var currentBusinessId = "";
 var promotions = [];
 var activeDashboardTab = "promos";
 var activeModalPanel = "promo";
+var promoFilters = {
+  search: "",
+  status: "all",
+  type: "all"
+};
+var branchFilters = {
+  search: "",
+  city: "all"
+};
+var businessFilters = {
+  search: "",
+  type: "all"
+};
 var setMessage = (el, text) => {
   if (el) {
     el.textContent = text;
@@ -218,6 +244,12 @@ var setInputValue = (form, name, value) => {
   if (input) {
     input.value = value;
   }
+};
+var setMultiSelectValues = (select, values) => {
+  if (!select) return;
+  Array.from(select.options).forEach((option) => {
+    option.selected = values.includes(option.value);
+  });
 };
 var formatDateInput = (value) => {
   const date = new Date(value);
@@ -499,15 +531,31 @@ var renderUser = () => {
     setMessage(businessMessage, "Necesitas rol BUSINESS_OWNER para crear negocios.");
   }
 };
-var renderBusinesses = () => {
+var getFilteredBusinesses = () => {
+  const searchValue = businessFilters.search.trim().toLowerCase();
+  return businesses.filter((business) => {
+    const typeMatch = businessFilters.type === "all" || business.type === businessFilters.type;
+    const textMatch = searchValue.length === 0 || business.name.toLowerCase().includes(searchValue) || business.slug.toLowerCase().includes(searchValue) || (business.description ?? "").toLowerCase().includes(searchValue);
+    return typeMatch && textMatch;
+  });
+};
+var renderBusinesses = (list, total) => {
   if (!businessList) return;
-  if (businesses.length === 0) {
+  if (total === 0) {
     businessList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         Aun no hay negocios.
         <button class="mt-3 inline-flex text-xs underline" data-empty-action="business">
           Crear mi primer negocio
         </button>
+      </div>
+    `;
+    return;
+  }
+  if (list.length === 0) {
+    businessList.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+        No hay negocios que coincidan con los filtros.
       </div>
     `;
     return;
@@ -519,7 +567,7 @@ var renderBusinesses = () => {
       <span>Tipo</span>
       <span>Acciones</span>
     </div>
-    ${businesses.map(
+    ${list.map(
     (business) => `
           <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
             <div class="grid gap-3 md:grid-cols-[1.6fr,1fr,1fr,auto] md:items-center">
@@ -567,7 +615,15 @@ var populateBranchSelect = (businessId) => {
   });
   branchSelect.disabled = filtered.length === 0;
 };
-var renderBranches = () => {
+var getFilteredBranches = () => {
+  const searchValue = branchFilters.search.trim().toLowerCase();
+  return branches.filter((branch) => {
+    const cityMatch = branchFilters.city === "all" || branch.city === branchFilters.city;
+    const textMatch = searchValue.length === 0 || branch.city.toLowerCase().includes(searchValue) || branch.address.toLowerCase().includes(searchValue) || (branch.zone ?? "").toLowerCase().includes(searchValue) || (branch.phone ?? "").toLowerCase().includes(searchValue);
+    return cityMatch && textMatch;
+  });
+};
+var renderBranches = (list, total) => {
   if (!branchList) return;
   if (!currentBusinessId) {
     branchList.innerHTML = `
@@ -577,13 +633,21 @@ var renderBranches = () => {
     `;
     return;
   }
-  if (branches.length === 0) {
+  if (total === 0) {
     branchList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         No hay sedes para este negocio.
         <button class="mt-3 inline-flex text-xs underline" data-empty-action="branch">
           Crear sede
         </button>
+      </div>
+    `;
+    return;
+  }
+  if (list.length === 0) {
+    branchList.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+        No hay sedes que coincidan con los filtros.
       </div>
     `;
     return;
@@ -595,7 +659,7 @@ var renderBranches = () => {
       <span>Contacto</span>
       <span>Acciones</span>
     </div>
-    ${branches.map(
+    ${list.map(
     (branch) => `
           <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
             <div class="grid gap-3 md:grid-cols-[1fr,1.6fr,1fr,auto] md:items-center">
@@ -615,7 +679,30 @@ var renderBranches = () => {
   ).join("")}
   `;
 };
-var renderPromotions = (promos) => {
+var updatePromoKpis = () => {
+  const total = promotions.length;
+  const activeCount = promotions.filter((promo) => promo.active ?? true).length;
+  const inactiveCount = total - activeCount;
+  if (promoKpiTotal) {
+    promoKpiTotal.textContent = String(total);
+  }
+  if (promoKpiActive) {
+    promoKpiActive.textContent = String(activeCount);
+  }
+  if (promoKpiInactive) {
+    promoKpiInactive.textContent = String(inactiveCount);
+  }
+};
+var getFilteredPromotions = () => {
+  const searchValue = promoFilters.search.trim().toLowerCase();
+  return promotions.filter((promo) => {
+    const statusMatch = promoFilters.status === "all" || promoFilters.status === "active" && (promo.active ?? true) || promoFilters.status === "inactive" && !(promo.active ?? true);
+    const typeMatch = promoFilters.type === "all" || promo.promoType === promoFilters.type;
+    const textMatch = searchValue.length === 0 || promo.title.toLowerCase().includes(searchValue) || (promo.description ?? "").toLowerCase().includes(searchValue);
+    return statusMatch && typeMatch && textMatch;
+  });
+};
+var renderPromotions = (promos, total) => {
   if (!promoList) return;
   if (!currentBusinessId) {
     promoList.innerHTML = `
@@ -625,13 +712,21 @@ var renderPromotions = (promos) => {
     `;
     return;
   }
-  if (promos.length === 0) {
+  if (total === 0) {
     promoList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         No hay promociones creadas.
         <button class="mt-3 inline-flex text-xs underline" data-empty-action="promo">
           Crear promoci\xF3n
         </button>
+      </div>
+    `;
+    return;
+  }
+  if (promos.length === 0) {
+    promoList.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+        No hay promociones que coincidan con los filtros.
       </div>
     `;
     return;
@@ -672,6 +767,31 @@ var renderPromotions = (promos) => {
   }).join("")}
   `;
 };
+var updatePromotionsView = () => {
+  updatePromoKpis();
+  renderPromotions(getFilteredPromotions(), promotions.length);
+};
+var updateBranchCityFilterOptions = () => {
+  if (!branchCityFilter) return;
+  const cities2 = Array.from(new Set(branches.map((branch) => branch.city))).sort();
+  const currentValue = branchCityFilter.value;
+  branchCityFilter.innerHTML = `
+    <option value="all">Todas</option>
+    ${cities2.map((city) => `<option value="${city}">${city}</option>`).join("")}
+  `;
+  if (cities2.includes(currentValue)) {
+    branchCityFilter.value = currentValue;
+  } else {
+    branchCityFilter.value = "all";
+    branchFilters.city = "all";
+  }
+};
+var updateBranchesView = () => {
+  renderBranches(getFilteredBranches(), branches.length);
+};
+var updateBusinessesView = () => {
+  renderBusinesses(getFilteredBusinesses(), businesses.length);
+};
 var loadUser = async () => {
   if (userCard) {
     userCard.innerHTML = "Cargando usuario...";
@@ -689,7 +809,14 @@ var loadBusinesses = async () => {
   businessSelects.forEach((select) => setSelectLoading(select, "Cargando negocios..."));
   const response = await apiFetch("/businesses/mine");
   businesses = response;
-  renderBusinesses();
+  businessFilters = { search: "", type: "all" };
+  if (businessSearchInput) {
+    businessSearchInput.value = "";
+  }
+  if (businessTypeFilter) {
+    businessTypeFilter.value = "all";
+  }
+  updateBusinessesView();
   populateBusinessSelects();
   const hasBusinesses = businesses.length > 0;
   setBranchFormEnabled(hasBusinesses);
@@ -700,8 +827,8 @@ var loadBusinesses = async () => {
   if (businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
     await loadBranches(currentBusinessId);
-    const promos = await loadPromotions(currentBusinessId);
-    renderPromotions(promos);
+    await loadPromotions(currentBusinessId);
+    updatePromotionsView();
   }
 };
 var loadBranches = async (businessId) => {
@@ -709,8 +836,16 @@ var loadBranches = async (businessId) => {
   setSelectLoading(branchSelect, "Cargando sedes...");
   const response = await apiFetch(`/branches?businessId=${businessId}`);
   branches = response;
+  branchFilters = { search: "", city: "all" };
+  if (branchSearchInput) {
+    branchSearchInput.value = "";
+  }
   populateBranchSelect(businessId);
-  renderBranches();
+  updateBranchCityFilterOptions();
+  if (branchCityFilter) {
+    branchCityFilter.value = "all";
+  }
+  updateBranchesView();
 };
 var loadPromotions = async (businessId) => {
   if (!businessId) return [];
@@ -926,8 +1061,8 @@ var handleBranchForm = () => {
         if (businessId) {
           currentBusinessId = businessId;
           await loadBranches(businessId);
-          const promos = await loadPromotions(businessId);
-          renderPromotions(promos);
+          await loadPromotions(businessId);
+          updatePromotionsView();
         }
         showToast("Listo", branchEditing ? "Sede actualizada." : "Sede creada.", "success");
         setModalOpen(false);
@@ -1000,8 +1135,8 @@ var handlePromoForm = () => {
         setMessage(promoMessage, promoEditing ? "Promoci\xF3n actualizada." : "Promoci\xF3n creada.");
         setPromoForm();
         if (currentBusinessId) {
-          const promos = await loadPromotions(currentBusinessId);
-          renderPromotions(promos);
+          await loadPromotions(currentBusinessId);
+          updatePromotionsView();
         }
         showToast(
           "Listo",
@@ -1106,8 +1241,8 @@ var wireSelectors = () => {
         setBranchFormEnabled(true);
         setPromoFormEnabled(true);
         await loadBranches(select.value);
-        const promos = await loadPromotions(select.value);
-        renderPromotions(promos);
+        await loadPromotions(select.value);
+        updatePromotionsView();
       }
     });
   });
@@ -1125,8 +1260,8 @@ var wireBusinessActions = () => {
         select.value = selectId;
       });
       await loadBranches(selectId);
-      const promos = await loadPromotions(selectId);
-      renderPromotions(promos);
+      await loadPromotions(selectId);
+      updatePromotionsView();
     }
     if (editId) {
       const business = businesses.find((item) => item._id === editId);
@@ -1140,27 +1275,30 @@ var wireBusinessActions = () => {
           select.value = business._id;
         });
         await loadBranches(business._id);
-        const promos = await loadPromotions(business._id);
-        renderPromotions(promos);
+        await loadPromotions(business._id);
+        updatePromotionsView();
       }
     }
     if (deleteId) {
       const confirmed = window.confirm("\xBFEliminar este negocio? Tambi\xE9n perder\xE1s sus sedes y promos.");
       if (!confirmed) return;
       businesses = businesses.filter((business) => business._id !== deleteId);
-      renderBusinesses();
+      updateBusinessesView();
       await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
       showToast("Listo", "Negocio eliminado.", "success");
       await loadBusinesses();
       if (businesses.length > 0) {
         currentBusinessId = businesses[0]._id;
         await loadBranches(currentBusinessId);
-        const promos = await loadPromotions(currentBusinessId);
-        renderPromotions(promos);
+        await loadPromotions(currentBusinessId);
+        updatePromotionsView();
       } else {
         currentBusinessId = "";
-        renderBranches();
-        renderPromotions([]);
+        branches = [];
+        updateBranchCityFilterOptions();
+        updateBranchesView();
+        promotions = [];
+        updatePromotionsView();
       }
     }
   });
@@ -1189,7 +1327,7 @@ var wireBranchActions = () => {
     const confirmed = window.confirm("\xBFEliminar esta sede?");
     if (!confirmed) return;
     branches = branches.filter((branch) => branch._id !== deleteId);
-    renderBranches();
+    updateBranchesView();
     await apiFetch(`/branches/${deleteId}`, { method: "DELETE" });
     showToast("Listo", "Sede eliminada.", "success");
     if (currentBusinessId) {
@@ -1233,12 +1371,12 @@ var wirePromoActions = () => {
     const confirmed = window.confirm("\xBFEliminar esta promoci\xF3n?");
     if (!confirmed) return;
     promotions = promotions.filter((promo) => promo._id !== deleteId);
-    renderPromotions(promotions);
+    updatePromotionsView();
     await apiFetch(`/promotions/${deleteId}`, { method: "DELETE" });
     showToast("Listo", "Promoci\xF3n eliminada.", "success");
     if (currentBusinessId) {
-      const promos = await loadPromotions(currentBusinessId);
-      renderPromotions(promos);
+      await loadPromotions(currentBusinessId);
+      updatePromotionsView();
     }
   });
 };
@@ -1314,6 +1452,128 @@ var wireDashboardModal = () => {
     }
   });
 };
+var wirePromoFilters = () => {
+  if (!promoSearchInput || !promoStatusSelect || !promoTypeSelect) return;
+  const updateFilters = () => {
+    promoFilters = {
+      search: promoSearchInput.value,
+      status: promoStatusSelect.value,
+      type: promoTypeSelect.value
+    };
+    updatePromotionsView();
+  };
+  promoSearchInput.addEventListener("input", updateFilters);
+  promoStatusSelect.addEventListener("change", updateFilters);
+  promoTypeSelect.addEventListener("change", updateFilters);
+};
+var wireBranchFilters = () => {
+  if (!branchSearchInput || !branchCityFilter) return;
+  const updateFilters = () => {
+    branchFilters = {
+      search: branchSearchInput.value,
+      city: branchCityFilter.value
+    };
+    updateBranchesView();
+  };
+  branchSearchInput.addEventListener("input", updateFilters);
+  branchCityFilter.addEventListener("change", updateFilters);
+};
+var wireBusinessFilters = () => {
+  if (!businessSearchInput || !businessTypeFilter) return;
+  const updateFilters = () => {
+    businessFilters = {
+      search: businessSearchInput.value,
+      type: businessTypeFilter.value
+    };
+    updateBusinessesView();
+  };
+  businessSearchInput.addEventListener("input", updateFilters);
+  businessTypeFilter.addEventListener("change", updateFilters);
+};
+var formatDateFromDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+var fillDemoPromo = () => {
+  if (!promoForm) return;
+  if (businesses.length === 0) {
+    showToast("Primero crea un negocio", "Necesitas un negocio para asociar la promo.", "info");
+    return;
+  }
+  const businessId = currentBusinessId || businesses[0]._id;
+  const today = /* @__PURE__ */ new Date();
+  const nextWeek = /* @__PURE__ */ new Date();
+  nextWeek.setDate(today.getDate() + 7);
+  setInputValue(promoForm, "businessId", businessId);
+  setInputValue(promoForm, "branchId", branches[0]?._id ?? "");
+  setInputValue(promoForm, "title", "Promo demo 2x1");
+  setInputValue(promoForm, "description", "Promoci\xF3n de prueba para el horario de almuerzo.");
+  setInputValue(promoForm, "promoType", "2x1");
+  setInputValue(promoForm, "value", "2x1");
+  setInputValue(promoForm, "startDate", formatDateFromDate(today));
+  setInputValue(promoForm, "endDate", formatDateFromDate(nextWeek));
+  setInputValue(promoForm, "startHour", "12:00");
+  setInputValue(promoForm, "endHour", "18:00");
+  promoForm.querySelectorAll('input[name="daysOfWeek"]').forEach((input) => {
+    input.checked = ["monday", "tuesday", "wednesday", "thursday", "friday"].includes(input.value);
+  });
+};
+var fillDemoBranch = () => {
+  if (!branchForm) return;
+  if (businesses.length === 0) {
+    showToast("Primero crea un negocio", "Necesitas un negocio para crear la sede.", "info");
+    return;
+  }
+  if (cities.length === 0) {
+    showToast("Agrega una ciudad", "Necesitas una ciudad disponible para la sede.", "info");
+    return;
+  }
+  const businessId = currentBusinessId || businesses[0]._id;
+  setInputValue(branchForm, "businessId", businessId);
+  setInputValue(branchForm, "city", cities[0].name);
+  setInputValue(branchForm, "address", "Calle 10 # 25-30");
+  setInputValue(branchForm, "zone", "Centro");
+  setInputValue(branchForm, "phone", "3001234567");
+};
+var fillDemoBusiness = () => {
+  if (!businessForm) return;
+  setInputValue(businessForm, "name", "Negocio demo");
+  setInputValue(businessForm, "slug", "negocio-demo");
+  setInputValue(businessForm, "type", "restaurant");
+  setInputValue(
+    businessForm,
+    "description",
+    "Negocio de prueba para validar el flujo administrativo."
+  );
+  setInputValue(businessForm, "instagram", "negocio_demo");
+  const categorySelect = businessForm.querySelector("[name='categories']");
+  if (categories.length > 0) {
+    setMultiSelectValues(
+      categorySelect,
+      categories.slice(0, 2).map((category) => category.slug)
+    );
+  }
+};
+var wireDemoFill = () => {
+  if (demoFillButtons.length === 0) return;
+  demoFillButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.demoFill;
+      if (!target) return;
+      setActiveModalPanel(target);
+      setModalOpen(true);
+      if (target === "promo") {
+        fillDemoPromo();
+      } else if (target === "branch") {
+        fillDemoBranch();
+      } else if (target === "business") {
+        fillDemoBusiness();
+      }
+    });
+  });
+};
 (async () => {
   setBusinessForm();
   setBranchForm();
@@ -1326,10 +1586,10 @@ var wireDashboardModal = () => {
     await loadCities();
     await loadCategories();
   }
-  renderBusinesses();
+  updateBusinessesView();
   populateBusinessSelects();
-  renderBranches();
-  renderPromotions([]);
+  updateBranchesView();
+  updatePromotionsView();
   wireSelectors();
   wireBusinessActions();
   wireBranchActions();
@@ -1340,6 +1600,10 @@ var wireDashboardModal = () => {
   wireDashboardCreateButtons();
   wireDashboardMenu();
   wireDashboardModal();
+  wirePromoFilters();
+  wireBranchFilters();
+  wireBusinessFilters();
+  wireDemoFill();
   handleBusinessForm();
   handleBranchForm();
   handlePromoForm();
