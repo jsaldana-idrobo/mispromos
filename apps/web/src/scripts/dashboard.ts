@@ -1689,6 +1689,35 @@ const fillDemoPromo = () => {
   });
 };
 
+const fillDemoPromoAlt = () => {
+  if (!promoForm) return;
+  if (businesses.length === 0) {
+    showToast("Primero crea un negocio", "Necesitas un negocio para asociar la promo.", "info");
+    return;
+  }
+  const businessId = currentBusinessId || businesses[0]._id;
+  const today = new Date();
+  const nextMonth = new Date();
+  nextMonth.setDate(today.getDate() + 30);
+  setInputValue(promoForm, "businessId", businessId);
+  setInputValue(promoForm, "branchId", branches[0]?._id ?? "");
+  setInputValue(promoForm, "title", "Promo demo happy hour");
+  setInputValue(
+    promoForm,
+    "description",
+    "Promo demo para negocio@demo.com con horario nocturno."
+  );
+  setInputValue(promoForm, "promoType", "discount");
+  setInputValue(promoForm, "value", "30%");
+  setInputValue(promoForm, "startDate", formatDateFromDate(today));
+  setInputValue(promoForm, "endDate", formatDateFromDate(nextMonth));
+  setInputValue(promoForm, "startHour", "18:00");
+  setInputValue(promoForm, "endHour", "22:00");
+  promoForm.querySelectorAll<HTMLInputElement>('input[name="daysOfWeek"]').forEach((input) => {
+    input.checked = ["friday", "saturday", "sunday"].includes(input.value);
+  });
+};
+
 const fillDemoBranch = () => {
   if (!branchForm) return;
   if (businesses.length === 0) {
@@ -1705,6 +1734,25 @@ const fillDemoBranch = () => {
   setInputValue(branchForm, "address", "Carrera 7 # 12-45");
   setInputValue(branchForm, "zone", "Zona demo");
   setInputValue(branchForm, "phone", "3005551212");
+};
+
+const fillDemoBranchAlt = () => {
+  if (!branchForm) return;
+  if (businesses.length === 0) {
+    showToast("Primero crea un negocio", "Necesitas un negocio para crear la sede.", "info");
+    return;
+  }
+  if (cities.length === 0) {
+    showToast("Agrega una ciudad", "Necesitas una ciudad disponible para la sede.", "info");
+    return;
+  }
+  const businessId = currentBusinessId || businesses[0]._id;
+  const city = cities.length > 1 ? cities[1].name : cities[0].name;
+  setInputValue(branchForm, "businessId", businessId);
+  setInputValue(branchForm, "city", city);
+  setInputValue(branchForm, "address", "Avenida 5 # 18-90");
+  setInputValue(branchForm, "zone", "Zona norte");
+  setInputValue(branchForm, "phone", "3019876543");
 };
 
 const fillDemoBusiness = () => {
@@ -1727,20 +1775,51 @@ const fillDemoBusiness = () => {
   }
 };
 
+const fillDemoBusinessAlt = () => {
+  if (!businessForm) return;
+  setInputValue(businessForm, "name", "Negocio demo 2 negocio@demo.com");
+  setInputValue(businessForm, "slug", "negocio-demo-2");
+  setInputValue(businessForm, "type", "bar");
+  setInputValue(
+    businessForm,
+    "description",
+    "Segundo negocio demo para validar vistas administrativas."
+  );
+  setInputValue(businessForm, "instagram", "negocio.demo2");
+  const categorySelect = businessForm.querySelector<HTMLSelectElement>("[name='categories']");
+  if (categories.length > 0) {
+    setMultiSelectValues(
+      categorySelect,
+      categories.slice(0, 1).map((category) => category.slug)
+    );
+  }
+};
+
 const wireDemoFill = () => {
   if (demoFillButtons.length === 0) return;
   demoFillButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const target = button.dataset.demoFill;
       if (!target) return;
-      setActiveModalPanel(target);
+      const panel = target.includes("promo")
+        ? "promo"
+        : target.includes("branch")
+          ? "branch"
+          : "business";
+      setActiveModalPanel(panel);
       setModalOpen(true);
       if (target === "promo") {
         fillDemoPromo();
+      } else if (target === "promo-2") {
+        fillDemoPromoAlt();
       } else if (target === "branch") {
         fillDemoBranch();
+      } else if (target === "branch-2") {
+        fillDemoBranchAlt();
       } else if (target === "business") {
         fillDemoBusiness();
+      } else if (target === "business-2") {
+        fillDemoBusinessAlt();
       }
     });
   });
