@@ -15,6 +15,7 @@ import { AuthService } from "./auth.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { OptionalJwtAuthGuard } from "./guards/optional-jwt-auth.guard";
 import { type AuthRequest } from "./auth.types";
 import { Roles } from "./roles.decorator";
 import { RolesGuard } from "./guards/roles.guard";
@@ -89,10 +90,10 @@ export class AuthController {
   }
 
   @Get("me")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   async me(@Req() req: AuthRequest) {
     if (!req.user) {
-      throw new NotFoundException("Usuario no encontrado");
+      return null;
     }
     return { id: req.user.id, email: req.user.email, role: req.user.role };
   }

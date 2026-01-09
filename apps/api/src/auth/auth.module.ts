@@ -6,6 +6,7 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { User, UserSchema } from "./user.schema";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { OptionalJwtAuthGuard } from "./guards/optional-jwt-auth.guard";
 import { RolesGuard } from "./guards/roles.guard";
 import { AuthSeedService } from "./auth-seed.service";
 
@@ -35,7 +36,7 @@ import { AuthSeedService } from "./auth-seed.service";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard, RolesGuard, AuthSeedService],
-  exports: [AuthService, JwtAuthGuard, RolesGuard],
+  providers: [AuthService, JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, AuthSeedService],
+  exports: [AuthService, JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}
