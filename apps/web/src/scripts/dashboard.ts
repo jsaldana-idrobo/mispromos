@@ -405,6 +405,21 @@ const setOwnerSectionsVisible = (visible: boolean) => {
   });
 };
 
+const setHeaderAuthState = (isAuthenticated: boolean) => {
+  const loginLink = document.querySelector<HTMLElement>("[data-nav-login]");
+  const registerLink = document.querySelector<HTMLElement>("[data-nav-register]");
+  const dashboardLink = document.querySelector<HTMLElement>("[data-nav-dashboard]");
+  if (loginLink) {
+    loginLink.hidden = isAuthenticated;
+  }
+  if (registerLink) {
+    registerLink.hidden = isAuthenticated;
+  }
+  if (dashboardLink) {
+    dashboardLink.hidden = !isAuthenticated;
+  }
+};
+
 const closeAllModals = () => {
   const setHidden = (overlay: HTMLElement | null, hidden: boolean) => {
     if (!overlay) return;
@@ -565,6 +580,7 @@ const renderUser = () => {
   if (ownerAccess) {
     setActiveDashboardTab(activeDashboardTab);
   }
+  setHeaderAuthState(true);
   if (dashboardHero) {
     dashboardHero.hidden = !ownerAccess;
   }
@@ -914,6 +930,9 @@ const loadUser = async () => {
     currentUser = await apiFetch<User>("/auth/me");
   } catch {
     currentUser = null;
+  }
+  if (!currentUser) {
+    setHeaderAuthState(false);
   }
   renderUser();
 };

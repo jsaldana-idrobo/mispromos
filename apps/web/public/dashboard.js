@@ -381,6 +381,20 @@ var setOwnerSectionsVisible = (visible) => {
     section.hidden = !visible;
   });
 };
+var setHeaderAuthState = (isAuthenticated) => {
+  const loginLink = document.querySelector("[data-nav-login]");
+  const registerLink = document.querySelector("[data-nav-register]");
+  const dashboardLink = document.querySelector("[data-nav-dashboard]");
+  if (loginLink) {
+    loginLink.hidden = isAuthenticated;
+  }
+  if (registerLink) {
+    registerLink.hidden = isAuthenticated;
+  }
+  if (dashboardLink) {
+    dashboardLink.hidden = !isAuthenticated;
+  }
+};
 var closeAllModals = () => {
   const setHidden = (overlay, hidden) => {
     if (!overlay) return;
@@ -518,6 +532,7 @@ var renderUser = () => {
   if (ownerAccess) {
     setActiveDashboardTab(activeDashboardTab);
   }
+  setHeaderAuthState(true);
   if (dashboardHero) {
     dashboardHero.hidden = !ownerAccess;
   }
@@ -825,6 +840,9 @@ var loadUser = async () => {
     currentUser = await apiFetch("/auth/me");
   } catch {
     currentUser = null;
+  }
+  if (!currentUser) {
+    setHeaderAuthState(false);
   }
   renderUser();
 };

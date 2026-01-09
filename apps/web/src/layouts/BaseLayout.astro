@@ -50,25 +50,29 @@ const title = Astro.props.title ?? "Mis promos";
       const dashboardLink = document.querySelector("[data-nav-dashboard]");
       const loginLink = document.querySelector("[data-nav-login]");
       const registerLink = document.querySelector("[data-nav-register]");
-      if (dashboardLink) {
+      if (dashboardLink || loginLink || registerLink) {
         fetch(`${apiBase}/auth/me`, { credentials: "include" })
           .then((response) => (response.ok ? response.json() : null))
           .then((user) => {
             if (user) {
               document.body.dataset.authenticated = "true";
-              dashboardLink.hidden = false;
+              if (dashboardLink) {
+                dashboardLink.hidden = false;
+              }
               if (loginLink) {
                 loginLink.hidden = true;
               }
               if (registerLink) {
                 registerLink.hidden = true;
               }
-            } else {
+            } else if (dashboardLink) {
               dashboardLink.remove();
             }
           })
           .catch(() => {
-            dashboardLink.remove();
+            if (dashboardLink) {
+              dashboardLink.remove();
+            }
           });
       }
     </script>
