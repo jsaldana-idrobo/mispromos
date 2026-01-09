@@ -69,7 +69,17 @@ const title = Astro.props.title ?? "Mis promos";
       } catch {
         // localStorage might be blocked; ignore.
       }
-      if (dashboardLink || loginLink || registerLink) {
+      let shouldCheck = false;
+      try {
+        const authHint = localStorage.getItem("auth");
+        shouldCheck = authHint === "true";
+        if (!shouldCheck) {
+          setAuthLinks(false);
+        }
+      } catch {
+        setAuthLinks(false);
+      }
+      if (shouldCheck && (dashboardLink || loginLink || registerLink)) {
         fetch(`${apiBase}/auth/me`, { credentials: "include" })
           .then((response) => (response.ok ? response.json() : null))
           .then((user) => {
