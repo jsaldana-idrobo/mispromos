@@ -1,6 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { businessTypes, promoTypes, daysOfWeek } from "../data/catalog";
+import {
+  businessTypes,
+  promoTypes,
+  daysOfWeek,
+  businessTypeLabels,
+  promoTypeLabels,
+} from "../data/catalog";
 
 const days = daysOfWeek;
 ---
@@ -12,7 +18,9 @@ const days = daysOfWeek;
     hidden
   >
     <div>
-      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Panel de negocio</p>
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Panel de negocio
+      </p>
       <h2 class="text-lg font-semibold">Dashboard</h2>
     </div>
     <button class="button-secondary" type="button" data-dashboard-toggle>
@@ -24,7 +32,8 @@ const days = daysOfWeek;
     class="fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm lg:hidden"
     data-dashboard-overlay
     hidden
-  ></div>
+  >
+  </div>
   <aside
     class="fixed right-0 top-0 z-50 flex h-full w-72 translate-x-full flex-col gap-6 border-l border-ink-900/10 bg-white p-6 shadow-2xl transition lg:hidden"
     data-dashboard-menu
@@ -44,26 +53,58 @@ const days = daysOfWeek;
       <button
         class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
         type="button"
+        data-dashboard-tab="business"
+      >
+        <span data-dashboard-business-label>Mi negocio</span>
+      </button>
+      <button
+        class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+        type="button"
         data-dashboard-tab="promos"
       >
-        Mis promociones
+        <span data-dashboard-promo-label>Mis promociones</span>
       </button>
       <button
         class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
         type="button"
         data-dashboard-tab="branches"
       >
-        Mis sucursales
+        <span data-dashboard-branch-label>Mis sucursales</span>
       </button>
       <button
         class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
         type="button"
-        data-dashboard-tab="business"
+        data-dashboard-tab="cities"
+        data-admin-only
+        hidden
       >
-        Mi negocio
+        Ciudades
+      </button>
+      <button
+        class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+        type="button"
+        data-dashboard-tab="categories"
+        data-admin-only
+        hidden
+      >
+        Categorías
       </button>
     </nav>
   </aside>
+
+  <div
+    class="glass-panel mb-5 rounded-3xl px-4 py-3"
+    data-dashboard-hero
+    hidden
+  >
+    <div class="rounded-2xl border border-ink-900/10 px-3 py-2">
+      <h1 class="text-2xl font-display">Dashboard de negocios</h1>
+      <p class="mt-1 text-xs text-ink-900/60">
+        Administra negocios, sedes y promociones desde un solo lugar.
+      </p>
+      <div class="mt-3" data-user-card>Cargando usuario...</div>
+    </div>
+  </div>
 
   <section class="grid gap-8 lg:grid-cols-[240px,1fr]">
     <aside
@@ -71,44 +112,58 @@ const days = daysOfWeek;
       data-owner-only
       hidden
     >
-      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Navegación</p>
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Navegación
+      </p>
       <nav class="mt-4 grid gap-2 text-sm">
+        <button
+          class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+          type="button"
+          data-dashboard-tab="business"
+        >
+          <span data-dashboard-business-label>Mi negocio</span>
+        </button>
         <button
           class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
           type="button"
           data-dashboard-tab="promos"
         >
-          Mis promociones
+          <span data-dashboard-promo-label>Mis promociones</span>
         </button>
         <button
           class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
           type="button"
           data-dashboard-tab="branches"
         >
-          Mis sucursales
+          <span data-dashboard-branch-label>Mis sucursales</span>
         </button>
         <button
           class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
           type="button"
-          data-dashboard-tab="business"
+          data-dashboard-tab="cities"
+          data-admin-only
+          hidden
         >
-          Mi negocio
+          Ciudades
+        </button>
+        <button
+          class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+          type="button"
+          data-dashboard-tab="categories"
+          data-admin-only
+          hidden
+        >
+          Categorías
         </button>
       </nav>
     </aside>
 
     <div class="space-y-6">
-      <div class="glass-panel rounded-3xl p-6" data-dashboard-hero hidden>
-        <h1 class="text-3xl font-display">Dashboard de negocios</h1>
-        <p class="mt-2 text-sm text-ink-900/60">
-          Administra negocios, sedes y promociones desde un solo lugar.
-        </p>
-        <div class="mt-4 rounded-2xl border border-ink-900/10 bg-white/70 p-4 text-sm" data-user-card>
-          Cargando usuario...
-        </div>
-      </div>
-
-      <div class="rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-auth-gate hidden>
+      <div
+        class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+        data-auth-gate
+        hidden
+      >
         <h2 class="text-lg font-semibold">Acceso restringido</h2>
         <p class="mt-2 text-sm text-ink-900/60" data-auth-gate-text>
           Inicia sesión con una cuenta de negocio para administrar promociones.
@@ -120,34 +175,64 @@ const days = daysOfWeek;
       </div>
 
       <div class="space-y-6" data-owner-only hidden>
-        <section class="rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-dashboard-panel="promos">
+        <section
+          class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+          data-dashboard-panel="promos"
+        >
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-xl font-semibold">Mis promociones</h2>
-              <p class="text-sm text-ink-900/60">Gestiona las promos activas de tu negocio.</p>
+              <h2 class="text-xl font-semibold" data-dashboard-promo-title>
+                Mis promociones
+              </h2>
+              <p class="text-sm text-ink-900/60" data-dashboard-promo-subtitle>
+                Gestiona las promos activas de tu negocio.
+              </p>
             </div>
-            <button class="button-primary" type="button" data-dashboard-create="promo">
+            <button
+              class="button-primary"
+              type="button"
+              data-dashboard-create="promo"
+            >
               Crear nueva promoción
             </button>
           </div>
           <div class="mt-5 grid gap-3 sm:grid-cols-3">
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Total
+              </p>
               <p class="text-2xl font-semibold" data-promo-kpi-total>0</p>
             </div>
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Activas</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Activas
+              </p>
               <p class="text-2xl font-semibold" data-promo-kpi-active>0</p>
             </div>
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Inactivas</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Inactivas
+              </p>
               <p class="text-2xl font-semibold" data-promo-kpi-inactive>0</p>
             </div>
           </div>
-          <div class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.4fr,1fr,1fr]">
+          <div
+            class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.2fr,1fr,1fr,1fr]"
+          >
             <label class="grid gap-2 text-sm font-semibold">
               Buscar promo
-              <input class="input-field" name="search" placeholder="Ej: 2x1, almuerzo..." data-promo-search />
+              <input
+                class="input-field"
+                name="search"
+                placeholder="Ej: 2x1, almuerzo..."
+                data-promo-search
+              />
             </label>
             <label class="grid gap-2 text-sm font-semibold">
               Estado
@@ -161,16 +246,47 @@ const days = daysOfWeek;
               Tipo
               <select class="input-field" name="promoType" data-promo-type>
                 <option value="all">Todos</option>
-                {promoTypes.map((type) => (
-                  <option value={type}>{type}</option>
-                ))}
+                {
+                  promoTypes.map((type) => (
+                    <option value={type}>{promoTypeLabels[type]}</option>
+                  ))
+                }
+              </select>
+            </label>
+            <label class="grid gap-2 text-sm font-semibold" data-admin-only hidden>
+              Negocio
+              <select class="input-field" name="business" data-promo-business-filter>
+                <option value="all">Todos</option>
               </select>
             </label>
           </div>
           <div class="mt-4 grid gap-3" data-promo-list>
-            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+            >
               Selecciona un negocio para ver promociones.
             </div>
+          </div>
+          <div
+            class="mt-4 flex items-center justify-between text-sm text-ink-900/60"
+            data-promo-pagination
+            hidden
+          >
+            <button
+              class="rounded-full border border-ink-900/20 px-4 py-1"
+              type="button"
+              data-promo-page-prev
+            >
+              Anterior
+            </button>
+            <span data-promo-page-info>Página 1</span>
+            <button
+              class="rounded-full border border-ink-900/20 px-4 py-1"
+              type="button"
+              data-promo-page-next
+            >
+              Siguiente
+            </button>
           </div>
         </section>
 
@@ -181,31 +297,58 @@ const days = daysOfWeek;
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-xl font-semibold">Mis sucursales</h2>
-              <p class="text-sm text-ink-900/60">Administra las sedes activas de tu negocio.</p>
+              <h2 class="text-xl font-semibold" data-dashboard-branch-title>
+                Mis sucursales
+              </h2>
+              <p class="text-sm text-ink-900/60" data-dashboard-branch-subtitle>
+                Administra las sedes activas de tu negocio.
+              </p>
             </div>
-            <button class="button-primary" type="button" data-dashboard-create="branch">
+            <button
+              class="button-primary"
+              type="button"
+              data-dashboard-create="branch"
+            >
               Crear nueva sede
             </button>
           </div>
           <div class="mt-5 grid gap-3 sm:grid-cols-3">
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total sedes</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Total sedes
+              </p>
               <p class="text-2xl font-semibold" data-branch-kpi-total>0</p>
             </div>
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Ciudades</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Ciudades
+              </p>
               <p class="text-2xl font-semibold" data-branch-kpi-cities>0</p>
             </div>
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Con teléfono</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Con teléfono
+              </p>
               <p class="text-2xl font-semibold" data-branch-kpi-phones>0</p>
             </div>
           </div>
-          <div class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.4fr,1fr]">
+          <div
+            class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.2fr,1fr,1fr]"
+          >
             <label class="grid gap-2 text-sm font-semibold">
-              Buscar sede
-              <input class="input-field" name="search" placeholder="Ej: Centro, Calle 10..." data-branch-search />
+              Dirección
+              <input
+                class="input-field"
+                name="search"
+                placeholder="Ej: Calle 10..."
+                data-branch-search
+              />
             </label>
             <label class="grid gap-2 text-sm font-semibold">
               Ciudad
@@ -213,11 +356,28 @@ const days = daysOfWeek;
                 <option value="all">Todas</option>
               </select>
             </label>
+            <label class="grid gap-2 text-sm font-semibold" data-admin-only hidden>
+              Negocio
+              <select class="input-field" name="business" data-branch-business-filter>
+                <option value="all">Todos</option>
+              </select>
+            </label>
           </div>
           <div class="mt-4 grid gap-3" data-branch-list>
-            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+            >
               Selecciona un negocio para ver sedes.
             </div>
+          </div>
+          <div class="mt-4 flex items-center justify-between text-sm text-ink-900/60" data-branch-pagination hidden>
+            <button class="rounded-full border border-ink-900/20 px-4 py-1" type="button" data-branch-page-prev>
+              Anterior
+            </button>
+            <span data-branch-page-info>Página 1</span>
+            <button class="rounded-full border border-ink-900/20 px-4 py-1" type="button" data-branch-page-next>
+              Siguiente
+            </button>
           </div>
         </section>
 
@@ -228,91 +388,215 @@ const days = daysOfWeek;
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 class="text-xl font-semibold">Mi negocio</h2>
-              <p class="text-sm text-ink-900/60">Gestiona la información de tus negocios.</p>
+              <h2 class="text-xl font-semibold" data-dashboard-business-title>
+                Mi negocio
+              </h2>
+              <p class="text-sm text-ink-900/60">
+                Gestiona la información de tus negocios.
+              </p>
             </div>
-            <button class="button-primary" type="button" data-dashboard-create="business">
+            <button
+              class="button-primary"
+              type="button"
+              data-dashboard-create="business"
+              data-admin-only
+            >
               Crear nuevo negocio
             </button>
           </div>
-          <div class="mt-5 grid gap-3 sm:grid-cols-3">
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total negocios</p>
+          <div class="mt-5 grid gap-3 sm:grid-cols-3" data-admin-only hidden>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Total negocios
+              </p>
               <p class="text-2xl font-semibold" data-business-kpi-total>0</p>
             </div>
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total sedes</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Total sedes
+              </p>
               <p class="text-2xl font-semibold" data-business-kpi-branches>0</p>
             </div>
-            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total promos</p>
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3"
+            >
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                Total promos
+              </p>
               <p class="text-2xl font-semibold" data-business-kpi-promos>0</p>
             </div>
           </div>
-          <div class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.4fr,1fr]">
+          <div
+            class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.4fr,1fr]"
+            data-admin-only
+            hidden
+          >
             <label class="grid gap-2 text-sm font-semibold">
               Buscar negocio
-              <input class="input-field" name="search" placeholder="Ej: Mis promos, pizza..." data-business-search />
+              <input
+                class="input-field"
+                name="search"
+                placeholder="Ej: Mis promos, pizza..."
+                data-business-search
+              />
             </label>
             <label class="grid gap-2 text-sm font-semibold">
               Tipo
               <select class="input-field" name="type" data-business-type-filter>
                 <option value="all">Todos</option>
-                {businessTypes.map((type) => (
-                  <option value={type}>{type}</option>
-                ))}
+                {
+                  businessTypes.map((type) => (
+                    <option value={type}>{businessTypeLabels[type]}</option>
+                  ))
+                }
               </select>
             </label>
           </div>
-          <div class="mt-4 grid gap-3" data-business-list>
-            <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
+          <div
+            class="mt-4 grid gap-3"
+            data-business-list
+            data-admin-only
+            hidden
+          >
+            <div
+              class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+            >
               Aun no hay negocios.
             </div>
           </div>
-
-          <div class="mt-6 rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-admin-panel hidden>
-            <h2 class="text-lg font-semibold">Panel admin</h2>
-            <p class="mt-2 text-sm text-ink-900/60">
-              Gestiona el catálogo de ciudades y categorías públicas.
-            </p>
-            <div class="mt-4 grid gap-6">
+          <div
+            class="mt-4 rounded-3xl border border-ink-900/10 bg-white/90 p-5"
+            data-owner-business
+            hidden
+          >
+            <div class="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
-                  Ciudades
+                <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+                  Perfil del negocio
+                </p>
+                <h3 class="text-xl font-semibold" data-owner-business-name>
+                  Mi negocio
                 </h3>
-                <form class="mt-3 grid gap-3" data-city-form>
-                  <div class="flex items-center justify-between text-xs text-ink-900/60">
-                    <span data-city-mode>Modo crear</span>
-                    <button class="underline" type="button" data-city-cancel hidden>
-                      Cancelar edición
-                    </button>
-                  </div>
-                  <input class="input-field" name="name" placeholder="Palmira" required />
-                  <input class="input-field" name="countryCode" placeholder="CO" required maxlength="2" />
-                  <button class="button-secondary" type="submit">Agregar ciudad</button>
-                  <p class="text-sm text-ink-900/60" data-city-message></p>
-                </form>
-                <div class="mt-4 grid gap-2 text-sm" data-city-list></div>
+                <p class="text-sm text-ink-900/60" data-owner-business-type>
+                  Tipo
+                </p>
+              </div>
+              <button
+                class="button-secondary"
+                type="button"
+                data-owner-business-edit
+              >
+                Editar negocio
+              </button>
+            </div>
+            <div class="mt-4 grid gap-3 text-sm text-ink-900/70">
+              <div>
+                <span class="font-semibold">Slug:</span>
+                <span data-owner-business-slug>-</span>
               </div>
               <div>
-                <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
-                  Categorías
-                </h3>
-                <form class="mt-3 grid gap-3" data-category-form>
-                  <div class="flex items-center justify-between text-xs text-ink-900/60">
-                    <span data-category-mode>Modo crear</span>
-                    <button class="underline" type="button" data-category-cancel hidden>
-                      Cancelar edición
-                    </button>
-                  </div>
-                  <input class="input-field" name="name" placeholder="Pizza" required />
-                  <input class="input-field" name="slug" placeholder="pizza" required />
-                  <button class="button-secondary" type="submit">Agregar categoría</button>
-                  <p class="text-sm text-ink-900/60" data-category-message></p>
-                </form>
-                <div class="mt-4 grid gap-2 text-sm" data-category-list></div>
+                <span class="font-semibold">Categorías:</span>
+                <span data-owner-business-categories>-</span>
+              </div>
+              <div>
+                <span class="font-semibold">Instagram:</span>
+                <span data-owner-business-instagram>-</span>
+              </div>
+              <div>
+                <span class="font-semibold">Descripción:</span>
+                <span data-owner-business-description>-</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section
+          class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+          data-dashboard-panel="cities"
+          data-admin-only
+          hidden
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-semibold">Ciudades</h2>
+              <p class="text-sm text-ink-900/60">
+                Gestiona el catálogo de ciudades públicas.
+              </p>
+            </div>
+            <button class="button-primary" type="button" data-dashboard-create="city">
+              Crear ciudad
+            </button>
+          </div>
+          <div class="mt-5 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total</p>
+              <p class="text-2xl font-semibold" data-city-kpi-total>0</p>
+            </div>
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Países</p>
+              <p class="text-2xl font-semibold" data-city-kpi-countries>0</p>
+            </div>
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Última creación</p>
+              <p class="text-2xl font-semibold" data-city-kpi-last>--</p>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-2 text-sm" data-city-list></div>
+          <div class="mt-4 flex items-center justify-between text-sm text-ink-900/60" data-city-pagination hidden>
+            <button class="rounded-full border border-ink-900/20 px-4 py-1" type="button" data-city-page-prev>
+              Anterior
+            </button>
+            <span data-city-page-info>Página 1</span>
+            <button class="rounded-full border border-ink-900/20 px-4 py-1" type="button" data-city-page-next>
+              Siguiente
+            </button>
+          </div>
+        </section>
+
+        <section
+          class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+          data-dashboard-panel="categories"
+          data-admin-only
+          hidden
+        >
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-xl font-semibold">Categorías</h2>
+              <p class="text-sm text-ink-900/60">
+                Gestiona el catálogo de categorías públicas.
+              </p>
+            </div>
+            <button class="button-primary" type="button" data-dashboard-create="category">
+              Crear categoría
+            </button>
+          </div>
+          <div class="mt-5 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total</p>
+              <p class="text-2xl font-semibold" data-category-kpi-total>0</p>
+            </div>
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Con slug</p>
+              <p class="text-2xl font-semibold" data-category-kpi-slugs>0</p>
+            </div>
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Última creación</p>
+              <p class="text-2xl font-semibold" data-category-kpi-last>--</p>
+            </div>
+          </div>
+          <div class="mt-5 grid gap-2 text-sm" data-category-list></div>
+          <div class="mt-4 flex items-center justify-between text-sm text-ink-900/60" data-category-pagination hidden>
+            <button class="rounded-full border border-ink-900/20 px-4 py-1" type="button" data-category-page-prev>
+              Anterior
+            </button>
+            <span data-category-page-info>Página 1</span>
+            <button class="rounded-full border border-ink-900/20 px-4 py-1" type="button" data-category-page-next>
+              Siguiente
+            </button>
           </div>
         </section>
       </div>
@@ -320,7 +604,7 @@ const days = daysOfWeek;
   </section>
 
   <div
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 hidden flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
     data-promo-modal-overlay
     hidden
   >
@@ -330,32 +614,34 @@ const days = daysOfWeek;
     >
       <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Promociones</p>
-          <h3 class="text-2xl font-semibold">Crear o editar promoción</h3>
-          <p class="mt-1 text-sm text-ink-900/60">Configura horarios y beneficios.</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+            Promociones
+          </p>
+          <h3 class="text-2xl font-semibold" data-promo-modal-title>
+            Crear promoción
+          </h3>
         </div>
-        <button class="rounded-full border border-ink-900/20 px-3 py-1 text-xs" type="button" data-promo-modal-close>
+        <button
+          class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+          type="button"
+          data-promo-modal-close
+        >
           Cerrar
         </button>
       </div>
-      <div class="mt-4 flex flex-wrap gap-3">
-        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="promo">
-          Usar datos demo promo
-        </button>
-        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="promo-2">
-          Usar datos demo promo 2
-        </button>
-      </div>
       <form class="mt-6 grid gap-4" data-promo-form>
-        <div class="flex items-center justify-between text-xs text-ink-900/60">
-          <span data-promo-mode>Modo crear</span>
-          <button class="underline" type="button" data-promo-cancel hidden>
-            Cancelar edición
-          </button>
+        <div class="flex items-center justify-end text-xs text-ink-900/60">
         </div>
-        <label class="grid gap-2 text-sm font-semibold">
+        <label
+          class="grid gap-2 text-sm font-semibold"
+          data-business-select-row="promo"
+        >
           Negocio
-          <select class="input-field" name="businessId" data-business-select required></select>
+          <select
+            class="input-field"
+            name="businessId"
+            data-business-select
+            required></select>
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Sede (opcional)
@@ -374,9 +660,11 @@ const days = daysOfWeek;
         <label class="grid gap-2 text-sm font-semibold">
           Tipo de promo
           <select class="input-field" name="promoType" required>
-            {promoTypes.map((type) => (
-              <option value={type}>{type}</option>
-            ))}
+            {
+              promoTypes.map((type) => (
+                <option value={type}>{promoTypeLabels[type]}</option>
+              ))
+            }
           </select>
         </label>
         <label class="grid gap-2 text-sm font-semibold">
@@ -386,12 +674,19 @@ const days = daysOfWeek;
         <div class="grid gap-2">
           <span class="text-sm font-semibold">Días de la semana</span>
           <div class="flex flex-wrap gap-2 text-sm">
-            {days.map((day) => (
-              <label class="flex items-center gap-2 rounded-full border border-ink-900/10 bg-sand-100 px-3 py-1">
-                <input type="checkbox" name="daysOfWeek" value={day} checked />
-                <span class="capitalize">{day}</span>
-              </label>
-            ))}
+            {
+              days.map((day) => (
+                <label class="flex items-center gap-2 rounded-full border border-ink-900/10 bg-sand-100 px-3 py-1">
+                  <input
+                    type="checkbox"
+                    name="daysOfWeek"
+                    value={day}
+                    checked
+                  />
+                  <span class="capitalize">{day}</span>
+                </label>
+              ))
+            }
           </div>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
@@ -423,7 +718,7 @@ const days = daysOfWeek;
   </div>
 
   <div
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 hidden flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
     data-branch-modal-overlay
     hidden
   >
@@ -433,36 +728,46 @@ const days = daysOfWeek;
     >
       <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Sucursales</p>
-          <h3 class="text-2xl font-semibold">Crear o editar sede</h3>
-          <p class="mt-1 text-sm text-ink-900/60">Actualiza direcciones y contacto.</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+            Sucursales
+          </p>
+          <h3 class="text-2xl font-semibold" data-branch-modal-title>
+            Crear sede
+          </h3>
+          <p class="mt-1 text-sm text-ink-900/60">
+            Actualiza direcciones y contacto.
+          </p>
         </div>
-        <button class="rounded-full border border-ink-900/20 px-3 py-1 text-xs" type="button" data-branch-modal-close>
+        <button
+          class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+          type="button"
+          data-branch-modal-close
+        >
           Cerrar
         </button>
       </div>
-      <div class="mt-4 flex flex-wrap gap-3">
-        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="branch">
-          Usar datos demo sede
-        </button>
-        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="branch-2">
-          Usar datos demo sede 2
-        </button>
-      </div>
       <form class="mt-6 grid gap-4" data-branch-form>
-        <div class="flex items-center justify-between text-xs text-ink-900/60">
-          <span data-branch-mode>Modo crear</span>
-          <button class="underline" type="button" data-branch-cancel hidden>
-            Cancelar edición
-          </button>
+        <div class="flex items-center justify-end text-xs text-ink-900/60">
         </div>
-        <label class="grid gap-2 text-sm font-semibold">
+        <label
+          class="grid gap-2 text-sm font-semibold"
+          data-business-select-row="branch"
+        >
           Negocio
-          <select class="input-field" name="businessId" data-business-select required></select>
+          <select
+            class="input-field"
+            name="businessId"
+            data-business-select
+            required></select>
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Ciudad
-          <select class="input-field" name="city" data-branch-city-select required>
+          <select
+            class="input-field"
+            name="city"
+            data-branch-city-select
+            required
+          >
             <option value="">Selecciona una ciudad</option>
           </select>
         </label>
@@ -485,7 +790,7 @@ const days = daysOfWeek;
   </div>
 
   <div
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+    class="fixed inset-0 z-50 hidden flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
     data-business-modal-overlay
     hidden
   >
@@ -495,28 +800,26 @@ const days = daysOfWeek;
     >
       <div class="flex items-start justify-between gap-4">
         <div>
-          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Negocios</p>
-          <h3 class="text-2xl font-semibold">Crear o editar negocio</h3>
-          <p class="mt-1 text-sm text-ink-900/60">Datos principales del negocio.</p>
+          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+            Negocios
+          </p>
+          <h3 class="text-2xl font-semibold" data-business-modal-title>
+            Crear negocio
+          </h3>
+          <p class="mt-1 text-sm text-ink-900/60">
+            Datos principales del negocio.
+          </p>
         </div>
-        <button class="rounded-full border border-ink-900/20 px-3 py-1 text-xs" type="button" data-business-modal-close>
+        <button
+          class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+          type="button"
+          data-business-modal-close
+        >
           Cerrar
         </button>
       </div>
-      <div class="mt-4 flex flex-wrap gap-3">
-        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="business">
-          Usar datos demo negocio
-        </button>
-        <button class="rounded-full border border-ink-900/20 px-4 py-2 text-xs" type="button" data-demo-fill="business-2">
-          Usar datos demo negocio 2
-        </button>
-      </div>
       <form class="mt-6 grid gap-4" data-business-form>
-        <div class="flex items-center justify-between text-xs text-ink-900/60">
-          <span data-business-mode>Modo crear</span>
-          <button class="underline" type="button" data-business-cancel hidden>
-            Cancelar edición
-          </button>
+        <div class="flex items-center justify-end text-xs text-ink-900/60">
         </div>
         <label class="grid gap-2 text-sm font-semibold">
           Nombre
@@ -529,14 +832,20 @@ const days = daysOfWeek;
         <label class="grid gap-2 text-sm font-semibold">
           Tipo
           <select class="input-field" name="type" required>
-            {businessTypes.map((type) => (
-              <option value={type}>{type}</option>
-            ))}
+            {
+              businessTypes.map((type) => (
+                <option value={type}>{businessTypeLabels[type]}</option>
+              ))
+            }
           </select>
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Categorías (separadas por coma)
-          <select class="input-field" name="categories" data-business-category-select multiple></select>
+          <select
+            class="input-field"
+            name="categories"
+            data-business-category-select
+            multiple></select>
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Descripción
@@ -544,10 +853,102 @@ const days = daysOfWeek;
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Instagram (opcional)
-          <input class="input-field" name="instagram" placeholder="tu_negocio" />
+          <input
+            class="input-field"
+            name="instagram"
+            placeholder="tu_negocio"
+          />
         </label>
         <p class="text-sm text-ink-900/60" data-business-message></p>
         <button class="button-primary" type="submit">Guardar negocio</button>
+      </form>
+    </div>
+  </div>
+
+  <div
+    class="fixed inset-0 z-50 hidden flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+    data-city-modal-overlay
+    hidden
+  >
+    <div
+      class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-ink-900/10 bg-white/95 p-6 shadow-2xl"
+      data-city-modal
+    >
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+            Ciudades
+          </p>
+          <h3 class="text-2xl font-semibold" data-city-modal-title>
+            Crear ciudad
+          </h3>
+          <p class="mt-1 text-sm text-ink-900/60">
+            Agrega una nueva ciudad al catálogo.
+          </p>
+        </div>
+        <button
+          class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+          type="button"
+          data-city-modal-close
+        >
+          Cerrar
+        </button>
+      </div>
+      <form class="mt-6 grid gap-4" data-city-form>
+        <label class="grid gap-2 text-sm font-semibold">
+          Nombre
+          <input class="input-field" name="name" placeholder="Palmira" required />
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Código país
+          <input class="input-field" name="countryCode" placeholder="CO" required maxlength="2" />
+        </label>
+        <p class="text-sm text-ink-900/60" data-city-message></p>
+        <button class="button-primary" type="submit">Guardar ciudad</button>
+      </form>
+    </div>
+  </div>
+
+  <div
+    class="fixed inset-0 z-50 hidden flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+    data-category-modal-overlay
+    hidden
+  >
+    <div
+      class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-ink-900/10 bg-white/95 p-6 shadow-2xl"
+      data-category-modal
+    >
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+            Categorías
+          </p>
+          <h3 class="text-2xl font-semibold" data-category-modal-title>
+            Crear categoría
+          </h3>
+          <p class="mt-1 text-sm text-ink-900/60">
+            Agrega una nueva categoría al catálogo.
+          </p>
+        </div>
+        <button
+          class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+          type="button"
+          data-category-modal-close
+        >
+          Cerrar
+        </button>
+      </div>
+      <form class="mt-6 grid gap-4" data-category-form>
+        <label class="grid gap-2 text-sm font-semibold">
+          Nombre
+          <input class="input-field" name="name" placeholder="Pizza" required />
+        </label>
+        <label class="grid gap-2 text-sm font-semibold">
+          Slug
+          <input class="input-field" name="slug" placeholder="pizza" required />
+        </label>
+        <p class="text-sm text-ink-900/60" data-category-message></p>
+        <button class="button-primary" type="submit">Guardar categoría</button>
       </form>
     </div>
   </div>

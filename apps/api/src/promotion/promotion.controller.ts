@@ -15,11 +15,12 @@ import { UserRole } from "@mispromos/shared";
 import { PromotionService } from "./promotion.service";
 import { CreatePromotionDto } from "./dto/create-promotion.dto";
 import { UpdatePromotionDto } from "./dto/update-promotion.dto";
-import { ActivePromotionsQueryDto } from "./dto/active-promotions.query";
+import { PromotionType, BusinessType } from "@mispromos/shared";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/roles.decorator";
 import { type AuthRequest } from "../auth/auth.types";
+import { type Request } from "express";
 
 @Controller("promotions")
 export class PromotionController {
@@ -41,16 +42,29 @@ export class PromotionController {
   }
 
   @Get("active")
-  findActive(@Query() query: ActivePromotionsQueryDto) {
+  findActive(@Req() req: Request) {
+    const query = req.query as Record<string, string | undefined>;
+    const city = query.city?.trim() || undefined;
+    const at = query.at?.trim() || undefined;
+    const promoType = Object.values(PromotionType).includes(query.promoType as PromotionType)
+      ? (query.promoType as PromotionType)
+      : undefined;
+    const category = query.category?.trim() || undefined;
+    const businessType = Object.values(BusinessType).includes(query.businessType as BusinessType)
+      ? (query.businessType as BusinessType)
+      : undefined;
+    const q = query.q?.trim() || undefined;
+    const offset = Number.isFinite(Number(query.offset)) ? Number(query.offset) : undefined;
+    const limit = Number.isFinite(Number(query.limit)) ? Number(query.limit) : undefined;
     return this.promotionService.findActiveByCity(
-      query.city,
-      query.at,
-      query.promoType,
-      query.category,
-      query.businessType,
-      query.q,
-      query.offset,
-      query.limit
+      city,
+      at,
+      promoType,
+      category,
+      businessType,
+      q,
+      offset,
+      limit
     );
   }
 

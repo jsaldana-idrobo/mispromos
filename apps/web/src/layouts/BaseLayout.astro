@@ -11,6 +11,29 @@ const title = Astro.props.title ?? "Mis promos";
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      html[data-authenticated="true"] [data-nav-login],
+      html[data-authenticated="true"] [data-nav-register] {
+        display: none;
+      }
+      html[data-authenticated="true"] [data-nav-dashboard] {
+        display: inline-flex;
+      }
+      body:not([data-role="ADMIN"]) [data-admin-only] {
+        display: none !important;
+      }
+    </style>
+    <script type="module">
+      try {
+        const authHint = localStorage.getItem("auth");
+        const tokenHint = localStorage.getItem("token");
+        if (authHint === "true" || tokenHint) {
+          document.documentElement.dataset.authenticated = "true";
+        }
+      } catch {
+        // ignore storage errors
+      }
+    </script>
   </head>
   <body class="min-h-screen bg-sand-100 text-ink-900" data-api-base={apiBase}>
     <div class="min-h-screen bg-radiant">
@@ -21,7 +44,7 @@ const title = Astro.props.title ?? "Mis promos";
           </a>
           <nav class="flex items-center gap-4 text-sm font-medium">
             <a href="/dashboard" class="transition hover:text-ink-700" data-nav-dashboard hidden>
-              Negocios
+              Dashboard
             </a>
             <a href="/register" class="button-secondary" data-nav-register>Soy un negocio</a>
             <a
@@ -31,6 +54,14 @@ const title = Astro.props.title ?? "Mis promos";
             >
               Entrar
             </a>
+            <button
+              class="rounded-full border border-ink-900/20 px-4 py-2 transition hover:border-ink-900/50"
+              type="button"
+              data-nav-logout
+              hidden
+            >
+              Salir
+            </button>
           </nav>
         </div>
       </header>
@@ -50,6 +81,7 @@ const title = Astro.props.title ?? "Mis promos";
       const dashboardLink = document.querySelector("[data-nav-dashboard]");
       const loginLink = document.querySelector("[data-nav-login]");
       const registerLink = document.querySelector("[data-nav-register]");
+      const logoutButton = document.querySelector("[data-nav-logout]");
       const setAuthLinks = (isAuthenticated) => {
         if (dashboardLink) {
           dashboardLink.hidden = !isAuthenticated;
@@ -60,43 +92,77 @@ const title = Astro.props.title ?? "Mis promos";
         if (registerLink) {
           registerLink.hidden = isAuthenticated;
         }
+        if (logoutButton) {
+          logoutButton.hidden = !isAuthenticated;
+        }
       };
+      let authHint = null;
+      let tokenHint = null;
       try {
-        const authHint = localStorage.getItem("auth");
-        if (authHint === "true") {
-          setAuthLinks(true);
-        }
+        authHint = localStorage.getItem("auth");
+        tokenHint = localStorage.getItem("token");
       } catch {
-        // localStorage might be blocked; ignore.
+        authHint = null;
+        tokenHint = null;
       }
-      let shouldCheck = false;
-      try {
-        const authHint = localStorage.getItem("auth");
-        shouldCheck = authHint === "true";
-        if (!shouldCheck) {
-          setAuthLinks(false);
-        }
-      } catch {
-        setAuthLinks(false);
-      }
-      if (shouldCheck && (dashboardLink || loginLink || registerLink)) {
+      const hasAuthHint = authHint === "true" || Boolean(tokenHint);
+      setAuthLinks(hasAuthHint);
+      if (dashboardLink || loginLink || registerLink) {
         fetch(`${apiBase}/auth/me`, { credentials: "include" })
           .then((response) => (response.ok ? response.json() : null))
           .then((user) => {
             if (user) {
               document.body.dataset.authenticated = "true";
+              document.documentElement.dataset.authenticated = "true";
+              document.body.dataset.role = user.role;
+              document.documentElement.dataset.role = user.role;
               setAuthLinks(true);
-            } else if (dashboardLink) {
-              dashboardLink.remove();
+              try {
+                localStorage.setItem("auth", "true");
+              } catch {
+                // ignore storage errors
+              }
+            } else if (!hasAuthHint) {
               setAuthLinks(false);
+              delete document.body.dataset.role;
+              delete document.documentElement.dataset.role;
+              try {
+                localStorage.removeItem("auth");
+              } catch {
+                // ignore storage errors
+              }
+              delete document.documentElement.dataset.authenticated;
             }
           })
           .catch(() => {
-            if (dashboardLink) {
-              dashboardLink.remove();
+            if (!hasAuthHint) {
+              setAuthLinks(false);
+              delete document.body.dataset.role;
+              delete document.documentElement.dataset.role;
+              try {
+                localStorage.removeItem("auth");
+              } catch {
+                // ignore storage errors
+              }
+              delete document.documentElement.dataset.authenticated;
             }
-            setAuthLinks(false);
           });
+      }
+      if (logoutButton) {
+        logoutButton.addEventListener("click", async () => {
+          try {
+            await fetch(`${apiBase}/auth/logout`, { method: "POST", credentials: "include" });
+          } catch {
+            // ignore network errors
+          }
+          try {
+            localStorage.removeItem("auth");
+            localStorage.removeItem("token");
+          } catch {
+            // ignore storage errors
+          }
+          window.location.href = "/login";
+        });
       }
     </script>
   </body>

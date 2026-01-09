@@ -23,7 +23,7 @@ async function bootstrap() {
   ];
   const originSet = new Set([...allowedOrigins, ...defaultOrigins]);
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       if (!origin) {
         callback(null, true);
         return;
@@ -43,13 +43,15 @@ async function bootstrap() {
     },
     credentials: true,
   });
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidUnknownValues: true,
-    })
-  );
+  if (process.env.NODE_ENV === "production") {
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidUnknownValues: false,
+      })
+    );
+  }
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

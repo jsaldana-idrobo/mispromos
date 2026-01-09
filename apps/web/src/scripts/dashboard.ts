@@ -1,6 +1,7 @@
 import { apiFetch } from "./api";
 import { setButtonLoading, showToast } from "./ui";
 import { isValidDateRange, isValidTimeRange } from "./validators";
+import { businessTypeLabels, promoTypeLabels } from "../data/catalog";
 
 type User = {
   id: string;
@@ -64,28 +65,40 @@ const promoList = document.querySelector<HTMLElement>("[data-promo-list]");
 const businessSelects = Array.from(
   document.querySelectorAll<HTMLSelectElement>("[data-business-select]")
 );
+const businessSelectRows = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-business-select-row]")
+);
 const branchSelect = document.querySelector<HTMLSelectElement>("[data-branch-select]");
 
 const businessForm = document.querySelector<HTMLFormElement>("[data-business-form]");
 const businessMessage = document.querySelector<HTMLElement>("[data-business-message]");
 const businessMode = document.querySelector<HTMLElement>("[data-business-mode]");
-const businessCancel = document.querySelector<HTMLButtonElement>("[data-business-cancel]");
 const branchForm = document.querySelector<HTMLFormElement>("[data-branch-form]");
 const branchMessage = document.querySelector<HTMLElement>("[data-branch-message]");
 const branchMode = document.querySelector<HTMLElement>("[data-branch-mode]");
-const branchCancel = document.querySelector<HTMLButtonElement>("[data-branch-cancel]");
 const promoForm = document.querySelector<HTMLFormElement>("[data-promo-form]");
 const promoMessage = document.querySelector<HTMLElement>("[data-promo-message]");
 const promoMode = document.querySelector<HTMLElement>("[data-promo-mode]");
-const promoCancel = document.querySelector<HTMLButtonElement>("[data-promo-cancel]");
 const promoSearchInput = document.querySelector<HTMLInputElement>("[data-promo-search]");
 const promoStatusSelect = document.querySelector<HTMLSelectElement>("[data-promo-status]");
 const promoTypeSelect = document.querySelector<HTMLSelectElement>("[data-promo-type]");
+const promoBusinessFilter = document.querySelector<HTMLSelectElement>("[data-promo-business-filter]");
+const promoPagination = document.querySelector<HTMLElement>("[data-promo-pagination]");
+const promoPagePrev = document.querySelector<HTMLButtonElement>("[data-promo-page-prev]");
+const promoPageNext = document.querySelector<HTMLButtonElement>("[data-promo-page-next]");
+const promoPageInfo = document.querySelector<HTMLElement>("[data-promo-page-info]");
 const promoKpiTotal = document.querySelector<HTMLElement>("[data-promo-kpi-total]");
 const promoKpiActive = document.querySelector<HTMLElement>("[data-promo-kpi-active]");
 const promoKpiInactive = document.querySelector<HTMLElement>("[data-promo-kpi-inactive]");
 const branchSearchInput = document.querySelector<HTMLInputElement>("[data-branch-search]");
 const branchCityFilter = document.querySelector<HTMLSelectElement>("[data-branch-city-filter]");
+const branchBusinessFilter = document.querySelector<HTMLSelectElement>(
+  "[data-branch-business-filter]"
+);
+const branchPagination = document.querySelector<HTMLElement>("[data-branch-pagination]");
+const branchPagePrev = document.querySelector<HTMLButtonElement>("[data-branch-page-prev]");
+const branchPageNext = document.querySelector<HTMLButtonElement>("[data-branch-page-next]");
+const branchPageInfo = document.querySelector<HTMLElement>("[data-branch-page-info]");
 const branchKpiTotal = document.querySelector<HTMLElement>("[data-branch-kpi-total]");
 const branchKpiCities = document.querySelector<HTMLElement>("[data-branch-kpi-cities]");
 const branchKpiPhones = document.querySelector<HTMLElement>("[data-branch-kpi-phones]");
@@ -95,16 +108,39 @@ const businessKpiTotal = document.querySelector<HTMLElement>("[data-business-kpi
 const businessKpiBranches = document.querySelector<HTMLElement>("[data-business-kpi-branches]");
 const businessKpiPromos = document.querySelector<HTMLElement>("[data-business-kpi-promos]");
 const adminPanel = document.querySelector<HTMLElement>("[data-admin-panel]");
+const adminOnlySections = Array.from(document.querySelectorAll<HTMLElement>("[data-admin-only]"));
+const ownerBusinessPanel = document.querySelector<HTMLElement>("[data-owner-business]");
+const ownerBusinessName = document.querySelector<HTMLElement>("[data-owner-business-name]");
+const ownerBusinessType = document.querySelector<HTMLElement>("[data-owner-business-type]");
+const ownerBusinessSlug = document.querySelector<HTMLElement>("[data-owner-business-slug]");
+const ownerBusinessCategories = document.querySelector<HTMLElement>("[data-owner-business-categories]");
+const ownerBusinessInstagram = document.querySelector<HTMLElement>("[data-owner-business-instagram]");
+const ownerBusinessDescription = document.querySelector<HTMLElement>(
+  "[data-owner-business-description]"
+);
+const ownerBusinessEdit = document.querySelector<HTMLButtonElement>("[data-owner-business-edit]");
 const cityForm = document.querySelector<HTMLFormElement>("[data-city-form]");
 const cityMessage = document.querySelector<HTMLElement>("[data-city-message]");
 const cityList = document.querySelector<HTMLElement>("[data-city-list]");
 const cityMode = document.querySelector<HTMLElement>("[data-city-mode]");
-const cityCancel = document.querySelector<HTMLButtonElement>("[data-city-cancel]");
+const cityPagination = document.querySelector<HTMLElement>("[data-city-pagination]");
+const cityPagePrev = document.querySelector<HTMLButtonElement>("[data-city-page-prev]");
+const cityPageNext = document.querySelector<HTMLButtonElement>("[data-city-page-next]");
+const cityPageInfo = document.querySelector<HTMLElement>("[data-city-page-info]");
+const cityKpiTotal = document.querySelector<HTMLElement>("[data-city-kpi-total]");
+const cityKpiCountries = document.querySelector<HTMLElement>("[data-city-kpi-countries]");
+const cityKpiLast = document.querySelector<HTMLElement>("[data-city-kpi-last]");
 const categoryForm = document.querySelector<HTMLFormElement>("[data-category-form]");
 const categoryMessage = document.querySelector<HTMLElement>("[data-category-message]");
 const categoryList = document.querySelector<HTMLElement>("[data-category-list]");
 const categoryMode = document.querySelector<HTMLElement>("[data-category-mode]");
-const categoryCancel = document.querySelector<HTMLButtonElement>("[data-category-cancel]");
+const categoryPagination = document.querySelector<HTMLElement>("[data-category-pagination]");
+const categoryPagePrev = document.querySelector<HTMLButtonElement>("[data-category-page-prev]");
+const categoryPageNext = document.querySelector<HTMLButtonElement>("[data-category-page-next]");
+const categoryPageInfo = document.querySelector<HTMLElement>("[data-category-page-info]");
+const categoryKpiTotal = document.querySelector<HTMLElement>("[data-category-kpi-total]");
+const categoryKpiSlugs = document.querySelector<HTMLElement>("[data-category-kpi-slugs]");
+const categoryKpiLast = document.querySelector<HTMLElement>("[data-category-kpi-last]");
 const categorySuggestions = document.querySelector<HTMLSelectElement>(
   "[data-business-category-select]"
 );
@@ -126,18 +162,40 @@ const dashboardPanels = Array.from(
 const dashboardCreateButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-dashboard-create]")
 );
+const businessTabLabels = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-dashboard-business-label]")
+);
+const businessTabTitle = document.querySelector<HTMLElement>("[data-dashboard-business-title]");
+const promoTabLabels = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-dashboard-promo-label]")
+);
+const promoTabTitle = document.querySelector<HTMLElement>("[data-dashboard-promo-title]");
+const promoTabSubtitle = document.querySelector<HTMLElement>("[data-dashboard-promo-subtitle]");
+const branchTabLabels = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-dashboard-branch-label]")
+);
+const branchTabTitle = document.querySelector<HTMLElement>("[data-dashboard-branch-title]");
+const branchTabSubtitle = document.querySelector<HTMLElement>("[data-dashboard-branch-subtitle]");
 const promoModalOverlay = document.querySelector<HTMLElement>("[data-promo-modal-overlay]");
 const promoModal = document.querySelector<HTMLElement>("[data-promo-modal]");
 const promoModalClose = document.querySelector<HTMLButtonElement>("[data-promo-modal-close]");
+const promoModalTitle = document.querySelector<HTMLElement>("[data-promo-modal-title]");
 const branchModalOverlay = document.querySelector<HTMLElement>("[data-branch-modal-overlay]");
 const branchModal = document.querySelector<HTMLElement>("[data-branch-modal]");
 const branchModalClose = document.querySelector<HTMLButtonElement>("[data-branch-modal-close]");
+const branchModalTitle = document.querySelector<HTMLElement>("[data-branch-modal-title]");
 const businessModalOverlay = document.querySelector<HTMLElement>("[data-business-modal-overlay]");
 const businessModal = document.querySelector<HTMLElement>("[data-business-modal]");
 const businessModalClose = document.querySelector<HTMLButtonElement>("[data-business-modal-close]");
-const demoFillButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("[data-demo-fill]")
-);
+const businessModalTitle = document.querySelector<HTMLElement>("[data-business-modal-title]");
+const cityModalOverlay = document.querySelector<HTMLElement>("[data-city-modal-overlay]");
+const cityModal = document.querySelector<HTMLElement>("[data-city-modal]");
+const cityModalClose = document.querySelector<HTMLButtonElement>("[data-city-modal-close]");
+const cityModalTitle = document.querySelector<HTMLElement>("[data-city-modal-title]");
+const categoryModalOverlay = document.querySelector<HTMLElement>("[data-category-modal-overlay]");
+const categoryModal = document.querySelector<HTMLElement>("[data-category-modal]");
+const categoryModalClose = document.querySelector<HTMLButtonElement>("[data-category-modal-close]");
+const categoryModalTitle = document.querySelector<HTMLElement>("[data-category-modal-title]");
 
 let businesses: Business[] = [];
 let branches: Branch[] = [];
@@ -151,15 +209,25 @@ let promoFilters = {
   search: "",
   status: "all",
   type: "all",
+  businessId: "all",
 };
 let branchFilters = {
   search: "",
   city: "all",
+  businessId: "all",
 };
+let adminBranchPage = 1;
+const ADMIN_BRANCH_PAGE_SIZE = 10;
 let businessFilters = {
   search: "",
   type: "all",
 };
+let adminPromoPage = 1;
+const ADMIN_PROMO_PAGE_SIZE = 10;
+let adminCityPage = 1;
+const ADMIN_CITY_PAGE_SIZE = 10;
+let adminCategoryPage = 1;
+const ADMIN_CATEGORY_PAGE_SIZE = 10;
 
 type FormMode = "create" | "edit";
 
@@ -281,7 +349,10 @@ const setBusinessForm = (business?: Business) => {
   if (!business) {
     businessForm.reset();
     businessForm.dataset.editId = "";
-    setMode(businessForm, businessMode, businessCancel, "create");
+    setMode(businessForm, businessMode, null, "create");
+    if (businessModalTitle) {
+      businessModalTitle.textContent = "Crear negocio";
+    }
     if (categorySuggestions) {
       Array.from(categorySuggestions.options).forEach((option) => {
         option.selected = false;
@@ -290,7 +361,10 @@ const setBusinessForm = (business?: Business) => {
     return;
   }
   businessForm.dataset.editId = business._id;
-  setMode(businessForm, businessMode, businessCancel, "edit");
+  setMode(businessForm, businessMode, null, "edit");
+  if (businessModalTitle) {
+    businessModalTitle.textContent = "Editar negocio";
+  }
   setInputValue(businessForm, "name", business.name);
   setInputValue(businessForm, "slug", business.slug);
   setInputValue(businessForm, "type", business.type);
@@ -309,11 +383,20 @@ const setBranchForm = (branch?: Branch) => {
   if (!branch) {
     branchForm.reset();
     branchForm.dataset.editId = "";
-    setMode(branchForm, branchMode, branchCancel, "create");
+    setMode(branchForm, branchMode, null, "create");
+    if (branchModalTitle) {
+      branchModalTitle.textContent = "Crear sede";
+    }
+    if (currentUser?.role !== "ADMIN" && currentBusinessId) {
+      setInputValue(branchForm, "businessId", currentBusinessId);
+    }
     return;
   }
   branchForm.dataset.editId = branch._id;
-  setMode(branchForm, branchMode, branchCancel, "edit");
+  setMode(branchForm, branchMode, null, "edit");
+  if (branchModalTitle) {
+    branchModalTitle.textContent = "Editar sede";
+  }
   setInputValue(branchForm, "businessId", branch.businessId);
   setInputValue(branchForm, "city", branch.city);
   setInputValue(branchForm, "address", branch.address);
@@ -326,16 +409,29 @@ const setPromoForm = async (promo?: Promotion) => {
   if (!promo) {
     promoForm.reset();
     promoForm.dataset.editId = "";
-    setMode(promoForm, promoMode, promoCancel, "create");
+    setMode(promoForm, promoMode, null, "create");
+    if (promoModalTitle) {
+      promoModalTitle.textContent = "Crear promoción";
+    }
+    if (currentUser?.role !== "ADMIN" && currentBusinessId) {
+      setInputValue(promoForm, "businessId", currentBusinessId);
+    }
     return;
   }
 
   promoForm.dataset.editId = promo._id;
-  setMode(promoForm, promoMode, promoCancel, "edit");
+  setMode(promoForm, promoMode, null, "edit");
+  if (promoModalTitle) {
+    promoModalTitle.textContent = "Editar promoción";
+  }
   setInputValue(promoForm, "businessId", promo.businessId);
   if (promo.businessId) {
-    currentBusinessId = promo.businessId;
-    await loadBranches(promo.businessId);
+    if (currentUser?.role === "ADMIN") {
+      await loadBranchOptionsForBusiness(promo.businessId);
+    } else {
+      currentBusinessId = promo.businessId;
+      await loadBranches(promo.businessId);
+    }
   }
   setInputValue(promoForm, "branchId", promo.branchId ?? "");
   setInputValue(promoForm, "title", promo.title);
@@ -361,11 +457,17 @@ const setCityForm = (city?: City) => {
   if (!city) {
     cityForm.reset();
     cityForm.dataset.editId = "";
-    setMode(cityForm, cityMode, cityCancel, "create");
+    setMode(cityForm, cityMode, null, "create");
+    if (cityModalTitle) {
+      cityModalTitle.textContent = "Crear ciudad";
+    }
     return;
   }
   cityForm.dataset.editId = city._id;
-  setMode(cityForm, cityMode, cityCancel, "edit");
+  setMode(cityForm, cityMode, null, "edit");
+  if (cityModalTitle) {
+    cityModalTitle.textContent = "Editar ciudad";
+  }
   setInputValue(cityForm, "name", city.name);
   setInputValue(cityForm, "countryCode", city.countryCode);
 };
@@ -375,11 +477,17 @@ const setCategoryForm = (category?: Category) => {
   if (!category) {
     categoryForm.reset();
     categoryForm.dataset.editId = "";
-    setMode(categoryForm, categoryMode, categoryCancel, "create");
+    setMode(categoryForm, categoryMode, null, "create");
+    if (categoryModalTitle) {
+      categoryModalTitle.textContent = "Crear categoría";
+    }
     return;
   }
   categoryForm.dataset.editId = category._id;
-  setMode(categoryForm, categoryMode, categoryCancel, "edit");
+  setMode(categoryForm, categoryMode, null, "edit");
+  if (categoryModalTitle) {
+    categoryModalTitle.textContent = "Editar categoría";
+  }
   setInputValue(categoryForm, "name", category.name);
   setInputValue(categoryForm, "slug", category.slug);
 };
@@ -420,6 +528,125 @@ const setHeaderAuthState = (isAuthenticated: boolean) => {
   }
 };
 
+const hasAuthHint = () => {
+  try {
+    return localStorage.getItem("auth") === "true";
+  } catch {
+    return false;
+  }
+};
+
+const setBusinessSelectVisibility = (isAdmin: boolean) => {
+  businessSelectRows.forEach((row) => {
+    row.hidden = !isAdmin;
+  });
+  businessSelects.forEach((select) => {
+    select.disabled = !isAdmin;
+    if (!isAdmin && currentBusinessId) {
+      select.value = currentBusinessId;
+    }
+  });
+};
+
+const setBusinessLabels = (isAdmin: boolean) => {
+  const label = isAdmin ? "Mis negocios" : "Mi negocio";
+  businessTabLabels.forEach((item) => {
+    item.textContent = label;
+  });
+  if (businessTabTitle) {
+    businessTabTitle.textContent = label;
+  }
+};
+
+const setPromoLabels = (isAdmin: boolean) => {
+  const label = isAdmin ? "Promociones" : "Mis promociones";
+  promoTabLabels.forEach((item) => {
+    item.textContent = label;
+  });
+  if (promoTabTitle) {
+    promoTabTitle.textContent = label;
+  }
+  if (promoTabSubtitle) {
+    promoTabSubtitle.textContent = isAdmin
+      ? "Gestiona promociones de todos los negocios."
+      : "Gestiona las promos activas de tu negocio.";
+  }
+};
+
+const setBranchLabels = (isAdmin: boolean) => {
+  const label = isAdmin ? "Sedes" : "Mis sucursales";
+  branchTabLabels.forEach((item) => {
+    item.textContent = label;
+  });
+  if (branchTabTitle) {
+    branchTabTitle.textContent = label;
+  }
+  if (branchTabSubtitle) {
+    branchTabSubtitle.textContent = isAdmin
+      ? "Gestiona sedes de todos los negocios."
+      : "Administra las sedes activas de tu negocio.";
+  }
+};
+
+const setAdminOnlyVisibility = (isAdmin: boolean) => {
+  adminOnlySections.forEach((section) => {
+    section.hidden = !isAdmin;
+  });
+  if (ownerBusinessPanel) {
+    ownerBusinessPanel.hidden = isAdmin;
+  }
+};
+
+const removeAdminOnlySections = () => {
+  adminOnlySections.forEach((section) => {
+    section.remove();
+  });
+};
+
+const renderOwnerBusinessDetails = () => {
+  if (!ownerBusinessPanel) return;
+  const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
+  if (!business) {
+    ownerBusinessPanel.hidden = true;
+    return;
+  }
+  ownerBusinessPanel.hidden = false;
+  if (ownerBusinessName) {
+    ownerBusinessName.textContent = business.name;
+  }
+  if (ownerBusinessType) {
+    ownerBusinessType.textContent = businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type;
+  }
+  if (ownerBusinessSlug) {
+    ownerBusinessSlug.textContent = business.slug;
+  }
+  if (ownerBusinessCategories) {
+    ownerBusinessCategories.textContent = (business.categories ?? []).join(", ") || "-";
+  }
+  if (ownerBusinessInstagram) {
+    ownerBusinessInstagram.textContent = business.instagram ? `@${business.instagram}` : "-";
+  }
+  if (ownerBusinessDescription) {
+    ownerBusinessDescription.textContent = business.description ?? "-";
+  }
+};
+
+const updatePromoPagination = (total: number, isAdmin: boolean) => {
+  if (!promoPagination || !promoPageInfo || !promoPagePrev || !promoPageNext) return;
+  if (!isAdmin) {
+    promoPagination.hidden = true;
+    return;
+  }
+  const totalPages = Math.max(1, Math.ceil(total / ADMIN_PROMO_PAGE_SIZE));
+  if (adminPromoPage > totalPages) {
+    adminPromoPage = totalPages;
+  }
+  promoPageInfo.textContent = `Página ${adminPromoPage} de ${totalPages}`;
+  promoPagePrev.disabled = adminPromoPage <= 1;
+  promoPageNext.disabled = adminPromoPage >= totalPages;
+  promoPagination.hidden = totalPages <= 1;
+};
+
 const closeAllModals = () => {
   const setHidden = (overlay: HTMLElement | null, hidden: boolean) => {
     if (!overlay) return;
@@ -429,14 +656,18 @@ const closeAllModals = () => {
   setHidden(promoModalOverlay, true);
   setHidden(branchModalOverlay, true);
   setHidden(businessModalOverlay, true);
+  setHidden(cityModalOverlay, true);
+  setHidden(categoryModalOverlay, true);
 };
 
-const openModal = (type: "promo" | "branch" | "business") => {
+const openModal = (type: "promo" | "branch" | "business" | "city" | "category") => {
   closeAllModals();
   const modalMap = {
     promo: { overlay: promoModalOverlay, modal: promoModal },
     branch: { overlay: branchModalOverlay, modal: branchModal },
     business: { overlay: businessModalOverlay, modal: businessModal },
+    city: { overlay: cityModalOverlay, modal: cityModal },
+    category: { overlay: categoryModalOverlay, modal: categoryModal },
   } as const;
   const target = modalMap[type];
   if (!target.overlay || !target.modal) return;
@@ -499,9 +730,31 @@ const focusCreateForm = (target: string) => {
     openModal("branch");
   }
   if (target === "business") {
+    if (currentUser?.role !== "ADMIN") {
+      showToast("Acceso restringido", "Solo el admin puede crear nuevos negocios.", "info");
+      return;
+    }
     setActiveDashboardTab("business");
     setBusinessForm();
     openModal("business");
+  }
+  if (target === "city") {
+    if (currentUser?.role !== "ADMIN") {
+      showToast("Acceso restringido", "Solo el admin puede crear ciudades.", "info");
+      return;
+    }
+    setActiveDashboardTab("cities");
+    setCityForm();
+    openModal("city");
+  }
+  if (target === "category") {
+    if (currentUser?.role !== "ADMIN") {
+      showToast("Acceso restringido", "Solo el admin puede crear categorías.", "info");
+      return;
+    }
+    setActiveDashboardTab("categories");
+    setCategoryForm();
+    openModal("category");
   }
 };
 
@@ -544,6 +797,8 @@ const renderUser = () => {
     setFormsEnabled(false);
     setOwnerSectionsVisible(false);
     setAuthGateVisible(true);
+    setBusinessSelectVisibility(false);
+    setAdminOnlyVisibility(false);
     if (dashboardHero) {
       dashboardHero.hidden = true;
     }
@@ -560,40 +815,45 @@ const renderUser = () => {
         <p class="text-sm font-semibold">${currentUser.email}</p>
         <p class="text-xs text-ink-900/60">Rol: ${currentUser.role}</p>
       </div>
-      <button class="rounded-full border border-ink-900/20 px-3 py-1 text-xs" data-logout>Salir</button>
     </div>
   `;
 
-  const logoutButton = userCard.querySelector<HTMLButtonElement>("[data-logout]");
-  if (logoutButton) {
-    logoutButton.addEventListener("click", async () => {
-      await apiFetch("/auth/logout", { method: "POST" });
-      localStorage.removeItem("auth");
-      window.location.href = "/login";
-    });
-  }
-
   const ownerAccess = currentUser.role === "BUSINESS_OWNER" || currentUser.role === "ADMIN";
+  const isAdmin = currentUser.role === "ADMIN";
   setFormsEnabled(ownerAccess);
   setOwnerSectionsVisible(ownerAccess);
   setAuthGateVisible(!ownerAccess);
   setDashboardMenuVisible(ownerAccess);
+  setBusinessSelectVisibility(isAdmin);
+  setAdminOnlyVisibility(isAdmin);
+  setBusinessLabels(isAdmin);
+  setPromoLabels(isAdmin);
+  setBranchLabels(isAdmin);
+  if (!isAdmin) {
+    removeAdminOnlySections();
+  }
+  if (isAdmin) {
+    activeDashboardTab = "business";
+  }
   if (ownerAccess) {
     setActiveDashboardTab(activeDashboardTab);
   }
   setHeaderAuthState(true);
   if (dashboardHero) {
-    dashboardHero.hidden = !ownerAccess;
+    dashboardHero.hidden = !isAdmin;
   }
   if (!ownerAccess && authGateText) {
     authGateText.textContent =
       "Tu usuario es de tipo visitante. Necesitas una cuenta de negocio para administrar promociones.";
   }
   if (adminPanel) {
-    adminPanel.hidden = currentUser.role !== "ADMIN";
+    adminPanel.hidden = !isAdmin;
   }
   if (!ownerAccess) {
     setMessage(businessMessage, "Necesitas rol BUSINESS_OWNER para crear negocios.");
+  }
+  if (!isAdmin) {
+    renderOwnerBusinessDetails();
   }
 };
 
@@ -645,10 +905,10 @@ const renderBusinesses = (list: Business[], total: number) => {
             <div class="grid gap-3 md:grid-cols-[1.6fr,1fr,1fr,auto] md:items-center">
               <div>
                 <p class="text-sm font-semibold">${business.name}</p>
-                <p class="text-xs text-ink-900/60 md:hidden">${business.slug} · ${business.type}</p>
+                <p class="text-xs text-ink-900/60 md:hidden">${business.slug} · ${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type}</p>
               </div>
               <p class="hidden text-xs text-ink-900/70 md:block">${business.slug}</p>
-              <p class="hidden text-xs text-ink-900/70 md:block">${business.type}</p>
+              <p class="hidden text-xs text-ink-900/70 md:block">${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type}</p>
               <div class="flex flex-wrap gap-2 text-xs">
                 <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-select="${business._id}">Ver</button>
                 <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-edit="${business._id}">Editar</button>
@@ -663,10 +923,18 @@ const renderBusinesses = (list: Business[], total: number) => {
 };
 
 const populateBusinessSelects = () => {
+  const isAdmin = currentUser?.role === "ADMIN";
   businessSelects.forEach((select) => {
     const selected = select.value;
     if (businesses.length === 0) {
       select.innerHTML = "<option value=\"\">Sin negocios</option>";
+      select.disabled = true;
+      return;
+    }
+    if (!isAdmin && currentBusinessId) {
+      const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
+      select.innerHTML = `<option value="${business._id}">${business.name}</option>`;
+      select.value = business._id;
       select.disabled = true;
       return;
     }
@@ -680,9 +948,9 @@ const populateBusinessSelects = () => {
   });
 };
 
-const populateBranchSelect = (businessId: string) => {
+const populateBranchSelect = (businessId: string, branchItems: Branch[] = branches) => {
   if (!branchSelect) return;
-  const filtered = branches.filter((branch) => branch.businessId === businessId);
+  const filtered = branchItems.filter((branch) => branch.businessId === businessId);
   branchSelect.innerHTML = `<option value="">Global</option>`;
   filtered.forEach((branch) => {
     const option = document.createElement("option");
@@ -696,20 +964,19 @@ const populateBranchSelect = (businessId: string) => {
 const getFilteredBranches = () => {
   const searchValue = branchFilters.search.trim().toLowerCase();
   return branches.filter((branch) => {
+    const businessMatch =
+      branchFilters.businessId === "all" || branch.businessId === branchFilters.businessId;
     const cityMatch = branchFilters.city === "all" || branch.city === branchFilters.city;
     const textMatch =
-      searchValue.length === 0 ||
-      branch.city.toLowerCase().includes(searchValue) ||
-      branch.address.toLowerCase().includes(searchValue) ||
-      (branch.zone ?? "").toLowerCase().includes(searchValue) ||
-      (branch.phone ?? "").toLowerCase().includes(searchValue);
-    return cityMatch && textMatch;
+      searchValue.length === 0 || branch.address.toLowerCase().includes(searchValue);
+    return businessMatch && cityMatch && textMatch;
   });
 };
 
 const renderBranches = (list: Branch[], total: number) => {
   if (!branchList) return;
-  if (!currentBusinessId) {
+  const isAdmin = currentUser?.role === "ADMIN";
+  if (!currentBusinessId && !isAdmin) {
     branchList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         Selecciona un negocio para ver sedes.
@@ -720,10 +987,14 @@ const renderBranches = (list: Branch[], total: number) => {
   if (total === 0) {
     branchList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
-        No hay sedes para este negocio.
-        <button class="mt-3 inline-flex text-xs underline" data-empty-action="branch">
+        ${isAdmin ? "No hay sedes registradas." : "No hay sedes para este negocio."}
+        ${
+          isAdmin
+            ? ""
+            : `<button class="mt-3 inline-flex text-xs underline" data-empty-action="branch">
           Crear sede
-        </button>
+        </button>`
+        }
       </div>
     `;
     return;
@@ -736,9 +1007,12 @@ const renderBranches = (list: Branch[], total: number) => {
     `;
     return;
   }
+  const businessMap = new Map(businesses.map((item) => [item._id, item]));
   branchList.innerHTML = `
-    <div class="hidden md:grid md:grid-cols-[1fr,1.6fr,1fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
+    <div class="hidden md:grid md:grid-cols-[1.2fr,1fr,1fr,1.4fr,1fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
+      <span>Negocio</span>
       <span>Ciudad</span>
+      <span>Zona</span>
       <span>Dirección</span>
       <span>Contacto</span>
       <span>Acciones</span>
@@ -747,11 +1021,15 @@ const renderBranches = (list: Branch[], total: number) => {
       .map(
         (branch) => `
           <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-            <div class="grid gap-3 md:grid-cols-[1fr,1.6fr,1fr,auto] md:items-center">
+            <div class="grid gap-3 md:grid-cols-[1.2fr,1fr,1fr,1.4fr,1fr,auto] md:items-center">
               <div>
-                <p class="text-sm font-semibold">${branch.city}</p>
+                <p class="text-sm font-semibold">${businessMap.get(branch.businessId)?.name ?? "Negocio"}</p>
+                <p class="text-xs text-ink-900/60 md:hidden">${branch.city}</p>
+                <p class="text-xs text-ink-900/60 md:hidden">${branch.zone ?? "Sin zona"}</p>
                 <p class="text-xs text-ink-900/60 md:hidden">${branch.address}</p>
               </div>
+              <p class="hidden text-xs text-ink-900/70 md:block">${branch.city}</p>
+              <p class="hidden text-xs text-ink-900/70 md:block">${branch.zone ?? "Sin zona"}</p>
               <p class="hidden text-xs text-ink-900/70 md:block">${branch.address}</p>
               <p class="hidden text-xs text-ink-900/70 md:block">${branch.phone ?? "Sin teléfono"}</p>
               <div class="flex flex-wrap gap-2 text-xs">
@@ -781,9 +1059,28 @@ const updatePromoKpis = () => {
   }
 };
 
+const updatePromoBusinessFilterOptions = () => {
+  if (!promoBusinessFilter) return;
+  const isAdmin = currentUser?.role === "ADMIN";
+  promoBusinessFilter.hidden = !isAdmin;
+  if (!isAdmin) {
+    return;
+  }
+  const currentValue = promoBusinessFilter.value || "all";
+  promoBusinessFilter.innerHTML = `
+    <option value="all">Todos</option>
+    ${businesses
+      .map((business) => `<option value="${business._id}">${business.name}</option>`)
+      .join("")}
+  `;
+  promoBusinessFilter.value = currentValue;
+};
+
 const getFilteredPromotions = () => {
   const searchValue = promoFilters.search.trim().toLowerCase();
   return promotions.filter((promo) => {
+    const businessMatch =
+      promoFilters.businessId === "all" || promo.businessId === promoFilters.businessId;
     const statusMatch =
       promoFilters.status === "all" ||
       (promoFilters.status === "active" && (promo.active ?? true)) ||
@@ -793,13 +1090,14 @@ const getFilteredPromotions = () => {
       searchValue.length === 0 ||
       promo.title.toLowerCase().includes(searchValue) ||
       (promo.description ?? "").toLowerCase().includes(searchValue);
-    return statusMatch && typeMatch && textMatch;
+    return businessMatch && statusMatch && typeMatch && textMatch;
   });
 };
 
 const renderPromotions = (promos: Promotion[], total: number) => {
   if (!promoList) return;
-  if (!currentBusinessId) {
+  const isAdmin = currentUser?.role === "ADMIN";
+  if (!currentBusinessId && !isAdmin) {
     promoList.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         Selecciona un negocio para ver promociones.
@@ -826,11 +1124,7 @@ const renderPromotions = (promos: Promotion[], total: number) => {
     `;
     return;
   }
-  const business = businesses.find((item) => item._id === currentBusinessId);
-  const instagramHandle = (business?.instagram ?? "").replace("@", "").trim();
-  const instagramLink = instagramHandle
-    ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
-    : "";
+  const businessMap = new Map(businesses.map((item) => [item._id, item]));
   promoList.innerHTML = `
     <div class="hidden md:grid md:grid-cols-[1.6fr,0.8fr,0.8fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
       <span>Promoción</span>
@@ -845,15 +1139,24 @@ const renderPromotions = (promos: Promotion[], total: number) => {
         const dateLabel = promo.startDate && promo.endDate
           ? `${promo.startDate.slice(0, 10)} → ${promo.endDate.slice(0, 10)}`
           : "Sin fechas";
+        const promoBusiness = isAdmin
+          ? businessMap.get(promo.businessId)
+          : businessMap.get(currentBusinessId);
+        const businessName = promoBusiness?.name ?? "Negocio";
+        const instagramHandle = (promoBusiness?.instagram ?? "").replace("@", "").trim();
+        const instagramLink = instagramHandle
+          ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
+          : "";
         return `
           <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
             <div class="grid gap-3 md:grid-cols-[1.6fr,0.8fr,0.8fr,auto] md:items-center">
               <div>
                 <p class="text-sm font-semibold">${promo.title}</p>
                 <p class="text-xs text-ink-900/60">${dateLabel}</p>
+                <p class="text-xs text-ink-900/60">${businessName}</p>
                 ${instagramLink ? `<div class="mt-1 text-xs text-ink-900/60">${instagramLink}</div>` : ""}
               </div>
-              <p class="hidden text-xs text-ink-900/70 md:block">${promo.promoType}</p>
+              <p class="hidden text-xs text-ink-900/70 md:block">${promoTypeLabels[promo.promoType as keyof typeof promoTypeLabels] ?? promo.promoType}</p>
               <span class="hidden w-fit rounded-full border border-ink-900/20 px-3 py-1 text-xs md:inline-flex">
                 ${statusLabel}
               </span>
@@ -871,7 +1174,18 @@ const renderPromotions = (promos: Promotion[], total: number) => {
 
 const updatePromotionsView = () => {
   updatePromoKpis();
-  renderPromotions(getFilteredPromotions(), promotions.length);
+  updatePromoBusinessFilterOptions();
+  const isAdmin = currentUser?.role === "ADMIN";
+  const filtered = getFilteredPromotions();
+  if (isAdmin) {
+    const start = (adminPromoPage - 1) * ADMIN_PROMO_PAGE_SIZE;
+    const paged = filtered.slice(start, start + ADMIN_PROMO_PAGE_SIZE);
+    renderPromotions(paged, promotions.length);
+    updatePromoPagination(filtered.length, true);
+  } else {
+    renderPromotions(filtered, promotions.length);
+    updatePromoPagination(0, false);
+  }
   updateBusinessesView();
 };
 
@@ -891,8 +1205,42 @@ const updateBranchCityFilterOptions = () => {
   }
 };
 
+const updateBranchBusinessFilterOptions = () => {
+  if (!branchBusinessFilter) return;
+  const isAdmin = currentUser?.role === "ADMIN";
+  branchBusinessFilter.hidden = !isAdmin;
+  if (!isAdmin) {
+    return;
+  }
+  const currentValue = branchBusinessFilter.value || "all";
+  branchBusinessFilter.innerHTML = `
+    <option value="all">Todos</option>
+    ${businesses
+      .map((business) => `<option value="${business._id}">${business.name}</option>`)
+      .join("")}
+  `;
+  branchBusinessFilter.value = currentValue;
+};
+
+const updateBranchPagination = (total: number, isAdmin: boolean) => {
+  if (!branchPagination || !branchPageInfo || !branchPagePrev || !branchPageNext) return;
+  if (!isAdmin) {
+    branchPagination.hidden = true;
+    return;
+  }
+  const totalPages = Math.max(1, Math.ceil(total / ADMIN_BRANCH_PAGE_SIZE));
+  if (adminBranchPage > totalPages) {
+    adminBranchPage = totalPages;
+  }
+  branchPageInfo.textContent = `Página ${adminBranchPage} de ${totalPages}`;
+  branchPagePrev.disabled = adminBranchPage <= 1;
+  branchPageNext.disabled = adminBranchPage >= totalPages;
+  branchPagination.hidden = totalPages <= 1;
+};
+
 const updateBranchesView = () => {
   updateBranchCityFilterOptions();
+  updateBranchBusinessFilterOptions();
   const total = branches.length;
   if (branchKpiTotal) {
     branchKpiTotal.textContent = String(total);
@@ -905,7 +1253,17 @@ const updateBranchesView = () => {
       branches.filter((branch) => (branch.phone ?? "").trim().length > 0).length
     );
   }
-  renderBranches(getFilteredBranches(), total);
+  const isAdmin = currentUser?.role === "ADMIN";
+  const filtered = getFilteredBranches();
+  if (isAdmin) {
+    const start = (adminBranchPage - 1) * ADMIN_BRANCH_PAGE_SIZE;
+    const paged = filtered.slice(start, start + ADMIN_BRANCH_PAGE_SIZE);
+    renderBranches(paged, total);
+    updateBranchPagination(filtered.length, true);
+  } else {
+    renderBranches(filtered, total);
+    updateBranchPagination(0, false);
+  }
   updateBusinessesView();
 };
 
@@ -921,6 +1279,9 @@ const updateBusinessesView = () => {
     businessKpiPromos.textContent = String(promotions.length);
   }
   renderBusinesses(getFilteredBusinesses(), total);
+  if (currentUser?.role !== "ADMIN") {
+    renderOwnerBusinessDetails();
+  }
 };
 
 const loadUser = async () => {
@@ -933,7 +1294,7 @@ const loadUser = async () => {
     currentUser = null;
   }
   if (!currentUser) {
-    setHeaderAuthState(false);
+    setHeaderAuthState(hasAuthHint());
   }
   renderUser();
 };
@@ -942,7 +1303,8 @@ const loadBusinesses = async () => {
   if (!currentUser) return;
   renderLoadingMessage(businessList, "Cargando negocios...");
   businessSelects.forEach((select) => setSelectLoading(select, "Cargando negocios..."));
-  const response = await apiFetch<Business[]>("/businesses/mine");
+  const isAdmin = currentUser.role === "ADMIN";
+  const response = await apiFetch<Business[]>(isAdmin ? "/businesses" : "/businesses/mine");
   businesses = response;
   businessFilters = { search: "", type: "all" };
   if (businessSearchInput) {
@@ -951,8 +1313,13 @@ const loadBusinesses = async () => {
   if (businessTypeFilter) {
     businessTypeFilter.value = "all";
   }
+  if (!currentBusinessId && businesses.length > 0) {
+    currentBusinessId = businesses[0]._id;
+  }
   updateBusinessesView();
   populateBusinessSelects();
+  setBusinessSelectVisibility(isAdmin);
+  setAdminOnlyVisibility(isAdmin);
   const hasBusinesses = businesses.length > 0;
   setBranchFormEnabled(hasBusinesses);
   setPromoFormEnabled(hasBusinesses);
@@ -960,9 +1327,16 @@ const loadBusinesses = async () => {
     setSelectLoading(branchSelect, "Sin sedes");
   }
   if (businesses.length > 0) {
-    currentBusinessId = businesses[0]._id;
-    await loadBranches(currentBusinessId);
-    await loadPromotions(currentBusinessId);
+    if (!currentBusinessId) {
+      currentBusinessId = businesses[0]._id;
+    }
+    if (isAdmin) {
+      await loadBranches("");
+      await loadPromotions();
+    } else {
+      await loadBranches(currentBusinessId);
+      await loadPromotions(currentBusinessId);
+    }
     updatePromotionsView();
     updateBusinessesView();
   }
@@ -971,34 +1345,80 @@ const loadBusinesses = async () => {
 const loadBranches = async (businessId: string) => {
   renderLoadingMessage(branchList, "Cargando sedes...");
   setSelectLoading(branchSelect, "Cargando sedes...");
-  const response = await apiFetch<Branch[]>(`/branches?businessId=${businessId}`);
+  const response = await apiFetch<Branch[]>(
+    businessId ? `/branches?businessId=${businessId}` : "/branches"
+  );
   branches = response;
-  branchFilters = { search: "", city: "all" };
+  branchFilters = { search: "", city: "all", businessId: "all" };
   if (branchSearchInput) {
     branchSearchInput.value = "";
   }
-  populateBranchSelect(businessId);
+  if (businessId) {
+    populateBranchSelect(businessId);
+  }
   if (branchCityFilter) {
     branchCityFilter.value = "all";
   }
   updateBranchesView();
 };
 
-const loadPromotions = async (businessId: string): Promise<Promotion[]> => {
-  if (!businessId) return [];
+const loadPromotions = async (businessId?: string): Promise<Promotion[]> => {
   renderLoadingMessage(promoList, "Cargando promociones...");
-  const response = await apiFetch<Promotion[]>(`/promotions?businessId=${businessId}`);
+  const response = await apiFetch<Promotion[]>(
+    businessId ? `/promotions?businessId=${businessId}` : "/promotions"
+  );
   promotions = response;
   return response;
+};
+
+const loadBranchOptionsForBusiness = async (businessId: string) => {
+  if (!branchSelect) return;
+  setSelectLoading(branchSelect, "Cargando sedes...");
+  const response = await apiFetch<Branch[]>(`/branches?businessId=${businessId}`);
+  populateBranchSelect(businessId, response);
+};
+
+const updateCityPagination = (total: number) => {
+  if (!cityPagination || !cityPageInfo || !cityPagePrev || !cityPageNext) return;
+  const totalPages = Math.max(1, Math.ceil(total / ADMIN_CITY_PAGE_SIZE));
+  if (adminCityPage > totalPages) {
+    adminCityPage = totalPages;
+  }
+  cityPageInfo.textContent = `Página ${adminCityPage} de ${totalPages}`;
+  cityPagePrev.disabled = adminCityPage <= 1;
+  cityPageNext.disabled = adminCityPage >= totalPages;
+  cityPagination.hidden = totalPages <= 1;
 };
 
 const renderCities = () => {
   if (!cityList) return;
   if (cities.length === 0) {
     cityList.innerHTML = "<p class=\"text-ink-900/60\">Sin ciudades registradas.</p>";
+    if (cityKpiTotal) {
+      cityKpiTotal.textContent = "0";
+    }
+    if (cityKpiCountries) {
+      cityKpiCountries.textContent = "0";
+    }
+    if (cityKpiLast) {
+      cityKpiLast.textContent = "--";
+    }
     return;
   }
-  cityList.innerHTML = cities
+  if (cityKpiTotal) {
+    cityKpiTotal.textContent = String(cities.length);
+  }
+  if (cityKpiCountries) {
+    cityKpiCountries.textContent = String(
+      new Set(cities.map((city) => city.countryCode.toUpperCase())).size
+    );
+  }
+  if (cityKpiLast) {
+    cityKpiLast.textContent = cities[0]?.name ?? "--";
+  }
+  const start = (adminCityPage - 1) * ADMIN_CITY_PAGE_SIZE;
+  const paged = cities.slice(start, start + ADMIN_CITY_PAGE_SIZE);
+  cityList.innerHTML = paged
     .map(
       (city) => `
         <div class=\"flex items-center justify-between rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-2\">
@@ -1014,15 +1434,38 @@ const renderCities = () => {
       `
     )
     .join("");
+  updateCityPagination(cities.length);
 };
 
 const renderCategories = () => {
   if (!categoryList) return;
   if (categories.length === 0) {
     categoryList.innerHTML = "<p class=\"text-ink-900/60\">Sin categorías registradas.</p>";
+    if (categoryKpiTotal) {
+      categoryKpiTotal.textContent = "0";
+    }
+    if (categoryKpiSlugs) {
+      categoryKpiSlugs.textContent = "0";
+    }
+    if (categoryKpiLast) {
+      categoryKpiLast.textContent = "--";
+    }
     return;
   }
-  categoryList.innerHTML = categories
+  if (categoryKpiTotal) {
+    categoryKpiTotal.textContent = String(categories.length);
+  }
+  if (categoryKpiSlugs) {
+    categoryKpiSlugs.textContent = String(
+      categories.filter((category) => category.slug.trim().length > 0).length
+    );
+  }
+  if (categoryKpiLast) {
+    categoryKpiLast.textContent = categories[0]?.name ?? "--";
+  }
+  const start = (adminCategoryPage - 1) * ADMIN_CATEGORY_PAGE_SIZE;
+  const paged = categories.slice(start, start + ADMIN_CATEGORY_PAGE_SIZE);
+  categoryList.innerHTML = paged
     .map(
       (category) => `
         <div class=\"flex items-center justify-between rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-2\">
@@ -1038,12 +1481,26 @@ const renderCategories = () => {
       `
     )
     .join("");
+  updateCategoryPagination(categories.length);
+};
+
+const updateCategoryPagination = (total: number) => {
+  if (!categoryPagination || !categoryPageInfo || !categoryPagePrev || !categoryPageNext) return;
+  const totalPages = Math.max(1, Math.ceil(total / ADMIN_CATEGORY_PAGE_SIZE));
+  if (adminCategoryPage > totalPages) {
+    adminCategoryPage = totalPages;
+  }
+  categoryPageInfo.textContent = `Página ${adminCategoryPage} de ${totalPages}`;
+  categoryPagePrev.disabled = adminCategoryPage <= 1;
+  categoryPageNext.disabled = adminCategoryPage >= totalPages;
+  categoryPagination.hidden = totalPages <= 1;
 };
 
 const loadCities = async () => {
   renderLoadingMessage(cityList, "Cargando ciudades...");
   setSelectLoading(branchCitySelect, "Cargando ciudades...");
   cities = await apiFetch<City[]>("/cities");
+  adminCityPage = 1;
   renderCities();
   if (branchCitySelect) {
     setSelectReady(
@@ -1060,6 +1517,7 @@ const loadCategories = async () => {
   renderLoadingMessage(categoryList, "Cargando categorías...");
   setSelectLoading(categorySuggestions, "Cargando categorías...");
   categories = await apiFetch<Category[]>("/categories");
+  adminCategoryPage = 1;
   renderCategories();
   if (categorySuggestions) {
     setSelectReady(
@@ -1397,6 +1855,10 @@ const wireSelectors = () => {
   businessSelects.forEach((select) => {
     select.addEventListener("change", async () => {
       if (select.value) {
+        if (currentUser?.role === "ADMIN") {
+          await loadBranchOptionsForBusiness(select.value);
+          return;
+        }
         currentBusinessId = select.value;
         setBranchFormEnabled(true);
         setPromoFormEnabled(true);
@@ -1418,6 +1880,15 @@ const wireBusinessActions = () => {
     const deleteId = target.dataset.businessDelete;
 
     if (selectId) {
+      if (currentUser?.role === "ADMIN") {
+        const business = businesses.find((item) => item._id === selectId);
+        if (business) {
+          setBusinessForm(business);
+          setActiveDashboardTab("business");
+          openModal("business");
+        }
+        return;
+      }
       currentBusinessId = selectId;
       businessSelects.forEach((select) => {
         select.value = selectId;
@@ -1470,6 +1941,17 @@ const wireBusinessActions = () => {
   });
 };
 
+const wireOwnerBusinessEdit = () => {
+  if (!ownerBusinessEdit) return;
+  ownerBusinessEdit.addEventListener("click", async () => {
+    const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
+    if (!business) return;
+    setBusinessForm(business);
+    setActiveDashboardTab("business");
+    openModal("business");
+  });
+};
+
 const wireBranchActions = () => {
   if (!branchList) return;
   branchList.addEventListener("click", async (event) => {
@@ -1482,6 +1964,10 @@ const wireBranchActions = () => {
         setBranchForm(branch);
         setActiveDashboardTab("branches");
         openModal("branch");
+        if (currentUser?.role === "ADMIN") {
+          await loadBranchOptionsForBusiness(branch.businessId);
+          return;
+        }
         currentBusinessId = branch.businessId;
         businessSelects.forEach((select) => {
           select.value = branch.businessId;
@@ -1557,20 +2043,7 @@ const wireEmptyStateActions = () => {
 };
 
 const wireCancelButtons = () => {
-  businessCancel?.addEventListener("click", () => {
-    setBusinessForm();
-    closeAllModals();
-  });
-  branchCancel?.addEventListener("click", () => {
-    setBranchForm();
-    closeAllModals();
-  });
-  promoCancel?.addEventListener("click", () => {
-    setPromoForm();
-    closeAllModals();
-  });
-  cityCancel?.addEventListener("click", () => setCityForm());
-  categoryCancel?.addEventListener("click", () => setCategoryForm());
+  // no-op: cancel buttons removed
 };
 
 const wireDashboardTabs = () => {
@@ -1644,6 +2117,8 @@ const wireDashboardModal = () => {
   wireModal(promoModalOverlay, promoModalClose);
   wireModal(branchModalOverlay, branchModalClose);
   wireModal(businessModalOverlay, businessModalClose);
+  wireModal(cityModalOverlay, cityModalClose);
+  wireModal(categoryModalOverlay, categoryModalClose);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeAllModals();
@@ -1658,12 +2133,63 @@ const wirePromoFilters = () => {
       search: promoSearchInput.value,
       status: promoStatusSelect.value,
       type: promoTypeSelect.value,
+      businessId: promoBusinessFilter?.value ?? "all",
     };
+    adminPromoPage = 1;
     updatePromotionsView();
   };
   promoSearchInput.addEventListener("input", updateFilters);
   promoStatusSelect.addEventListener("change", updateFilters);
   promoTypeSelect.addEventListener("change", updateFilters);
+  promoBusinessFilter?.addEventListener("change", updateFilters);
+};
+
+const wirePromoPagination = () => {
+  if (!promoPagePrev || !promoPageNext) return;
+  promoPagePrev.addEventListener("click", () => {
+    adminPromoPage = Math.max(1, adminPromoPage - 1);
+    updatePromotionsView();
+  });
+  promoPageNext.addEventListener("click", () => {
+    adminPromoPage += 1;
+    updatePromotionsView();
+  });
+};
+
+const wireBranchPagination = () => {
+  if (!branchPagePrev || !branchPageNext) return;
+  branchPagePrev.addEventListener("click", () => {
+    adminBranchPage = Math.max(1, adminBranchPage - 1);
+    updateBranchesView();
+  });
+  branchPageNext.addEventListener("click", () => {
+    adminBranchPage += 1;
+    updateBranchesView();
+  });
+};
+
+const wireCityPagination = () => {
+  if (!cityPagePrev || !cityPageNext) return;
+  cityPagePrev.addEventListener("click", () => {
+    adminCityPage = Math.max(1, adminCityPage - 1);
+    renderCities();
+  });
+  cityPageNext.addEventListener("click", () => {
+    adminCityPage += 1;
+    renderCities();
+  });
+};
+
+const wireCategoryPagination = () => {
+  if (!categoryPagePrev || !categoryPageNext) return;
+  categoryPagePrev.addEventListener("click", () => {
+    adminCategoryPage = Math.max(1, adminCategoryPage - 1);
+    renderCategories();
+  });
+  categoryPageNext.addEventListener("click", () => {
+    adminCategoryPage += 1;
+    renderCategories();
+  });
 };
 
 const wireBranchFilters = () => {
@@ -1672,11 +2198,14 @@ const wireBranchFilters = () => {
     branchFilters = {
       search: branchSearchInput.value,
       city: branchCityFilter.value,
+      businessId: branchBusinessFilter?.value ?? "all",
     };
+    adminBranchPage = 1;
     updateBranchesView();
   };
   branchSearchInput.addEventListener("input", updateFilters);
   branchCityFilter.addEventListener("change", updateFilters);
+  branchBusinessFilter?.addEventListener("change", updateFilters);
 };
 
 const wireBusinessFilters = () => {
@@ -1690,177 +2219,6 @@ const wireBusinessFilters = () => {
   };
   businessSearchInput.addEventListener("input", updateFilters);
   businessTypeFilter.addEventListener("change", updateFilters);
-};
-
-const formatDateFromDate = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
-
-const fillDemoPromo = () => {
-  if (!promoForm) return;
-  if (businesses.length === 0) {
-    showToast("Primero crea un negocio", "Necesitas un negocio para asociar la promo.", "info");
-    return;
-  }
-  const businessId = currentBusinessId || businesses[0]._id;
-  const today = new Date();
-  const nextWeek = new Date();
-  nextWeek.setDate(today.getDate() + 7);
-  setInputValue(promoForm, "businessId", businessId);
-  setInputValue(promoForm, "branchId", branches[0]?._id ?? "");
-  setInputValue(promoForm, "title", "Promo demo negocio@demo.com");
-  setInputValue(
-    promoForm,
-    "description",
-    "Promo de prueba para el usuario negocio@demo.com (almuerzo y tarde)."
-  );
-  setInputValue(promoForm, "promoType", "2x1");
-  setInputValue(promoForm, "value", "2x1");
-  setInputValue(promoForm, "startDate", formatDateFromDate(today));
-  setInputValue(promoForm, "endDate", formatDateFromDate(nextWeek));
-  setInputValue(promoForm, "startHour", "12:00");
-  setInputValue(promoForm, "endHour", "18:00");
-  promoForm.querySelectorAll<HTMLInputElement>('input[name="daysOfWeek"]').forEach((input) => {
-    input.checked = ["monday", "tuesday", "wednesday", "thursday", "friday"].includes(input.value);
-  });
-};
-
-const fillDemoPromoAlt = () => {
-  if (!promoForm) return;
-  if (businesses.length === 0) {
-    showToast("Primero crea un negocio", "Necesitas un negocio para asociar la promo.", "info");
-    return;
-  }
-  const businessId = currentBusinessId || businesses[0]._id;
-  const today = new Date();
-  const nextMonth = new Date();
-  nextMonth.setDate(today.getDate() + 30);
-  setInputValue(promoForm, "businessId", businessId);
-  setInputValue(promoForm, "branchId", branches[0]?._id ?? "");
-  setInputValue(promoForm, "title", "Promo demo happy hour");
-  setInputValue(
-    promoForm,
-    "description",
-    "Promo demo para negocio@demo.com con horario nocturno."
-  );
-  setInputValue(promoForm, "promoType", "discount");
-  setInputValue(promoForm, "value", "30%");
-  setInputValue(promoForm, "startDate", formatDateFromDate(today));
-  setInputValue(promoForm, "endDate", formatDateFromDate(nextMonth));
-  setInputValue(promoForm, "startHour", "18:00");
-  setInputValue(promoForm, "endHour", "22:00");
-  promoForm.querySelectorAll<HTMLInputElement>('input[name="daysOfWeek"]').forEach((input) => {
-    input.checked = ["friday", "saturday", "sunday"].includes(input.value);
-  });
-};
-
-const fillDemoBranch = () => {
-  if (!branchForm) return;
-  if (businesses.length === 0) {
-    showToast("Primero crea un negocio", "Necesitas un negocio para crear la sede.", "info");
-    return;
-  }
-  if (cities.length === 0) {
-    showToast("Agrega una ciudad", "Necesitas una ciudad disponible para la sede.", "info");
-    return;
-  }
-  const businessId = currentBusinessId || businesses[0]._id;
-  setInputValue(branchForm, "businessId", businessId);
-  setInputValue(branchForm, "city", cities[0].name);
-  setInputValue(branchForm, "address", "Carrera 7 # 12-45");
-  setInputValue(branchForm, "zone", "Zona demo");
-  setInputValue(branchForm, "phone", "3005551212");
-};
-
-const fillDemoBranchAlt = () => {
-  if (!branchForm) return;
-  if (businesses.length === 0) {
-    showToast("Primero crea un negocio", "Necesitas un negocio para crear la sede.", "info");
-    return;
-  }
-  if (cities.length === 0) {
-    showToast("Agrega una ciudad", "Necesitas una ciudad disponible para la sede.", "info");
-    return;
-  }
-  const businessId = currentBusinessId || businesses[0]._id;
-  const city = cities.length > 1 ? cities[1].name : cities[0].name;
-  setInputValue(branchForm, "businessId", businessId);
-  setInputValue(branchForm, "city", city);
-  setInputValue(branchForm, "address", "Avenida 5 # 18-90");
-  setInputValue(branchForm, "zone", "Zona norte");
-  setInputValue(branchForm, "phone", "3019876543");
-};
-
-const fillDemoBusiness = () => {
-  if (!businessForm) return;
-  setInputValue(businessForm, "name", "Negocio demo negocio@demo.com");
-  setInputValue(businessForm, "slug", "negocio-demo-negocio");
-  setInputValue(businessForm, "type", "restaurant");
-  setInputValue(
-    businessForm,
-    "description",
-    "Negocio de prueba para el usuario negocio@demo.com."
-  );
-  setInputValue(businessForm, "instagram", "negocio.demo");
-  const categorySelect = businessForm.querySelector<HTMLSelectElement>("[name='categories']");
-  if (categories.length > 0) {
-    setMultiSelectValues(
-      categorySelect,
-      categories.slice(0, 2).map((category) => category.slug)
-    );
-  }
-};
-
-const fillDemoBusinessAlt = () => {
-  if (!businessForm) return;
-  setInputValue(businessForm, "name", "Negocio demo 2 negocio@demo.com");
-  setInputValue(businessForm, "slug", "negocio-demo-2");
-  setInputValue(businessForm, "type", "bar");
-  setInputValue(
-    businessForm,
-    "description",
-    "Segundo negocio demo para validar vistas administrativas."
-  );
-  setInputValue(businessForm, "instagram", "negocio.demo2");
-  const categorySelect = businessForm.querySelector<HTMLSelectElement>("[name='categories']");
-  if (categories.length > 0) {
-    setMultiSelectValues(
-      categorySelect,
-      categories.slice(0, 1).map((category) => category.slug)
-    );
-  }
-};
-
-const wireDemoFill = () => {
-  if (demoFillButtons.length === 0) return;
-  demoFillButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const target = button.dataset.demoFill;
-      if (!target) return;
-      const panel = target.includes("promo")
-        ? "promo"
-        : target.includes("branch")
-          ? "branch"
-          : "business";
-      openModal(panel);
-      if (target === "promo") {
-        fillDemoPromo();
-      } else if (target === "promo-2") {
-        fillDemoPromoAlt();
-      } else if (target === "branch") {
-        fillDemoBranch();
-      } else if (target === "branch-2") {
-        fillDemoBranchAlt();
-      } else if (target === "business") {
-        fillDemoBusiness();
-      } else if (target === "business-2") {
-        fillDemoBusinessAlt();
-      }
-    });
-  });
 };
 
 (async () => {
@@ -1892,9 +2250,13 @@ const wireDemoFill = () => {
   wireDashboardMenu();
   wireDashboardModal();
   wirePromoFilters();
+  wirePromoPagination();
   wireBranchFilters();
+  wireBranchPagination();
   wireBusinessFilters();
-  wireDemoFill();
+  wireCityPagination();
+  wireCategoryPagination();
+  wireOwnerBusinessEdit();
   handleBusinessForm();
   handleBranchForm();
   handlePromoForm();

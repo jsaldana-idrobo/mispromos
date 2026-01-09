@@ -1,7 +1,12 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": false
+    "noEmit": false,
+    "rootDir": "src",
+    "paths": {
+      "@mispromos/shared": ["../../../packages/shared/dist/index.d.ts"],
+      "@mispromos/shared/*": ["../../../packages/shared/dist/*"]
+    }
   },
   "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
 }
