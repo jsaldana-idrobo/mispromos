@@ -141,6 +141,14 @@ var dashboardPanels = Array.from(
 var dashboardCreateButtons = Array.from(
   document.querySelectorAll("[data-dashboard-create]")
 );
+var dashboardModalOverlay = document.querySelector("[data-dashboard-modal-overlay]");
+var dashboardModal = document.querySelector("[data-dashboard-modal]");
+var dashboardModalTitle = document.querySelector("[data-dashboard-modal-title]");
+var dashboardModalSubtitle = document.querySelector("[data-dashboard-modal-subtitle]");
+var dashboardModalClose = document.querySelector("[data-dashboard-modal-close]");
+var dashboardModalPanels = Array.from(
+  document.querySelectorAll("[data-modal-panel]")
+);
 var businesses = [];
 var branches = [];
 var currentUser = null;
@@ -149,6 +157,7 @@ var categories = [];
 var currentBusinessId = "";
 var promotions = [];
 var activeDashboardTab = "promos";
+var activeModalPanel = "promo";
 var setMessage = (el, text) => {
   if (el) {
     el.textContent = text;
@@ -334,6 +343,35 @@ var setOwnerSectionsVisible = (visible) => {
     section.hidden = !visible;
   });
 };
+var setActiveModalPanel = (panel) => {
+  activeModalPanel = panel;
+  dashboardModalPanels.forEach((section) => {
+    section.hidden = section.dataset.modalPanel !== panel;
+  });
+  if (dashboardModalTitle && dashboardModalSubtitle) {
+    if (panel === "promo") {
+      dashboardModalTitle.textContent = "Crear o editar promoci\xF3n";
+      dashboardModalSubtitle.textContent = "Gestiona los beneficios y horarios de tu promo.";
+    } else if (panel === "branch") {
+      dashboardModalTitle.textContent = "Crear o editar sede";
+      dashboardModalSubtitle.textContent = "Actualiza direcciones y datos de contacto.";
+    } else {
+      dashboardModalTitle.textContent = "Crear o editar negocio";
+      dashboardModalSubtitle.textContent = "Configura los datos principales de tu negocio.";
+    }
+  }
+};
+var setModalOpen = (open) => {
+  if (!dashboardModalOverlay || !dashboardModal) return;
+  dashboardModalOverlay.hidden = !open;
+  if (!open) {
+    return;
+  }
+  const focusTarget = dashboardModal.querySelector(
+    "input, select, textarea"
+  );
+  focusTarget?.focus();
+};
 var setActiveDashboardTab = (tab) => {
   activeDashboardTab = tab;
   dashboardPanels.forEach((panel) => {
@@ -370,24 +408,23 @@ var setDashboardMenuOpen = (open) => {
   dashboardMenu.classList.toggle("translate-x-0", open);
   dashboardMenu.classList.toggle("translate-x-full", !open);
 };
-var scrollToForm = (selector) => {
-  const el = document.querySelector(selector);
-  if (!el) return;
-  el.scrollIntoView({ behavior: "smooth", block: "start" });
-};
 var focusCreateForm = (target) => {
   if (target === "promo") {
     setActiveDashboardTab("promos");
-    scrollToForm("[data-promo-form]");
+    setActiveModalPanel("promo");
+    setPromoForm();
   }
   if (target === "branch") {
     setActiveDashboardTab("branches");
-    scrollToForm("[data-branch-form]");
+    setActiveModalPanel("branch");
+    setBranchForm();
   }
   if (target === "business") {
     setActiveDashboardTab("business");
-    scrollToForm("[data-business-form]");
+    setActiveModalPanel("business");
+    setBusinessForm();
   }
+  setModalOpen(true);
 };
 var setAuthGateVisible = (visible) => {
   if (authGate) {
@@ -475,23 +512,33 @@ var renderBusinesses = () => {
     `;
     return;
   }
-  businessList.innerHTML = businesses.map(
+  businessList.innerHTML = `
+    <div class="hidden md:grid md:grid-cols-[1.6fr,1fr,1fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
+      <span>Negocio</span>
+      <span>Slug</span>
+      <span>Tipo</span>
+      <span>Acciones</span>
+    </div>
+    ${businesses.map(
     (business) => `
-        <div class="rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-3">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-sm font-semibold">${business.name}</p>
-              <p class="text-xs text-ink-900/60">${business.slug} \xB7 ${business.type}</p>
-            </div>
-            <div class="flex gap-2 text-xs">
-              <button class="underline" data-business-select="${business._id}">Ver</button>
-              <button class="underline" data-business-edit="${business._id}">Editar</button>
-              <button class="underline" data-business-delete="${business._id}">Eliminar</button>
+          <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+            <div class="grid gap-3 md:grid-cols-[1.6fr,1fr,1fr,auto] md:items-center">
+              <div>
+                <p class="text-sm font-semibold">${business.name}</p>
+                <p class="text-xs text-ink-900/60 md:hidden">${business.slug} \xB7 ${business.type}</p>
+              </div>
+              <p class="hidden text-xs text-ink-900/70 md:block">${business.slug}</p>
+              <p class="hidden text-xs text-ink-900/70 md:block">${business.type}</p>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-select="${business._id}">Ver</button>
+                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-edit="${business._id}">Editar</button>
+                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-delete="${business._id}">Eliminar</button>
+              </div>
             </div>
           </div>
-        </div>
-      `
-  ).join("");
+        `
+  ).join("")}
+  `;
 };
 var populateBusinessSelects = () => {
   businessSelects.forEach((select) => {
@@ -541,22 +588,32 @@ var renderBranches = () => {
     `;
     return;
   }
-  branchList.innerHTML = branches.map(
+  branchList.innerHTML = `
+    <div class="hidden md:grid md:grid-cols-[1fr,1.6fr,1fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
+      <span>Ciudad</span>
+      <span>Direcci\xF3n</span>
+      <span>Contacto</span>
+      <span>Acciones</span>
+    </div>
+    ${branches.map(
     (branch) => `
-        <div class="rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-3">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-sm font-semibold">${branch.city}</p>
-              <p class="text-xs text-ink-900/60">${branch.address}</p>
-            </div>
-            <div class="flex gap-2 text-xs">
-              <button class="underline" data-branch-edit="${branch._id}">Editar</button>
-              <button class="underline" data-branch-delete="${branch._id}">Eliminar</button>
+          <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+            <div class="grid gap-3 md:grid-cols-[1fr,1.6fr,1fr,auto] md:items-center">
+              <div>
+                <p class="text-sm font-semibold">${branch.city}</p>
+                <p class="text-xs text-ink-900/60 md:hidden">${branch.address}</p>
+              </div>
+              <p class="hidden text-xs text-ink-900/70 md:block">${branch.address}</p>
+              <p class="hidden text-xs text-ink-900/70 md:block">${branch.phone ?? "Sin tel\xE9fono"}</p>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-branch-edit="${branch._id}">Editar</button>
+                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-branch-delete="${branch._id}">Eliminar</button>
+              </div>
             </div>
           </div>
-        </div>
-      `
-  ).join("");
+        `
+  ).join("")}
+  `;
 };
 var renderPromotions = (promos) => {
   if (!promoList) return;
@@ -582,23 +639,38 @@ var renderPromotions = (promos) => {
   const business = businesses.find((item) => item._id === currentBusinessId);
   const instagramHandle = (business?.instagram ?? "").replace("@", "").trim();
   const instagramLink = instagramHandle ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>` : "";
-  promoList.innerHTML = promos.map(
-    (promo) => `
-        <div class="rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-3">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p class="text-sm font-semibold">${promo.title}</p>
-              <p class="text-xs text-ink-900/60">${promo._id}</p>
-              ${instagramLink ? `<div class="mt-2 text-xs text-ink-900/60">${instagramLink}</div>` : ""}
-            </div>
-            <div class="flex gap-2 text-xs">
-              <button class="underline" data-promo-edit="${promo._id}">Editar</button>
-              <button class="underline" data-promo-delete="${promo._id}">Eliminar</button>
+  promoList.innerHTML = `
+    <div class="hidden md:grid md:grid-cols-[1.6fr,0.8fr,0.8fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
+      <span>Promoci\xF3n</span>
+      <span>Tipo</span>
+      <span>Estado</span>
+      <span>Acciones</span>
+    </div>
+    ${promos.map((promo) => {
+    const isActive = promo.active ?? true;
+    const statusLabel = isActive ? "Activa" : "Inactiva";
+    const dateLabel = promo.startDate && promo.endDate ? `${promo.startDate.slice(0, 10)} \u2192 ${promo.endDate.slice(0, 10)}` : "Sin fechas";
+    return `
+          <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+            <div class="grid gap-3 md:grid-cols-[1.6fr,0.8fr,0.8fr,auto] md:items-center">
+              <div>
+                <p class="text-sm font-semibold">${promo.title}</p>
+                <p class="text-xs text-ink-900/60">${dateLabel}</p>
+                ${instagramLink ? `<div class="mt-1 text-xs text-ink-900/60">${instagramLink}</div>` : ""}
+              </div>
+              <p class="hidden text-xs text-ink-900/70 md:block">${promo.promoType}</p>
+              <span class="hidden w-fit rounded-full border border-ink-900/20 px-3 py-1 text-xs md:inline-flex">
+                ${statusLabel}
+              </span>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-promo-edit="${promo._id}">Editar</button>
+                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-promo-delete="${promo._id}">Eliminar</button>
+              </div>
             </div>
           </div>
-        </div>
-      `
-  ).join("");
+        `;
+  }).join("")}
+  `;
 };
 var loadUser = async () => {
   if (userCard) {
@@ -811,6 +883,7 @@ var handleBusinessForm = () => {
           businessEditing ? "Negocio actualizado." : "Negocio creado.",
           "success"
         );
+        setModalOpen(false);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando negocio";
         setMessage(businessMessage, message);
@@ -857,6 +930,7 @@ var handleBranchForm = () => {
           renderPromotions(promos);
         }
         showToast("Listo", branchEditing ? "Sede actualizada." : "Sede creada.", "success");
+        setModalOpen(false);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando sede";
         setMessage(branchMessage, message);
@@ -934,6 +1008,7 @@ var handlePromoForm = () => {
           promoEditing ? "Promoci\xF3n actualizada." : "Promoci\xF3n creada.",
           "success"
         );
+        setModalOpen(false);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando promoci\xF3n";
         setMessage(promoMessage, message);
@@ -1057,6 +1132,9 @@ var wireBusinessActions = () => {
       const business = businesses.find((item) => item._id === editId);
       if (business) {
         setBusinessForm(business);
+        setActiveDashboardTab("business");
+        setActiveModalPanel("business");
+        setModalOpen(true);
         currentBusinessId = business._id;
         businessSelects.forEach((select) => {
           select.value = business._id;
@@ -1097,6 +1175,9 @@ var wireBranchActions = () => {
       const branch = branches.find((item) => item._id === editId);
       if (branch) {
         setBranchForm(branch);
+        setActiveDashboardTab("branches");
+        setActiveModalPanel("branch");
+        setModalOpen(true);
         currentBusinessId = branch.businessId;
         businessSelects.forEach((select) => {
           select.value = branch.businessId;
@@ -1143,6 +1224,9 @@ var wirePromoActions = () => {
       }
       if (promo) {
         await setPromoForm(promo);
+        setActiveDashboardTab("promos");
+        setActiveModalPanel("promo");
+        setModalOpen(true);
       }
     }
     if (!deleteId) return;
@@ -1167,9 +1251,18 @@ var wireEmptyStateActions = () => {
   });
 };
 var wireCancelButtons = () => {
-  businessCancel?.addEventListener("click", () => setBusinessForm());
-  branchCancel?.addEventListener("click", () => setBranchForm());
-  promoCancel?.addEventListener("click", () => setPromoForm());
+  businessCancel?.addEventListener("click", () => {
+    setBusinessForm();
+    setModalOpen(false);
+  });
+  branchCancel?.addEventListener("click", () => {
+    setBranchForm();
+    setModalOpen(false);
+  });
+  promoCancel?.addEventListener("click", () => {
+    setPromoForm();
+    setModalOpen(false);
+  });
   cityCancel?.addEventListener("click", () => setCityForm());
   categoryCancel?.addEventListener("click", () => setCategoryForm());
 };
@@ -1206,6 +1299,21 @@ var wireDashboardCreateButtons = () => {
     });
   });
 };
+var wireDashboardModal = () => {
+  if (!dashboardModalOverlay || !dashboardModal) return;
+  const closeModal = () => setModalOpen(false);
+  dashboardModalOverlay.addEventListener("click", (event) => {
+    if (event.target === dashboardModalOverlay) {
+      closeModal();
+    }
+  });
+  dashboardModalClose?.addEventListener("click", closeModal);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeModal();
+    }
+  });
+};
 (async () => {
   setBusinessForm();
   setBranchForm();
@@ -1231,6 +1339,7 @@ var wireDashboardCreateButtons = () => {
   wireDashboardTabs();
   wireDashboardCreateButtons();
   wireDashboardMenu();
+  wireDashboardModal();
   handleBusinessForm();
   handleBranchForm();
   handlePromoForm();
