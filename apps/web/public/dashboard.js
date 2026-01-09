@@ -117,8 +117,14 @@ var promoKpiActive = document.querySelector("[data-promo-kpi-active]");
 var promoKpiInactive = document.querySelector("[data-promo-kpi-inactive]");
 var branchSearchInput = document.querySelector("[data-branch-search]");
 var branchCityFilter = document.querySelector("[data-branch-city-filter]");
+var branchKpiTotal = document.querySelector("[data-branch-kpi-total]");
+var branchKpiCities = document.querySelector("[data-branch-kpi-cities]");
+var branchKpiPhones = document.querySelector("[data-branch-kpi-phones]");
 var businessSearchInput = document.querySelector("[data-business-search]");
 var businessTypeFilter = document.querySelector("[data-business-type-filter]");
+var businessKpiTotal = document.querySelector("[data-business-kpi-total]");
+var businessKpiBranches = document.querySelector("[data-business-kpi-branches]");
+var businessKpiPromos = document.querySelector("[data-business-kpi-promos]");
 var adminPanel = document.querySelector("[data-admin-panel]");
 var cityForm = document.querySelector("[data-city-form]");
 var cityMessage = document.querySelector("[data-city-message]");
@@ -770,6 +776,7 @@ var renderPromotions = (promos, total) => {
 var updatePromotionsView = () => {
   updatePromoKpis();
   renderPromotions(getFilteredPromotions(), promotions.length);
+  updateBusinessesView();
 };
 var updateBranchCityFilterOptions = () => {
   if (!branchCityFilter) return;
@@ -787,10 +794,34 @@ var updateBranchCityFilterOptions = () => {
   }
 };
 var updateBranchesView = () => {
-  renderBranches(getFilteredBranches(), branches.length);
+  updateBranchCityFilterOptions();
+  const total = branches.length;
+  if (branchKpiTotal) {
+    branchKpiTotal.textContent = String(total);
+  }
+  if (branchKpiCities) {
+    branchKpiCities.textContent = String(new Set(branches.map((branch) => branch.city)).size);
+  }
+  if (branchKpiPhones) {
+    branchKpiPhones.textContent = String(
+      branches.filter((branch) => (branch.phone ?? "").trim().length > 0).length
+    );
+  }
+  renderBranches(getFilteredBranches(), total);
+  updateBusinessesView();
 };
 var updateBusinessesView = () => {
-  renderBusinesses(getFilteredBusinesses(), businesses.length);
+  const total = businesses.length;
+  if (businessKpiTotal) {
+    businessKpiTotal.textContent = String(total);
+  }
+  if (businessKpiBranches) {
+    businessKpiBranches.textContent = String(branches.length);
+  }
+  if (businessKpiPromos) {
+    businessKpiPromos.textContent = String(promotions.length);
+  }
+  renderBusinesses(getFilteredBusinesses(), total);
 };
 var loadUser = async () => {
   if (userCard) {
@@ -829,6 +860,7 @@ var loadBusinesses = async () => {
     await loadBranches(currentBusinessId);
     await loadPromotions(currentBusinessId);
     updatePromotionsView();
+    updateBusinessesView();
   }
 };
 var loadBranches = async (businessId) => {
@@ -841,7 +873,6 @@ var loadBranches = async (businessId) => {
     branchSearchInput.value = "";
   }
   populateBranchSelect(businessId);
-  updateBranchCityFilterOptions();
   if (branchCityFilter) {
     branchCityFilter.value = "all";
   }
@@ -1243,6 +1274,7 @@ var wireSelectors = () => {
         await loadBranches(select.value);
         await loadPromotions(select.value);
         updatePromotionsView();
+        updateBusinessesView();
       }
     });
   });
@@ -1292,6 +1324,7 @@ var wireBusinessActions = () => {
         await loadBranches(currentBusinessId);
         await loadPromotions(currentBusinessId);
         updatePromotionsView();
+        updateBusinessesView();
       } else {
         currentBusinessId = "";
         branches = [];
@@ -1299,6 +1332,7 @@ var wireBusinessActions = () => {
         updateBranchesView();
         promotions = [];
         updatePromotionsView();
+        updateBusinessesView();
       }
     }
   });
@@ -1508,8 +1542,12 @@ var fillDemoPromo = () => {
   nextWeek.setDate(today.getDate() + 7);
   setInputValue(promoForm, "businessId", businessId);
   setInputValue(promoForm, "branchId", branches[0]?._id ?? "");
-  setInputValue(promoForm, "title", "Promo demo 2x1");
-  setInputValue(promoForm, "description", "Promoci\xF3n de prueba para el horario de almuerzo.");
+  setInputValue(promoForm, "title", "Promo demo negocio@demo.com");
+  setInputValue(
+    promoForm,
+    "description",
+    "Promo de prueba para el usuario negocio@demo.com (almuerzo y tarde)."
+  );
   setInputValue(promoForm, "promoType", "2x1");
   setInputValue(promoForm, "value", "2x1");
   setInputValue(promoForm, "startDate", formatDateFromDate(today));
@@ -1533,21 +1571,21 @@ var fillDemoBranch = () => {
   const businessId = currentBusinessId || businesses[0]._id;
   setInputValue(branchForm, "businessId", businessId);
   setInputValue(branchForm, "city", cities[0].name);
-  setInputValue(branchForm, "address", "Calle 10 # 25-30");
-  setInputValue(branchForm, "zone", "Centro");
-  setInputValue(branchForm, "phone", "3001234567");
+  setInputValue(branchForm, "address", "Carrera 7 # 12-45");
+  setInputValue(branchForm, "zone", "Zona demo");
+  setInputValue(branchForm, "phone", "3005551212");
 };
 var fillDemoBusiness = () => {
   if (!businessForm) return;
-  setInputValue(businessForm, "name", "Negocio demo");
-  setInputValue(businessForm, "slug", "negocio-demo");
+  setInputValue(businessForm, "name", "Negocio demo negocio@demo.com");
+  setInputValue(businessForm, "slug", "negocio-demo-negocio");
   setInputValue(businessForm, "type", "restaurant");
   setInputValue(
     businessForm,
     "description",
-    "Negocio de prueba para validar el flujo administrativo."
+    "Negocio de prueba para el usuario negocio@demo.com."
   );
-  setInputValue(businessForm, "instagram", "negocio_demo");
+  setInputValue(businessForm, "instagram", "negocio.demo");
   const categorySelect = businessForm.querySelector("[name='categories']");
   if (categories.length > 0) {
     setMultiSelectValues(

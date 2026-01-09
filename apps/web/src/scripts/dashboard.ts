@@ -86,8 +86,14 @@ const promoKpiActive = document.querySelector<HTMLElement>("[data-promo-kpi-acti
 const promoKpiInactive = document.querySelector<HTMLElement>("[data-promo-kpi-inactive]");
 const branchSearchInput = document.querySelector<HTMLInputElement>("[data-branch-search]");
 const branchCityFilter = document.querySelector<HTMLSelectElement>("[data-branch-city-filter]");
+const branchKpiTotal = document.querySelector<HTMLElement>("[data-branch-kpi-total]");
+const branchKpiCities = document.querySelector<HTMLElement>("[data-branch-kpi-cities]");
+const branchKpiPhones = document.querySelector<HTMLElement>("[data-branch-kpi-phones]");
 const businessSearchInput = document.querySelector<HTMLInputElement>("[data-business-search]");
 const businessTypeFilter = document.querySelector<HTMLSelectElement>("[data-business-type-filter]");
+const businessKpiTotal = document.querySelector<HTMLElement>("[data-business-kpi-total]");
+const businessKpiBranches = document.querySelector<HTMLElement>("[data-business-kpi-branches]");
+const businessKpiPromos = document.querySelector<HTMLElement>("[data-business-kpi-promos]");
 const adminPanel = document.querySelector<HTMLElement>("[data-admin-panel]");
 const cityForm = document.querySelector<HTMLFormElement>("[data-city-form]");
 const cityMessage = document.querySelector<HTMLElement>("[data-city-message]");
@@ -853,6 +859,7 @@ const renderPromotions = (promos: Promotion[], total: number) => {
 const updatePromotionsView = () => {
   updatePromoKpis();
   renderPromotions(getFilteredPromotions(), promotions.length);
+  updateBusinessesView();
 };
 
 const updateBranchCityFilterOptions = () => {
@@ -872,11 +879,35 @@ const updateBranchCityFilterOptions = () => {
 };
 
 const updateBranchesView = () => {
-  renderBranches(getFilteredBranches(), branches.length);
+  updateBranchCityFilterOptions();
+  const total = branches.length;
+  if (branchKpiTotal) {
+    branchKpiTotal.textContent = String(total);
+  }
+  if (branchKpiCities) {
+    branchKpiCities.textContent = String(new Set(branches.map((branch) => branch.city)).size);
+  }
+  if (branchKpiPhones) {
+    branchKpiPhones.textContent = String(
+      branches.filter((branch) => (branch.phone ?? "").trim().length > 0).length
+    );
+  }
+  renderBranches(getFilteredBranches(), total);
+  updateBusinessesView();
 };
 
 const updateBusinessesView = () => {
-  renderBusinesses(getFilteredBusinesses(), businesses.length);
+  const total = businesses.length;
+  if (businessKpiTotal) {
+    businessKpiTotal.textContent = String(total);
+  }
+  if (businessKpiBranches) {
+    businessKpiBranches.textContent = String(branches.length);
+  }
+  if (businessKpiPromos) {
+    businessKpiPromos.textContent = String(promotions.length);
+  }
+  renderBusinesses(getFilteredBusinesses(), total);
 };
 
 const loadUser = async () => {
@@ -917,6 +948,7 @@ const loadBusinesses = async () => {
     await loadBranches(currentBusinessId);
     await loadPromotions(currentBusinessId);
     updatePromotionsView();
+    updateBusinessesView();
   }
 };
 
@@ -930,7 +962,6 @@ const loadBranches = async (businessId: string) => {
     branchSearchInput.value = "";
   }
   populateBranchSelect(businessId);
-  updateBranchCityFilterOptions();
   if (branchCityFilter) {
     branchCityFilter.value = "all";
   }
@@ -1356,6 +1387,7 @@ const wireSelectors = () => {
         await loadBranches(select.value);
         await loadPromotions(select.value);
         updatePromotionsView();
+        updateBusinessesView();
       }
     });
   });
@@ -1404,19 +1436,21 @@ const wireBusinessActions = () => {
       await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
       showToast("Listo", "Negocio eliminado.", "success");
       await loadBusinesses();
-      if (businesses.length > 0) {
-        currentBusinessId = businesses[0]._id;
-        await loadBranches(currentBusinessId);
-        await loadPromotions(currentBusinessId);
-        updatePromotionsView();
-      } else {
-        currentBusinessId = "";
-        branches = [];
-        updateBranchCityFilterOptions();
-        updateBranchesView();
-        promotions = [];
-        updatePromotionsView();
-      }
+  if (businesses.length > 0) {
+    currentBusinessId = businesses[0]._id;
+    await loadBranches(currentBusinessId);
+    await loadPromotions(currentBusinessId);
+    updatePromotionsView();
+    updateBusinessesView();
+  } else {
+    currentBusinessId = "";
+    branches = [];
+    updateBranchCityFilterOptions();
+    updateBranchesView();
+    promotions = [];
+    updatePromotionsView();
+    updateBusinessesView();
+  }
     }
   });
 };
@@ -1638,8 +1672,12 @@ const fillDemoPromo = () => {
   nextWeek.setDate(today.getDate() + 7);
   setInputValue(promoForm, "businessId", businessId);
   setInputValue(promoForm, "branchId", branches[0]?._id ?? "");
-  setInputValue(promoForm, "title", "Promo demo 2x1");
-  setInputValue(promoForm, "description", "Promoción de prueba para el horario de almuerzo.");
+  setInputValue(promoForm, "title", "Promo demo negocio@demo.com");
+  setInputValue(
+    promoForm,
+    "description",
+    "Promo de prueba para el usuario negocio@demo.com (almuerzo y tarde)."
+  );
   setInputValue(promoForm, "promoType", "2x1");
   setInputValue(promoForm, "value", "2x1");
   setInputValue(promoForm, "startDate", formatDateFromDate(today));
@@ -1664,22 +1702,22 @@ const fillDemoBranch = () => {
   const businessId = currentBusinessId || businesses[0]._id;
   setInputValue(branchForm, "businessId", businessId);
   setInputValue(branchForm, "city", cities[0].name);
-  setInputValue(branchForm, "address", "Calle 10 # 25-30");
-  setInputValue(branchForm, "zone", "Centro");
-  setInputValue(branchForm, "phone", "3001234567");
+  setInputValue(branchForm, "address", "Carrera 7 # 12-45");
+  setInputValue(branchForm, "zone", "Zona demo");
+  setInputValue(branchForm, "phone", "3005551212");
 };
 
 const fillDemoBusiness = () => {
   if (!businessForm) return;
-  setInputValue(businessForm, "name", "Negocio demo");
-  setInputValue(businessForm, "slug", "negocio-demo");
+  setInputValue(businessForm, "name", "Negocio demo negocio@demo.com");
+  setInputValue(businessForm, "slug", "negocio-demo-negocio");
   setInputValue(businessForm, "type", "restaurant");
   setInputValue(
     businessForm,
     "description",
-    "Negocio de prueba para validar el flujo administrativo."
+    "Negocio de prueba para el usuario negocio@demo.com."
   );
-  setInputValue(businessForm, "instagram", "negocio_demo");
+  setInputValue(businessForm, "instagram", "negocio.demo");
   const categorySelect = businessForm.querySelector<HTMLSelectElement>("[name='categories']");
   if (categories.length > 0) {
     setMultiSelectValues(
