@@ -86,8 +86,22 @@ var setButtonLoading = (button, loading, text) => {
 // apps/web/src/scripts/auth.ts
 var form = document.querySelector("[data-auth-form]");
 var messageEl = document.querySelector("[data-auth-message]");
+var redirectIfAuthenticated = async () => {
+  if (!form) return false;
+  try {
+    await apiFetch("/auth/me");
+    if (messageEl) {
+      messageEl.textContent = "Ya tienes una sesi\xF3n activa. Redirigiendo...";
+    }
+    window.location.href = "/dashboard";
+    return true;
+  } catch {
+    return false;
+  }
+};
 if (form) {
   const mode = form.dataset.mode === "register" ? "register" : "login";
+  redirectIfAuthenticated();
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (messageEl) {

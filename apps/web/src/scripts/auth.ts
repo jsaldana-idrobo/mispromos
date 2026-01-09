@@ -10,8 +10,24 @@ type AuthResponse = {
 const form = document.querySelector<HTMLFormElement>("[data-auth-form]");
 const messageEl = document.querySelector<HTMLElement>("[data-auth-message]");
 
+const redirectIfAuthenticated = async () => {
+  if (!form) return false;
+  try {
+    await apiFetch<AuthResponse>("/auth/me");
+    if (messageEl) {
+      messageEl.textContent = "Ya tienes una sesión activa. Redirigiendo...";
+    }
+    window.location.href = "/dashboard";
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 if (form) {
   const mode = form.dataset.mode === "register" ? "register" : "login";
+
+  redirectIfAuthenticated();
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();

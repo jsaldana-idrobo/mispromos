@@ -6,9 +6,46 @@ const days = daysOfWeek;
 ---
 
 <BaseLayout title="Mis promos | Dashboard">
+  <div class="mb-6 flex items-center justify-between rounded-3xl border border-ink-900/10 bg-white/80 p-4" data-owner-only hidden>
+    <div>
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Panel de negocio</p>
+      <h2 class="text-xl font-semibold">Administra tu cuenta</h2>
+    </div>
+    <button class="button-secondary" type="button" data-dashboard-toggle>
+      Menú
+    </button>
+  </div>
+
+  <div
+    class="fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm"
+    data-dashboard-overlay
+    hidden
+  ></div>
+  <aside
+    class="fixed right-0 top-0 z-50 flex h-full w-72 translate-x-full flex-col gap-6 border-l border-ink-900/10 bg-white p-6 shadow-2xl transition"
+    data-dashboard-menu
+    hidden
+  >
+    <div class="flex items-center justify-between">
+      <p class="text-sm font-semibold">Tu panel</p>
+      <button class="rounded-full border border-ink-900/20 px-3 py-1 text-xs" type="button" data-dashboard-close>
+        Cerrar
+      </button>
+    </div>
+    <nav class="grid gap-3 text-sm">
+      <a class="underline" href="#perfil" data-dashboard-link>Perfil</a>
+      <a class="underline" href="#negocios" data-dashboard-link>Mis negocios</a>
+      <a class="underline" href="#sucursales" data-dashboard-link>Mis sucursales</a>
+      <a class="underline" href="#promos" data-dashboard-link>Mis promos</a>
+      <a class="underline" href="#crear-negocio" data-dashboard-link>Crear negocio</a>
+      <a class="underline" href="#crear-sede" data-dashboard-link>Crear sede</a>
+      <a class="underline" href="#crear-promo" data-dashboard-link>Crear promo</a>
+    </nav>
+  </aside>
+
   <section class="grid gap-8 lg:grid-cols-[1fr,1.1fr]">
     <div class="space-y-6">
-      <div class="glass-panel rounded-3xl p-6" data-dashboard-hero hidden>
+      <div class="glass-panel rounded-3xl p-6" data-dashboard-hero id="perfil" hidden>
         <h1 class="text-3xl font-display">Dashboard de negocios</h1>
         <p class="mt-2 text-sm text-ink-900/60">
           Administra negocios, sedes y promociones desde un solo lugar.
@@ -29,7 +66,12 @@ const days = daysOfWeek;
         </div>
       </div>
 
-      <div class="rounded-3xl border border-ink-900/10 bg-white/80 p-6" data-owner-only hidden>
+      <div
+        class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+        data-owner-only
+        id="negocios"
+        hidden
+      >
         <h2 class="text-lg font-semibold">Tus negocios</h2>
         <div class="mt-4 grid gap-3" data-business-list>
           <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
@@ -40,7 +82,7 @@ const days = daysOfWeek;
           <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
             Sedes del negocio
           </h3>
-          <div class="grid gap-3" data-branch-list>
+          <div class="grid gap-3" data-branch-list id="sucursales">
             <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
               Selecciona un negocio para ver sedes.
             </div>
@@ -50,7 +92,7 @@ const days = daysOfWeek;
           <h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-ink-900/50">
             Promociones activas
           </h3>
-          <div class="grid gap-3" data-promo-list>
+          <div class="grid gap-3" data-promo-list id="promos">
             <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
               Selecciona un negocio para ver promociones.
             </div>
@@ -105,7 +147,7 @@ const days = daysOfWeek;
     </div>
 
     <div class="space-y-6" data-owner-only hidden>
-      <div class="glass-panel rounded-3xl p-6">
+      <div class="glass-panel rounded-3xl p-6" id="crear-negocio">
         <h2 class="text-xl font-semibold">Crear negocio</h2>
         <form class="mt-4 grid gap-4" data-business-form>
           <div class="flex items-center justify-between text-xs text-ink-900/60">
@@ -147,7 +189,7 @@ const days = daysOfWeek;
         </form>
       </div>
 
-      <div class="glass-panel rounded-3xl p-6">
+      <div class="glass-panel rounded-3xl p-6" id="crear-sede">
         <h2 class="text-xl font-semibold">Crear sede</h2>
         <form class="mt-4 grid gap-4" data-branch-form>
           <div class="flex items-center justify-between text-xs text-ink-900/60">
@@ -183,7 +225,7 @@ const days = daysOfWeek;
         </form>
       </div>
 
-      <div class="glass-panel rounded-3xl p-6">
+      <div class="glass-panel rounded-3xl p-6" id="crear-promo">
         <h2 class="text-xl font-semibold">Crear promoción</h2>
         <form class="mt-4 grid gap-4" data-promo-form>
           <div class="flex items-center justify-between text-xs text-ink-900/60">

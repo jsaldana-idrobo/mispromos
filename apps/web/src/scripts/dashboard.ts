@@ -97,6 +97,13 @@ const authGate = document.querySelector<HTMLElement>("[data-auth-gate]");
 const authGateText = document.querySelector<HTMLElement>("[data-auth-gate-text]");
 const branchCitySelect = document.querySelector<HTMLSelectElement>("[data-branch-city-select]");
 const dashboardHero = document.querySelector<HTMLElement>("[data-dashboard-hero]");
+const dashboardMenu = document.querySelector<HTMLElement>("[data-dashboard-menu]");
+const dashboardOverlay = document.querySelector<HTMLElement>("[data-dashboard-overlay]");
+const dashboardToggle = document.querySelector<HTMLButtonElement>("[data-dashboard-toggle]");
+const dashboardClose = document.querySelector<HTMLButtonElement>("[data-dashboard-close]");
+const dashboardLinks = Array.from(
+  document.querySelectorAll<HTMLAnchorElement>("[data-dashboard-link]")
+);
 
 let businesses: Business[] = [];
 let branches: Branch[] = [];
@@ -343,6 +350,31 @@ const setOwnerSectionsVisible = (visible: boolean) => {
   });
 };
 
+const setDashboardMenuVisible = (visible: boolean) => {
+  if (dashboardMenu) {
+    dashboardMenu.hidden = !visible;
+  }
+  if (dashboardToggle) {
+    dashboardToggle.hidden = !visible;
+  }
+  if (!visible) {
+    if (dashboardOverlay) {
+      dashboardOverlay.hidden = true;
+    }
+    if (dashboardMenu) {
+      dashboardMenu.classList.remove("translate-x-0");
+      dashboardMenu.classList.add("translate-x-full");
+    }
+  }
+};
+
+const setDashboardMenuOpen = (open: boolean) => {
+  if (!dashboardMenu || !dashboardOverlay) return;
+  dashboardOverlay.hidden = !open;
+  dashboardMenu.classList.toggle("translate-x-0", open);
+  dashboardMenu.classList.toggle("translate-x-full", !open);
+};
+
 const setAuthGateVisible = (visible: boolean) => {
   if (authGate) {
     authGate.hidden = !visible;
@@ -414,6 +446,7 @@ const renderUser = () => {
   setFormsEnabled(ownerAccess);
   setOwnerSectionsVisible(ownerAccess);
   setAuthGateVisible(!ownerAccess);
+  setDashboardMenuVisible(ownerAccess);
   if (dashboardHero) {
     dashboardHero.hidden = !ownerAccess;
   }
@@ -1206,6 +1239,20 @@ const wireCancelButtons = () => {
   categoryCancel?.addEventListener("click", () => setCategoryForm());
 };
 
+const wireDashboardMenu = () => {
+  if (!dashboardMenu || !dashboardOverlay || !dashboardToggle) return;
+  const closeMenu = () => setDashboardMenuOpen(false);
+  dashboardToggle.addEventListener("click", () => setDashboardMenuOpen(true));
+  dashboardClose?.addEventListener("click", closeMenu);
+  dashboardOverlay.addEventListener("click", closeMenu);
+  dashboardLinks.forEach((link) => link.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMenu();
+    }
+  });
+};
+
 (async () => {
   setBusinessForm();
   setBranchForm();
@@ -1228,6 +1275,7 @@ const wireCancelButtons = () => {
   wirePromoActions();
   wireEmptyStateActions();
   wireCancelButtons();
+  wireDashboardMenu();
   handleBusinessForm();
   handleBranchForm();
   handlePromoForm();

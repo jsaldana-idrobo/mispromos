@@ -128,6 +128,13 @@ var authGate = document.querySelector("[data-auth-gate]");
 var authGateText = document.querySelector("[data-auth-gate-text]");
 var branchCitySelect = document.querySelector("[data-branch-city-select]");
 var dashboardHero = document.querySelector("[data-dashboard-hero]");
+var dashboardMenu = document.querySelector("[data-dashboard-menu]");
+var dashboardOverlay = document.querySelector("[data-dashboard-overlay]");
+var dashboardToggle = document.querySelector("[data-dashboard-toggle]");
+var dashboardClose = document.querySelector("[data-dashboard-close]");
+var dashboardLinks = Array.from(
+  document.querySelectorAll("[data-dashboard-link]")
+);
 var businesses = [];
 var branches = [];
 var currentUser = null;
@@ -320,6 +327,29 @@ var setOwnerSectionsVisible = (visible) => {
     section.hidden = !visible;
   });
 };
+var setDashboardMenuVisible = (visible) => {
+  if (dashboardMenu) {
+    dashboardMenu.hidden = !visible;
+  }
+  if (dashboardToggle) {
+    dashboardToggle.hidden = !visible;
+  }
+  if (!visible) {
+    if (dashboardOverlay) {
+      dashboardOverlay.hidden = true;
+    }
+    if (dashboardMenu) {
+      dashboardMenu.classList.remove("translate-x-0");
+      dashboardMenu.classList.add("translate-x-full");
+    }
+  }
+};
+var setDashboardMenuOpen = (open) => {
+  if (!dashboardMenu || !dashboardOverlay) return;
+  dashboardOverlay.hidden = !open;
+  dashboardMenu.classList.toggle("translate-x-0", open);
+  dashboardMenu.classList.toggle("translate-x-full", !open);
+};
 var setAuthGateVisible = (visible) => {
   if (authGate) {
     authGate.hidden = !visible;
@@ -376,6 +406,7 @@ var renderUser = () => {
   setFormsEnabled(ownerAccess);
   setOwnerSectionsVisible(ownerAccess);
   setAuthGateVisible(!ownerAccess);
+  setDashboardMenuVisible(ownerAccess);
   if (dashboardHero) {
     dashboardHero.hidden = !ownerAccess;
   }
@@ -1113,6 +1144,19 @@ var wireCancelButtons = () => {
   cityCancel?.addEventListener("click", () => setCityForm());
   categoryCancel?.addEventListener("click", () => setCategoryForm());
 };
+var wireDashboardMenu = () => {
+  if (!dashboardMenu || !dashboardOverlay || !dashboardToggle) return;
+  const closeMenu = () => setDashboardMenuOpen(false);
+  dashboardToggle.addEventListener("click", () => setDashboardMenuOpen(true));
+  dashboardClose?.addEventListener("click", closeMenu);
+  dashboardOverlay.addEventListener("click", closeMenu);
+  dashboardLinks.forEach((link) => link.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMenu();
+    }
+  });
+};
 (async () => {
   setBusinessForm();
   setBranchForm();
@@ -1135,6 +1179,7 @@ var wireCancelButtons = () => {
   wirePromoActions();
   wireEmptyStateActions();
   wireCancelButtons();
+  wireDashboardMenu();
   handleBusinessForm();
   handleBranchForm();
   handlePromoForm();
