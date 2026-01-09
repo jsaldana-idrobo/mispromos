@@ -63,6 +63,7 @@ export class AuthController {
     const token = await this.authService.createAccessToken({
       id: user.id,
       role: user.role,
+      email: user.email,
     });
     this.setAuthCookie(res, token);
     return user;
@@ -74,6 +75,7 @@ export class AuthController {
     const token = await this.authService.createAccessToken({
       id: String(user._id),
       role: user.role,
+      email: user.email,
     });
     this.setAuthCookie(res, token);
     return { id: user.id, email: user.email, role: user.role };
@@ -92,11 +94,7 @@ export class AuthController {
     if (!req.user) {
       throw new NotFoundException("Usuario no encontrado");
     }
-    const user = await this.authService.findUserById(req.user.id);
-    if (!user) {
-      throw new NotFoundException("Usuario no encontrado");
-    }
-    return { id: user.id, email: user.email, role: user.role };
+    return { id: req.user.id, email: req.user.email, role: req.user.role };
   }
 
   @Patch("users/:id/role")

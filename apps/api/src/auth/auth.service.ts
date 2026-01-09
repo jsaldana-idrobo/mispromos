@@ -49,12 +49,12 @@ export class AuthService {
     return user;
   }
 
-  async createAccessToken(payload: { id: string; role: UserRole }) {
-    return this.jwtService.sign({ sub: payload.id, role: payload.role });
+  async createAccessToken(payload: { id: string; role: UserRole; email: string }) {
+    return this.jwtService.sign({ sub: payload.id, role: payload.role, email: payload.email });
   }
 
   async verifyAccessToken(token: string) {
-    return this.jwtService.verify<{ sub: string; role: UserRole }>(token);
+    return this.jwtService.verify<{ sub: string; role: UserRole; email?: string }>(token);
   }
 
   async findUserById(id: string) {
