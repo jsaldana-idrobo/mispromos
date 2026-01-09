@@ -13,12 +13,19 @@ const messageEl = document.querySelector<HTMLElement>("[data-auth-message]");
 const redirectIfAuthenticated = async () => {
   if (!form) return false;
   try {
-    await apiFetch<AuthResponse>("/auth/me");
-    if (messageEl) {
-      messageEl.textContent = "Ya tienes una sesión activa. Redirigiendo...";
+    const response = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
+    if (!response.ok) {
+      return false;
     }
-    window.location.href = "/dashboard";
-    return true;
+    const payload = (await response.json()) as AuthResponse | null;
+    if (payload?.id) {
+      if (messageEl) {
+        messageEl.textContent = "Ya tienes una sesión activa. Redirigiendo...";
+      }
+      window.location.href = "/dashboard";
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }

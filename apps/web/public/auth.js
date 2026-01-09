@@ -3,7 +3,7 @@ var readApiBase = () => {
   const base = document.body.dataset.apiBase;
   return base && base.length > 0 ? base : "http://localhost:3000/api/v1";
 };
-var API_BASE = readApiBase();
+var API_BASE2 = readApiBase();
 var parseErrorMessage = (payload) => {
   if (!payload?.message) {
     return "Ocurri\xF3 un error inesperado";
@@ -14,7 +14,7 @@ var parseErrorMessage = (payload) => {
   return payload.message;
 };
 var apiFetch = async (path, options) => {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetch(`${API_BASE2}${path}`, {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -89,12 +89,19 @@ var messageEl = document.querySelector("[data-auth-message]");
 var redirectIfAuthenticated = async () => {
   if (!form) return false;
   try {
-    await apiFetch("/auth/me");
-    if (messageEl) {
-      messageEl.textContent = "Ya tienes una sesi\xF3n activa. Redirigiendo...";
+    const response = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
+    if (!response.ok) {
+      return false;
     }
-    window.location.href = "/dashboard";
-    return true;
+    const payload = await response.json();
+    if (payload?.id) {
+      if (messageEl) {
+        messageEl.textContent = "Ya tienes una sesi\xF3n activa. Redirigiendo...";
+      }
+      window.location.href = "/dashboard";
+      return true;
+    }
+    return false;
   } catch {
     return false;
   }
