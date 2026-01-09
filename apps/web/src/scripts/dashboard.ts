@@ -126,14 +126,15 @@ const dashboardPanels = Array.from(
 const dashboardCreateButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-dashboard-create]")
 );
-const dashboardModalOverlay = document.querySelector<HTMLElement>("[data-dashboard-modal-overlay]");
-const dashboardModal = document.querySelector<HTMLElement>("[data-dashboard-modal]");
-const dashboardModalTitle = document.querySelector<HTMLElement>("[data-dashboard-modal-title]");
-const dashboardModalSubtitle = document.querySelector<HTMLElement>("[data-dashboard-modal-subtitle]");
-const dashboardModalClose = document.querySelector<HTMLButtonElement>("[data-dashboard-modal-close]");
-const dashboardModalPanels = Array.from(
-  document.querySelectorAll<HTMLElement>("[data-modal-panel]")
-);
+const promoModalOverlay = document.querySelector<HTMLElement>("[data-promo-modal-overlay]");
+const promoModal = document.querySelector<HTMLElement>("[data-promo-modal]");
+const promoModalClose = document.querySelector<HTMLButtonElement>("[data-promo-modal-close]");
+const branchModalOverlay = document.querySelector<HTMLElement>("[data-branch-modal-overlay]");
+const branchModal = document.querySelector<HTMLElement>("[data-branch-modal]");
+const branchModalClose = document.querySelector<HTMLButtonElement>("[data-branch-modal-close]");
+const businessModalOverlay = document.querySelector<HTMLElement>("[data-business-modal-overlay]");
+const businessModal = document.querySelector<HTMLElement>("[data-business-modal]");
+const businessModalClose = document.querySelector<HTMLButtonElement>("[data-business-modal-close]");
 const demoFillButtons = Array.from(
   document.querySelectorAll<HTMLButtonElement>("[data-demo-fill]")
 );
@@ -146,7 +147,6 @@ let categories: Category[] = [];
 let currentBusinessId = "";
 let promotions: Promotion[] = [];
 let activeDashboardTab = "promos";
-let activeModalPanel = "promo";
 let promoFilters = {
   search: "",
   status: "all",
@@ -405,34 +405,31 @@ const setOwnerSectionsVisible = (visible: boolean) => {
   });
 };
 
-const setActiveModalPanel = (panel: string) => {
-  activeModalPanel = panel;
-  dashboardModalPanels.forEach((section) => {
-    section.hidden = section.dataset.modalPanel !== panel;
-  });
-  if (dashboardModalTitle && dashboardModalSubtitle) {
-    if (panel === "promo") {
-      dashboardModalTitle.textContent = "Crear o editar promoción";
-      dashboardModalSubtitle.textContent = "Gestiona los beneficios y horarios de tu promo.";
-    } else if (panel === "branch") {
-      dashboardModalTitle.textContent = "Crear o editar sede";
-      dashboardModalSubtitle.textContent = "Actualiza direcciones y datos de contacto.";
-    } else {
-      dashboardModalTitle.textContent = "Crear o editar negocio";
-      dashboardModalSubtitle.textContent = "Configura los datos principales de tu negocio.";
-    }
+const closeAllModals = () => {
+  if (promoModalOverlay) {
+    promoModalOverlay.hidden = true;
+  }
+  if (branchModalOverlay) {
+    branchModalOverlay.hidden = true;
+  }
+  if (businessModalOverlay) {
+    businessModalOverlay.hidden = true;
   }
 };
 
-const setModalOpen = (open: boolean) => {
-  if (!dashboardModalOverlay || !dashboardModal) return;
-  dashboardModalOverlay.hidden = !open;
-  if (!open) {
-    return;
-  }
-  const focusTarget = dashboardModal.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
-    "input, select, textarea"
-  );
+const openModal = (type: "promo" | "branch" | "business") => {
+  closeAllModals();
+  const modalMap = {
+    promo: { overlay: promoModalOverlay, modal: promoModal },
+    branch: { overlay: branchModalOverlay, modal: branchModal },
+    business: { overlay: businessModalOverlay, modal: businessModal },
+  } as const;
+  const target = modalMap[type];
+  if (!target.overlay || !target.modal) return;
+  target.overlay.hidden = false;
+  const focusTarget = target.modal.querySelector<
+    HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  >("input, select, textarea");
   focusTarget?.focus();
 };
 
@@ -478,20 +475,19 @@ const setDashboardMenuOpen = (open: boolean) => {
 const focusCreateForm = (target: string) => {
   if (target === "promo") {
     setActiveDashboardTab("promos");
-    setActiveModalPanel("promo");
     setPromoForm();
+    openModal("promo");
   }
   if (target === "branch") {
     setActiveDashboardTab("branches");
-    setActiveModalPanel("branch");
     setBranchForm();
+    openModal("branch");
   }
   if (target === "business") {
     setActiveDashboardTab("business");
-    setActiveModalPanel("business");
     setBusinessForm();
+    openModal("business");
   }
-  setModalOpen(true);
 };
 
 const setAuthGateVisible = (visible: boolean) => {
@@ -1154,7 +1150,7 @@ const handleBusinessForm = () => {
           businessEditing ? "Negocio actualizado." : "Negocio creado.",
           "success"
         );
-        setModalOpen(false);
+        closeAllModals();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando negocio";
         setMessage(businessMessage, message);
@@ -1203,7 +1199,7 @@ const handleBranchForm = () => {
           updatePromotionsView();
         }
         showToast("Listo", branchEditing ? "Sede actualizada." : "Sede creada.", "success");
-        setModalOpen(false);
+        closeAllModals();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando sede";
         setMessage(branchMessage, message);
@@ -1284,7 +1280,7 @@ const handlePromoForm = () => {
           promoEditing ? "Promoción actualizada." : "Promoción creada.",
           "success"
         );
-        setModalOpen(false);
+        closeAllModals();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando promoción";
         setMessage(promoMessage, message);
@@ -1416,8 +1412,7 @@ const wireBusinessActions = () => {
       if (business) {
         setBusinessForm(business);
         setActiveDashboardTab("business");
-        setActiveModalPanel("business");
-        setModalOpen(true);
+        openModal("business");
         currentBusinessId = business._id;
         businessSelects.forEach((select) => {
           select.value = business._id;
@@ -1466,8 +1461,7 @@ const wireBranchActions = () => {
       if (branch) {
         setBranchForm(branch);
         setActiveDashboardTab("branches");
-        setActiveModalPanel("branch");
-        setModalOpen(true);
+        openModal("branch");
         currentBusinessId = branch.businessId;
         businessSelects.forEach((select) => {
           select.value = branch.businessId;
@@ -1516,8 +1510,7 @@ const wirePromoActions = () => {
       if (promo) {
         await setPromoForm(promo);
         setActiveDashboardTab("promos");
-        setActiveModalPanel("promo");
-        setModalOpen(true);
+        openModal("promo");
       }
     }
     if (!deleteId) return;
@@ -1546,15 +1539,15 @@ const wireEmptyStateActions = () => {
 const wireCancelButtons = () => {
   businessCancel?.addEventListener("click", () => {
     setBusinessForm();
-    setModalOpen(false);
+    closeAllModals();
   });
   branchCancel?.addEventListener("click", () => {
     setBranchForm();
-    setModalOpen(false);
+    closeAllModals();
   });
   promoCancel?.addEventListener("click", () => {
     setPromoForm();
-    setModalOpen(false);
+    closeAllModals();
   });
   cityCancel?.addEventListener("click", () => setCityForm());
   categoryCancel?.addEventListener("click", () => setCategoryForm());
@@ -1597,17 +1590,25 @@ const wireDashboardCreateButtons = () => {
 };
 
 const wireDashboardModal = () => {
-  if (!dashboardModalOverlay || !dashboardModal) return;
-  const closeModal = () => setModalOpen(false);
-  dashboardModalOverlay.addEventListener("click", (event) => {
-    if (event.target === dashboardModalOverlay) {
-      closeModal();
-    }
-  });
-  dashboardModalClose?.addEventListener("click", closeModal);
+  const wireModal = (
+    overlay: HTMLElement | null,
+    closeButton: HTMLButtonElement | null
+  ) => {
+    if (!overlay) return;
+    const closeModal = () => closeAllModals();
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        closeModal();
+      }
+    });
+    closeButton?.addEventListener("click", closeModal);
+  };
+  wireModal(promoModalOverlay, promoModalClose);
+  wireModal(branchModalOverlay, branchModalClose);
+  wireModal(businessModalOverlay, businessModalClose);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      closeModal();
+      closeAllModals();
     }
   });
 };
@@ -1806,8 +1807,7 @@ const wireDemoFill = () => {
         : target.includes("branch")
           ? "branch"
           : "business";
-      setActiveModalPanel(panel);
-      setModalOpen(true);
+      openModal(panel);
       if (target === "promo") {
         fillDemoPromo();
       } else if (target === "promo-2") {
@@ -1831,6 +1831,7 @@ const wireDemoFill = () => {
   setPromoForm();
   setCityForm();
   setCategoryForm();
+  closeAllModals();
   await loadUser();
   if (currentUser) {
     await loadBusinesses();
