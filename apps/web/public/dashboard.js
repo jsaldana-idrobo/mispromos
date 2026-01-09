@@ -382,15 +382,14 @@ var setOwnerSectionsVisible = (visible) => {
   });
 };
 var closeAllModals = () => {
-  if (promoModalOverlay) {
-    promoModalOverlay.hidden = true;
-  }
-  if (branchModalOverlay) {
-    branchModalOverlay.hidden = true;
-  }
-  if (businessModalOverlay) {
-    businessModalOverlay.hidden = true;
-  }
+  const setHidden = (overlay, hidden) => {
+    if (!overlay) return;
+    overlay.hidden = hidden;
+    overlay.classList.toggle("hidden", hidden);
+  };
+  setHidden(promoModalOverlay, true);
+  setHidden(branchModalOverlay, true);
+  setHidden(businessModalOverlay, true);
 };
 var openModal = (type) => {
   closeAllModals();
@@ -402,6 +401,7 @@ var openModal = (type) => {
   const target = modalMap[type];
   if (!target.overlay || !target.modal) return;
   target.overlay.hidden = false;
+  target.overlay.classList.remove("hidden");
   const focusTarget = target.modal.querySelector("input, select, textarea");
   focusTarget?.focus();
 };

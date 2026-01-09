@@ -406,15 +406,14 @@ const setOwnerSectionsVisible = (visible: boolean) => {
 };
 
 const closeAllModals = () => {
-  if (promoModalOverlay) {
-    promoModalOverlay.hidden = true;
-  }
-  if (branchModalOverlay) {
-    branchModalOverlay.hidden = true;
-  }
-  if (businessModalOverlay) {
-    businessModalOverlay.hidden = true;
-  }
+  const setHidden = (overlay: HTMLElement | null, hidden: boolean) => {
+    if (!overlay) return;
+    overlay.hidden = hidden;
+    overlay.classList.toggle("hidden", hidden);
+  };
+  setHidden(promoModalOverlay, true);
+  setHidden(branchModalOverlay, true);
+  setHidden(businessModalOverlay, true);
 };
 
 const openModal = (type: "promo" | "branch" | "business") => {
@@ -427,6 +426,7 @@ const openModal = (type: "promo" | "branch" | "business") => {
   const target = modalMap[type];
   if (!target.overlay || !target.modal) return;
   target.overlay.hidden = false;
+  target.overlay.classList.remove("hidden");
   const focusTarget = target.modal.querySelector<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
   >("input, select, textarea");
