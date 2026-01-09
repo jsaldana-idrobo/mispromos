@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import authScript from "../scripts/auth.ts?url";
 ---
 
 <BaseLayout title="Mis promos | Iniciar sesión">
@@ -34,5 +33,5 @@ import authScript from "../scripts/auth.ts?url";
     </div>
   </section>
 
-  <script type="module" src={authScript}></script>
+  <script type="module" src="/auth.js"></script>
 </BaseLayout>

@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { businessTypes, promoTypes, daysOfWeek } from "../data/catalog";
-import dashboardScript from "../scripts/dashboard.ts?url";
 
 const days = daysOfWeek;
 ---
@@ -263,5 +262,5 @@ const days = daysOfWeek;
     </div>
   </section>
 
-  <script type="module" src={dashboardScript}></script>
+  <script type="module" src="/dashboard.js"></script>
 </BaseLayout>
