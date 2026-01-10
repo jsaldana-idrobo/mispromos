@@ -55,6 +55,38 @@ body {
   border-color: rgba(233, 120, 82, 0.35);
 }
 
+.action-btn {
+  @apply inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold transition;
+  border-color: rgba(26, 23, 22, 0.2);
+}
+
+.action-view {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(14, 116, 144, 0.25));
+  color: rgb(30, 64, 175);
+}
+
+.action-view:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.45), rgba(14, 116, 144, 0.45));
+}
+
+.action-edit {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
+  color: rgb(120, 53, 15);
+}
+
+.action-edit:hover {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.55), rgba(245, 158, 11, 0.55));
+}
+
+.action-delete {
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.3), rgba(220, 38, 38, 0.3));
+  color: rgb(136, 19, 55);
+}
+
+.action-delete:hover {
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.55), rgba(220, 38, 38, 0.55));
+}
+
 .spinner {
   width: 16px;
   height: 16px;

@@ -56,7 +56,11 @@ export class BusinessController {
   @Patch(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.BUSINESS_OWNER, UserRole.ADMIN)
-  update(@Param("id") id: string, @Body() dto: UpdateBusinessDto, @Req() req: AuthRequest) {
+  update(
+    @Param("id") id: string,
+    @Body() dto: UpdateBusinessDto,
+    @Req() req: AuthRequest,
+  ) {
     if (!req.user) {
       throw new UnauthorizedException("No autenticado");
     }

@@ -1,0 +1,172 @@
+---
+const { businessTypes = [], businessTypeLabels = {} } = Astro.props;
+---
+
+<section
+  class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+  data-dashboard-panel="business"
+  hidden
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-xl font-semibold" data-dashboard-business-title>
+        Mi negocio
+      </h2>
+      <p class="text-sm text-ink-900/60">
+        Gestiona la información de tus negocios.
+      </p>
+    </div>
+    <button
+      class="button-primary"
+      type="button"
+      data-dashboard-create="business"
+      data-admin-only
+    >
+      Crear nuevo negocio
+    </button>
+  </div>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3" data-admin-only hidden>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Total negocios
+      </p>
+      <p class="text-2xl font-semibold" data-business-kpi-total>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Total sedes
+      </p>
+      <p class="text-2xl font-semibold" data-business-kpi-branches>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Total promos
+      </p>
+      <p class="text-2xl font-semibold" data-business-kpi-promos>0</p>
+    </div>
+  </div>
+  <div
+    class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-3"
+    data-admin-only
+    hidden
+  >
+    <label class="grid gap-2 text-sm font-semibold">
+      Buscar negocio
+      <input
+        class="input-field"
+        name="search"
+        placeholder="Nombre, slug o Instagram..."
+        data-business-search
+      />
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Tipo
+      <select class="input-field" name="type" data-business-type-filter>
+        <option value="all">Todos</option>
+        {
+          businessTypes.map((type) => (
+            <option value={type}>{businessTypeLabels[type]}</option>
+          ))
+        }
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Ciudad
+      <select class="input-field" name="city" data-business-city-filter>
+        <option value="all">Todas</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Categoría
+      <select class="input-field" name="category" data-business-category-filter>
+        <option value="all">Todas</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Verificación
+      <select class="input-field" name="verified" data-business-verified-filter>
+        <option value="all">Todas</option>
+        <option value="verified">Verificado</option>
+        <option value="unverified">Pendiente</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Instagram
+      <select
+        class="input-field"
+        name="instagram"
+        data-business-instagram-filter
+      >
+        <option value="all">Todos</option>
+        <option value="with">Con Instagram</option>
+        <option value="without">Sin Instagram</option>
+      </select>
+    </label>
+  </div>
+  <div class="mt-4 grid gap-3" data-business-list data-admin-only hidden>
+    <div
+      class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+    >
+      Aun no hay negocios.
+    </div>
+  </div>
+  <div
+    class="mt-4 flex items-center justify-between text-sm text-ink-900/60"
+    data-business-pagination
+    hidden
+  >
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-business-page-prev
+    >
+      Anterior
+    </button>
+    <span data-business-page-info>Página 1</span>
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-business-page-next
+    >
+      Siguiente
+    </button>
+  </div>
+  <div
+    class="mt-4 rounded-3xl border border-ink-900/10 bg-white/90 p-5"
+    data-owner-business
+    hidden
+  >
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          Perfil del negocio
+        </p>
+        <h3 class="text-xl font-semibold" data-owner-business-name>
+          Mi negocio
+        </h3>
+        <p class="text-sm text-ink-900/60" data-owner-business-type>Tipo</p>
+      </div>
+      <button class="button-secondary" type="button" data-owner-business-edit>
+        Editar negocio
+      </button>
+    </div>
+    <div class="mt-4 grid gap-3 text-sm text-ink-900/70">
+      <div>
+        <span class="font-semibold">Slug:</span>
+        <span data-owner-business-slug>-</span>
+      </div>
+      <div>
+        <span class="font-semibold">Categorías:</span>
+        <span data-owner-business-categories>-</span>
+      </div>
+      <div>
+        <span class="font-semibold">Instagram:</span>
+        <span data-owner-business-instagram>-</span>
+      </div>
+      <div>
+        <span class="font-semibold">Descripción:</span>
+        <span data-owner-business-description>-</span>
+      </div>
+    </div>
+  </div>
+</section>

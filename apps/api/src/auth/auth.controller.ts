@@ -31,7 +31,7 @@ type ResponseWithCookies = {
       sameSite?: "lax" | "strict" | "none";
       secure?: boolean;
       maxAge?: number;
-    }
+    },
   ) => void;
   clearCookie: (name: string) => void;
 };
@@ -40,11 +40,13 @@ type ResponseWithCookies = {
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   private getCookieMaxAgeMs() {
-    const days = Number(this.configService.get<string>("JWT_COOKIE_MAX_AGE_DAYS") ?? "7");
+    const days = Number(
+      this.configService.get<string>("JWT_COOKIE_MAX_AGE_DAYS") ?? "7",
+    );
     return Number.isFinite(days) ? days * 24 * 60 * 60 * 1000 : undefined;
   }
 
@@ -59,7 +61,10 @@ export class AuthController {
   }
 
   @Post("register")
-  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: ResponseWithCookies) {
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: ResponseWithCookies,
+  ) {
     const user = await this.authService.register(dto);
     const token = await this.authService.createAccessToken({
       id: user.id,
@@ -71,10 +76,16 @@ export class AuthController {
   }
 
   @Post("login")
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: ResponseWithCookies) {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: ResponseWithCookies,
+  ) {
     let user = await this.authService.validateLogin(dto);
     if (user.role === UserRole.USER && user.email === "negocio@demo.com") {
-      const updated = await this.authService.updateUserRole(String(user._id), UserRole.BUSINESS_OWNER);
+      const updated = await this.authService.updateUserRole(
+        String(user._id),
+        UserRole.BUSINESS_OWNER,
+      );
       if (updated) {
         user = updated as typeof user;
       }

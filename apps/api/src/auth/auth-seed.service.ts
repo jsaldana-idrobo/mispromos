@@ -13,7 +13,7 @@ export class AuthSeedService implements OnModuleInit {
   constructor(
     private readonly configService: ConfigService,
     @InjectModel(User.name)
-    private readonly userModel: Model<UserDocument>
+    private readonly userModel: Model<UserDocument>,
   ) {}
 
   async onModuleInit() {

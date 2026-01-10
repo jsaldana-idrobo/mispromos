@@ -17,6 +17,7 @@ type Business = {
   categories?: string[];
   description?: string;
   instagram?: string;
+  verified?: boolean;
 };
 
 type Branch = {
@@ -56,146 +57,351 @@ type Category = {
   slug: string;
 };
 
-const isMobileDevice = () => /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+const isMobileDevice = () =>
+  /android|iphone|ipad|ipod/i.test(navigator.userAgent);
 
 const userCard = document.querySelector<HTMLElement>("[data-user-card]");
-const businessList = document.querySelector<HTMLElement>("[data-business-list]");
+const businessList = document.querySelector<HTMLElement>(
+  "[data-business-list]",
+);
 const branchList = document.querySelector<HTMLElement>("[data-branch-list]");
 const promoList = document.querySelector<HTMLElement>("[data-promo-list]");
 const businessSelects = Array.from(
-  document.querySelectorAll<HTMLSelectElement>("[data-business-select]")
+  document.querySelectorAll<HTMLSelectElement>("[data-business-select]"),
 );
 const businessSelectRows = Array.from(
-  document.querySelectorAll<HTMLElement>("[data-business-select-row]")
+  document.querySelectorAll<HTMLElement>("[data-business-select-row]"),
 );
-const branchSelect = document.querySelector<HTMLSelectElement>("[data-branch-select]");
+const branchSelect = document.querySelector<HTMLSelectElement>(
+  "[data-branch-select]",
+);
 
-const businessForm = document.querySelector<HTMLFormElement>("[data-business-form]");
-const businessMessage = document.querySelector<HTMLElement>("[data-business-message]");
-const businessMode = document.querySelector<HTMLElement>("[data-business-mode]");
-const branchForm = document.querySelector<HTMLFormElement>("[data-branch-form]");
-const branchMessage = document.querySelector<HTMLElement>("[data-branch-message]");
+const businessForm = document.querySelector<HTMLFormElement>(
+  "[data-business-form]",
+);
+const businessMessage = document.querySelector<HTMLElement>(
+  "[data-business-message]",
+);
+const businessMode = document.querySelector<HTMLElement>(
+  "[data-business-mode]",
+);
+const branchForm =
+  document.querySelector<HTMLFormElement>("[data-branch-form]");
+const branchMessage = document.querySelector<HTMLElement>(
+  "[data-branch-message]",
+);
 const branchMode = document.querySelector<HTMLElement>("[data-branch-mode]");
 const promoForm = document.querySelector<HTMLFormElement>("[data-promo-form]");
-const promoMessage = document.querySelector<HTMLElement>("[data-promo-message]");
+const promoMessage = document.querySelector<HTMLElement>(
+  "[data-promo-message]",
+);
 const promoMode = document.querySelector<HTMLElement>("[data-promo-mode]");
-const promoSearchInput = document.querySelector<HTMLInputElement>("[data-promo-search]");
-const promoStatusSelect = document.querySelector<HTMLSelectElement>("[data-promo-status]");
-const promoTypeSelect = document.querySelector<HTMLSelectElement>("[data-promo-type]");
-const promoBusinessFilter = document.querySelector<HTMLSelectElement>("[data-promo-business-filter]");
-const promoPagination = document.querySelector<HTMLElement>("[data-promo-pagination]");
-const promoPagePrev = document.querySelector<HTMLButtonElement>("[data-promo-page-prev]");
-const promoPageNext = document.querySelector<HTMLButtonElement>("[data-promo-page-next]");
-const promoPageInfo = document.querySelector<HTMLElement>("[data-promo-page-info]");
-const promoKpiTotal = document.querySelector<HTMLElement>("[data-promo-kpi-total]");
-const promoKpiActive = document.querySelector<HTMLElement>("[data-promo-kpi-active]");
-const promoKpiInactive = document.querySelector<HTMLElement>("[data-promo-kpi-inactive]");
-const branchSearchInput = document.querySelector<HTMLInputElement>("[data-branch-search]");
-const branchCityFilter = document.querySelector<HTMLSelectElement>("[data-branch-city-filter]");
+const promoSearchInput = document.querySelector<HTMLInputElement>(
+  "[data-promo-search]",
+);
+const promoStatusSelect = document.querySelector<HTMLSelectElement>(
+  "[data-promo-status]",
+);
+const promoTypeSelect =
+  document.querySelector<HTMLSelectElement>("[data-promo-type]");
+const promoBusinessFilter = document.querySelector<HTMLSelectElement>(
+  "[data-promo-business-filter]",
+);
+const promoPagination = document.querySelector<HTMLElement>(
+  "[data-promo-pagination]",
+);
+const promoPagePrev = document.querySelector<HTMLButtonElement>(
+  "[data-promo-page-prev]",
+);
+const promoPageNext = document.querySelector<HTMLButtonElement>(
+  "[data-promo-page-next]",
+);
+const promoPageInfo = document.querySelector<HTMLElement>(
+  "[data-promo-page-info]",
+);
+const promoKpiTotal = document.querySelector<HTMLElement>(
+  "[data-promo-kpi-total]",
+);
+const promoKpiActive = document.querySelector<HTMLElement>(
+  "[data-promo-kpi-active]",
+);
+const promoKpiInactive = document.querySelector<HTMLElement>(
+  "[data-promo-kpi-inactive]",
+);
+const branchSearchInput = document.querySelector<HTMLInputElement>(
+  "[data-branch-search]",
+);
+const branchCityFilter = document.querySelector<HTMLSelectElement>(
+  "[data-branch-city-filter]",
+);
 const branchBusinessFilter = document.querySelector<HTMLSelectElement>(
-  "[data-branch-business-filter]"
+  "[data-branch-business-filter]",
 );
-const branchPagination = document.querySelector<HTMLElement>("[data-branch-pagination]");
-const branchPagePrev = document.querySelector<HTMLButtonElement>("[data-branch-page-prev]");
-const branchPageNext = document.querySelector<HTMLButtonElement>("[data-branch-page-next]");
-const branchPageInfo = document.querySelector<HTMLElement>("[data-branch-page-info]");
-const branchKpiTotal = document.querySelector<HTMLElement>("[data-branch-kpi-total]");
-const branchKpiCities = document.querySelector<HTMLElement>("[data-branch-kpi-cities]");
-const branchKpiPhones = document.querySelector<HTMLElement>("[data-branch-kpi-phones]");
-const businessSearchInput = document.querySelector<HTMLInputElement>("[data-business-search]");
-const businessTypeFilter = document.querySelector<HTMLSelectElement>("[data-business-type-filter]");
-const businessKpiTotal = document.querySelector<HTMLElement>("[data-business-kpi-total]");
-const businessKpiBranches = document.querySelector<HTMLElement>("[data-business-kpi-branches]");
-const businessKpiPromos = document.querySelector<HTMLElement>("[data-business-kpi-promos]");
+const branchPagination = document.querySelector<HTMLElement>(
+  "[data-branch-pagination]",
+);
+const branchPagePrev = document.querySelector<HTMLButtonElement>(
+  "[data-branch-page-prev]",
+);
+const branchPageNext = document.querySelector<HTMLButtonElement>(
+  "[data-branch-page-next]",
+);
+const branchPageInfo = document.querySelector<HTMLElement>(
+  "[data-branch-page-info]",
+);
+const branchKpiTotal = document.querySelector<HTMLElement>(
+  "[data-branch-kpi-total]",
+);
+const branchKpiCities = document.querySelector<HTMLElement>(
+  "[data-branch-kpi-cities]",
+);
+const branchKpiPhones = document.querySelector<HTMLElement>(
+  "[data-branch-kpi-phones]",
+);
+const businessSearchInput = document.querySelector<HTMLInputElement>(
+  "[data-business-search]",
+);
+const businessTypeFilter = document.querySelector<HTMLSelectElement>(
+  "[data-business-type-filter]",
+);
+const businessCityFilter = document.querySelector<HTMLSelectElement>(
+  "[data-business-city-filter]",
+);
+const businessCategoryFilter = document.querySelector<HTMLSelectElement>(
+  "[data-business-category-filter]",
+);
+const businessVerifiedFilter = document.querySelector<HTMLSelectElement>(
+  "[data-business-verified-filter]",
+);
+const businessInstagramFilter = document.querySelector<HTMLSelectElement>(
+  "[data-business-instagram-filter]",
+);
+const businessPagination = document.querySelector<HTMLElement>(
+  "[data-business-pagination]",
+);
+const businessPagePrev = document.querySelector<HTMLButtonElement>(
+  "[data-business-page-prev]",
+);
+const businessPageNext = document.querySelector<HTMLButtonElement>(
+  "[data-business-page-next]",
+);
+const businessPageInfo = document.querySelector<HTMLElement>(
+  "[data-business-page-info]",
+);
+const businessKpiTotal = document.querySelector<HTMLElement>(
+  "[data-business-kpi-total]",
+);
+const businessKpiBranches = document.querySelector<HTMLElement>(
+  "[data-business-kpi-branches]",
+);
+const businessKpiPromos = document.querySelector<HTMLElement>(
+  "[data-business-kpi-promos]",
+);
 const adminPanel = document.querySelector<HTMLElement>("[data-admin-panel]");
-const adminOnlySections = Array.from(document.querySelectorAll<HTMLElement>("[data-admin-only]"));
-const ownerBusinessPanel = document.querySelector<HTMLElement>("[data-owner-business]");
-const ownerBusinessName = document.querySelector<HTMLElement>("[data-owner-business-name]");
-const ownerBusinessType = document.querySelector<HTMLElement>("[data-owner-business-type]");
-const ownerBusinessSlug = document.querySelector<HTMLElement>("[data-owner-business-slug]");
-const ownerBusinessCategories = document.querySelector<HTMLElement>("[data-owner-business-categories]");
-const ownerBusinessInstagram = document.querySelector<HTMLElement>("[data-owner-business-instagram]");
-const ownerBusinessDescription = document.querySelector<HTMLElement>(
-  "[data-owner-business-description]"
+const adminOnlySections = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-admin-only]"),
 );
-const ownerBusinessEdit = document.querySelector<HTMLButtonElement>("[data-owner-business-edit]");
+const ownerBusinessPanel = document.querySelector<HTMLElement>(
+  "[data-owner-business]",
+);
+const ownerBusinessName = document.querySelector<HTMLElement>(
+  "[data-owner-business-name]",
+);
+const ownerBusinessType = document.querySelector<HTMLElement>(
+  "[data-owner-business-type]",
+);
+const ownerBusinessSlug = document.querySelector<HTMLElement>(
+  "[data-owner-business-slug]",
+);
+const ownerBusinessCategories = document.querySelector<HTMLElement>(
+  "[data-owner-business-categories]",
+);
+const ownerBusinessInstagram = document.querySelector<HTMLElement>(
+  "[data-owner-business-instagram]",
+);
+const ownerBusinessDescription = document.querySelector<HTMLElement>(
+  "[data-owner-business-description]",
+);
+const ownerBusinessEdit = document.querySelector<HTMLButtonElement>(
+  "[data-owner-business-edit]",
+);
 const cityForm = document.querySelector<HTMLFormElement>("[data-city-form]");
 const cityMessage = document.querySelector<HTMLElement>("[data-city-message]");
 const cityList = document.querySelector<HTMLElement>("[data-city-list]");
 const cityMode = document.querySelector<HTMLElement>("[data-city-mode]");
-const cityPagination = document.querySelector<HTMLElement>("[data-city-pagination]");
-const cityPagePrev = document.querySelector<HTMLButtonElement>("[data-city-page-prev]");
-const cityPageNext = document.querySelector<HTMLButtonElement>("[data-city-page-next]");
-const cityPageInfo = document.querySelector<HTMLElement>("[data-city-page-info]");
-const cityKpiTotal = document.querySelector<HTMLElement>("[data-city-kpi-total]");
-const cityKpiCountries = document.querySelector<HTMLElement>("[data-city-kpi-countries]");
-const cityKpiLast = document.querySelector<HTMLElement>("[data-city-kpi-last]");
-const categoryForm = document.querySelector<HTMLFormElement>("[data-category-form]");
-const categoryMessage = document.querySelector<HTMLElement>("[data-category-message]");
-const categoryList = document.querySelector<HTMLElement>("[data-category-list]");
-const categoryMode = document.querySelector<HTMLElement>("[data-category-mode]");
-const categoryPagination = document.querySelector<HTMLElement>("[data-category-pagination]");
-const categoryPagePrev = document.querySelector<HTMLButtonElement>("[data-category-page-prev]");
-const categoryPageNext = document.querySelector<HTMLButtonElement>("[data-category-page-next]");
-const categoryPageInfo = document.querySelector<HTMLElement>("[data-category-page-info]");
-const categoryKpiTotal = document.querySelector<HTMLElement>("[data-category-kpi-total]");
-const categoryKpiSlugs = document.querySelector<HTMLElement>("[data-category-kpi-slugs]");
-const categoryKpiLast = document.querySelector<HTMLElement>("[data-category-kpi-last]");
-const categorySuggestions = document.querySelector<HTMLSelectElement>(
-  "[data-business-category-select]"
+const cityPagination = document.querySelector<HTMLElement>(
+  "[data-city-pagination]",
 );
-const ownerSections = Array.from(document.querySelectorAll<HTMLElement>("[data-owner-only]"));
+const cityPagePrev = document.querySelector<HTMLButtonElement>(
+  "[data-city-page-prev]",
+);
+const cityPageNext = document.querySelector<HTMLButtonElement>(
+  "[data-city-page-next]",
+);
+const cityPageInfo = document.querySelector<HTMLElement>(
+  "[data-city-page-info]",
+);
+const cityKpiTotal = document.querySelector<HTMLElement>(
+  "[data-city-kpi-total]",
+);
+const cityKpiCountries = document.querySelector<HTMLElement>(
+  "[data-city-kpi-countries]",
+);
+const cityKpiLast = document.querySelector<HTMLElement>("[data-city-kpi-last]");
+const categoryForm = document.querySelector<HTMLFormElement>(
+  "[data-category-form]",
+);
+const categoryMessage = document.querySelector<HTMLElement>(
+  "[data-category-message]",
+);
+const categoryList = document.querySelector<HTMLElement>(
+  "[data-category-list]",
+);
+const categoryMode = document.querySelector<HTMLElement>(
+  "[data-category-mode]",
+);
+const categoryPagination = document.querySelector<HTMLElement>(
+  "[data-category-pagination]",
+);
+const categoryPagePrev = document.querySelector<HTMLButtonElement>(
+  "[data-category-page-prev]",
+);
+const categoryPageNext = document.querySelector<HTMLButtonElement>(
+  "[data-category-page-next]",
+);
+const categoryPageInfo = document.querySelector<HTMLElement>(
+  "[data-category-page-info]",
+);
+const categoryKpiTotal = document.querySelector<HTMLElement>(
+  "[data-category-kpi-total]",
+);
+const categoryKpiSlugs = document.querySelector<HTMLElement>(
+  "[data-category-kpi-slugs]",
+);
+const categoryKpiLast = document.querySelector<HTMLElement>(
+  "[data-category-kpi-last]",
+);
+const categorySuggestions = document.querySelector<HTMLSelectElement>(
+  "[data-business-category-select]",
+);
+const ownerSections = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-owner-only]"),
+);
 const authGate = document.querySelector<HTMLElement>("[data-auth-gate]");
-const authGateText = document.querySelector<HTMLElement>("[data-auth-gate-text]");
-const branchCitySelect = document.querySelector<HTMLSelectElement>("[data-branch-city-select]");
-const dashboardHero = document.querySelector<HTMLElement>("[data-dashboard-hero]");
-const dashboardMenu = document.querySelector<HTMLElement>("[data-dashboard-menu]");
-const dashboardOverlay = document.querySelector<HTMLElement>("[data-dashboard-overlay]");
-const dashboardToggle = document.querySelector<HTMLButtonElement>("[data-dashboard-toggle]");
-const dashboardClose = document.querySelector<HTMLButtonElement>("[data-dashboard-close]");
+const authGateText = document.querySelector<HTMLElement>(
+  "[data-auth-gate-text]",
+);
+const branchCitySelect = document.querySelector<HTMLSelectElement>(
+  "[data-branch-city-select]",
+);
+const dashboardHero = document.querySelector<HTMLElement>(
+  "[data-dashboard-hero]",
+);
+const dashboardMenu = document.querySelector<HTMLElement>(
+  "[data-dashboard-menu]",
+);
+const dashboardOverlay = document.querySelector<HTMLElement>(
+  "[data-dashboard-overlay]",
+);
+const dashboardToggle = document.querySelector<HTMLButtonElement>(
+  "[data-dashboard-toggle]",
+);
+const dashboardClose = document.querySelector<HTMLButtonElement>(
+  "[data-dashboard-close]",
+);
+const dashboardLoader = document.querySelector<HTMLElement>(
+  "[data-dashboard-loader]",
+);
+const dashboardContent = document.querySelector<HTMLElement>(
+  "[data-dashboard-content]",
+);
 const dashboardTabs = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("[data-dashboard-tab]")
+  document.querySelectorAll<HTMLButtonElement>("[data-dashboard-tab]"),
 );
 const dashboardPanels = Array.from(
-  document.querySelectorAll<HTMLElement>("[data-dashboard-panel]")
+  document.querySelectorAll<HTMLElement>("[data-dashboard-panel]"),
 );
 const dashboardCreateButtons = Array.from(
-  document.querySelectorAll<HTMLButtonElement>("[data-dashboard-create]")
+  document.querySelectorAll<HTMLButtonElement>("[data-dashboard-create]"),
 );
 const businessTabLabels = Array.from(
-  document.querySelectorAll<HTMLElement>("[data-dashboard-business-label]")
+  document.querySelectorAll<HTMLElement>("[data-dashboard-business-label]"),
 );
-const businessTabTitle = document.querySelector<HTMLElement>("[data-dashboard-business-title]");
+const businessTabTitle = document.querySelector<HTMLElement>(
+  "[data-dashboard-business-title]",
+);
 const promoTabLabels = Array.from(
-  document.querySelectorAll<HTMLElement>("[data-dashboard-promo-label]")
+  document.querySelectorAll<HTMLElement>("[data-dashboard-promo-label]"),
 );
-const promoTabTitle = document.querySelector<HTMLElement>("[data-dashboard-promo-title]");
-const promoTabSubtitle = document.querySelector<HTMLElement>("[data-dashboard-promo-subtitle]");
+const promoTabTitle = document.querySelector<HTMLElement>(
+  "[data-dashboard-promo-title]",
+);
+const promoTabSubtitle = document.querySelector<HTMLElement>(
+  "[data-dashboard-promo-subtitle]",
+);
 const branchTabLabels = Array.from(
-  document.querySelectorAll<HTMLElement>("[data-dashboard-branch-label]")
+  document.querySelectorAll<HTMLElement>("[data-dashboard-branch-label]"),
 );
-const branchTabTitle = document.querySelector<HTMLElement>("[data-dashboard-branch-title]");
-const branchTabSubtitle = document.querySelector<HTMLElement>("[data-dashboard-branch-subtitle]");
-const promoModalOverlay = document.querySelector<HTMLElement>("[data-promo-modal-overlay]");
+const branchTabTitle = document.querySelector<HTMLElement>(
+  "[data-dashboard-branch-title]",
+);
+const branchTabSubtitle = document.querySelector<HTMLElement>(
+  "[data-dashboard-branch-subtitle]",
+);
+const promoModalOverlay = document.querySelector<HTMLElement>(
+  "[data-promo-modal-overlay]",
+);
 const promoModal = document.querySelector<HTMLElement>("[data-promo-modal]");
-const promoModalClose = document.querySelector<HTMLButtonElement>("[data-promo-modal-close]");
-const promoModalTitle = document.querySelector<HTMLElement>("[data-promo-modal-title]");
-const branchModalOverlay = document.querySelector<HTMLElement>("[data-branch-modal-overlay]");
+const promoModalClose = document.querySelector<HTMLButtonElement>(
+  "[data-promo-modal-close]",
+);
+const promoModalTitle = document.querySelector<HTMLElement>(
+  "[data-promo-modal-title]",
+);
+const branchModalOverlay = document.querySelector<HTMLElement>(
+  "[data-branch-modal-overlay]",
+);
 const branchModal = document.querySelector<HTMLElement>("[data-branch-modal]");
-const branchModalClose = document.querySelector<HTMLButtonElement>("[data-branch-modal-close]");
-const branchModalTitle = document.querySelector<HTMLElement>("[data-branch-modal-title]");
-const businessModalOverlay = document.querySelector<HTMLElement>("[data-business-modal-overlay]");
-const businessModal = document.querySelector<HTMLElement>("[data-business-modal]");
-const businessModalClose = document.querySelector<HTMLButtonElement>("[data-business-modal-close]");
-const businessModalTitle = document.querySelector<HTMLElement>("[data-business-modal-title]");
-const cityModalOverlay = document.querySelector<HTMLElement>("[data-city-modal-overlay]");
+const branchModalClose = document.querySelector<HTMLButtonElement>(
+  "[data-branch-modal-close]",
+);
+const branchModalTitle = document.querySelector<HTMLElement>(
+  "[data-branch-modal-title]",
+);
+const businessModalOverlay = document.querySelector<HTMLElement>(
+  "[data-business-modal-overlay]",
+);
+const businessModal = document.querySelector<HTMLElement>(
+  "[data-business-modal]",
+);
+const businessModalClose = document.querySelector<HTMLButtonElement>(
+  "[data-business-modal-close]",
+);
+const businessModalTitle = document.querySelector<HTMLElement>(
+  "[data-business-modal-title]",
+);
+const cityModalOverlay = document.querySelector<HTMLElement>(
+  "[data-city-modal-overlay]",
+);
 const cityModal = document.querySelector<HTMLElement>("[data-city-modal]");
-const cityModalClose = document.querySelector<HTMLButtonElement>("[data-city-modal-close]");
-const cityModalTitle = document.querySelector<HTMLElement>("[data-city-modal-title]");
-const categoryModalOverlay = document.querySelector<HTMLElement>("[data-category-modal-overlay]");
-const categoryModal = document.querySelector<HTMLElement>("[data-category-modal]");
-const categoryModalClose = document.querySelector<HTMLButtonElement>("[data-category-modal-close]");
-const categoryModalTitle = document.querySelector<HTMLElement>("[data-category-modal-title]");
+const cityModalClose = document.querySelector<HTMLButtonElement>(
+  "[data-city-modal-close]",
+);
+const cityModalTitle = document.querySelector<HTMLElement>(
+  "[data-city-modal-title]",
+);
+const categoryModalOverlay = document.querySelector<HTMLElement>(
+  "[data-category-modal-overlay]",
+);
+const categoryModal = document.querySelector<HTMLElement>(
+  "[data-category-modal]",
+);
+const categoryModalClose = document.querySelector<HTMLButtonElement>(
+  "[data-category-modal-close]",
+);
+const categoryModalTitle = document.querySelector<HTMLElement>(
+  "[data-category-modal-title]",
+);
 
 let businesses: Business[] = [];
 let branches: Branch[] = [];
@@ -216,11 +422,17 @@ let branchFilters = {
   city: "all",
   businessId: "all",
 };
+let adminBusinessPage = 1;
+const ADMIN_BUSINESS_PAGE_SIZE = 10;
 let adminBranchPage = 1;
 const ADMIN_BRANCH_PAGE_SIZE = 10;
 let businessFilters = {
   search: "",
   type: "all",
+  city: "all",
+  category: "all",
+  verified: "all",
+  instagram: "all",
 };
 let adminPromoPage = 1;
 const ADMIN_PROMO_PAGE_SIZE = 10;
@@ -229,7 +441,7 @@ const ADMIN_CITY_PAGE_SIZE = 10;
 let adminCategoryPage = 1;
 const ADMIN_CATEGORY_PAGE_SIZE = 10;
 
-type FormMode = "create" | "edit";
+type FormMode = "create" | "edit" | "view";
 
 const setMessage = (el: HTMLElement | null, text: string) => {
   if (el) {
@@ -254,12 +466,15 @@ const renderSkeleton = (container: HTMLElement | null, count = 3) => {
           <div class="h-3 w-2/3 rounded bg-ink-900/10"></div>
           <div class="mt-2 h-2 w-1/3 rounded bg-ink-900/10"></div>
         </div>
-      `
+      `,
     )
     .join("");
 };
 
-const renderLoadingMessage = (container: HTMLElement | null, message: string) => {
+const renderLoadingMessage = (
+  container: HTMLElement | null,
+  message: string,
+) => {
   if (!container) return;
   container.innerHTML = `
     <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70 flex items-center gap-3">
@@ -269,7 +484,10 @@ const renderLoadingMessage = (container: HTMLElement | null, message: string) =>
   `;
 };
 
-const setSelectLoading = (select: HTMLSelectElement | null, message: string) => {
+const setSelectLoading = (
+  select: HTMLSelectElement | null,
+  message: string,
+) => {
   if (!select) return;
   select.disabled = true;
   select.innerHTML = `<option value="">${message}</option>`;
@@ -278,14 +496,17 @@ const setSelectLoading = (select: HTMLSelectElement | null, message: string) => 
 const setSelectReady = (
   select: HTMLSelectElement | null,
   optionsHtml: string,
-  keepDisabled = false
+  keepDisabled = false,
 ) => {
   if (!select) return;
   select.innerHTML = optionsHtml;
   select.disabled = keepDisabled;
 };
 
-const withLoading = async (form: HTMLFormElement | null, action: () => Promise<void>) => {
+const withLoading = async (
+  form: HTMLFormElement | null,
+  action: () => Promise<void>,
+) => {
   if (!form) {
     await action();
     return;
@@ -307,29 +528,59 @@ const setMode = (
   form: HTMLFormElement | null,
   label: HTMLElement | null,
   cancel: HTMLButtonElement | null,
-  mode: FormMode
+  mode: FormMode,
 ) => {
   if (!form) return;
   form.dataset.mode = mode;
   if (label) {
-    label.textContent = mode === "edit" ? "Modo edición" : "Modo crear";
+    if (mode === "edit") {
+      label.textContent = "Modo edición";
+    } else if (mode === "view") {
+      label.textContent = "Solo lectura";
+    } else {
+      label.textContent = "Modo crear";
+    }
   }
   if (cancel) {
     cancel.hidden = mode !== "edit";
   }
 };
 
-const setInputValue = (form: HTMLFormElement | null, name: string, value: string) => {
+const setFormReadOnly = (form: HTMLFormElement | null, readOnly: boolean) => {
   if (!form) return;
-  const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
-    `[name="${name}"]`
+  form.dataset.readonly = readOnly ? "true" : "false";
+  const fields = form.querySelectorAll<
+    HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  >("input, select, textarea");
+  fields.forEach((field) => {
+    field.disabled = readOnly;
+  });
+  const submitButton = form.querySelector<HTMLButtonElement>(
+    "button[type='submit']",
   );
+  if (submitButton) {
+    submitButton.hidden = readOnly;
+  }
+};
+
+const setInputValue = (
+  form: HTMLFormElement | null,
+  name: string,
+  value: string,
+) => {
+  if (!form) return;
+  const input = form.querySelector<
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  >(`[name="${name}"]`);
   if (input) {
     input.value = value;
   }
 };
 
-const setMultiSelectValues = (select: HTMLSelectElement | null, values: string[]) => {
+const setMultiSelectValues = (
+  select: HTMLSelectElement | null,
+  values: string[],
+) => {
   if (!select) return;
   Array.from(select.options).forEach((option) => {
     option.selected = values.includes(option.value);
@@ -344,11 +595,15 @@ const formatDateInput = (value: string) => {
   return date.toISOString().slice(0, 10);
 };
 
-const setBusinessForm = (business?: Business) => {
+const setBusinessForm = (
+  business?: Business,
+  options: { mode?: FormMode; readOnly?: boolean; title?: string } = {},
+) => {
   if (!businessForm) return;
   if (!business) {
     businessForm.reset();
     businessForm.dataset.editId = "";
+    setFormReadOnly(businessForm, false);
     setMode(businessForm, businessMode, null, "create");
     if (businessModalTitle) {
       businessModalTitle.textContent = "Crear negocio";
@@ -360,10 +615,17 @@ const setBusinessForm = (business?: Business) => {
     }
     return;
   }
+  const mode = options.mode ?? "edit";
   businessForm.dataset.editId = business._id;
-  setMode(businessForm, businessMode, null, "edit");
+  setFormReadOnly(businessForm, options.readOnly ?? false);
+  setMode(businessForm, businessMode, null, mode);
   if (businessModalTitle) {
-    businessModalTitle.textContent = "Editar negocio";
+    if (options.title) {
+      businessModalTitle.textContent = options.title;
+    } else {
+      businessModalTitle.textContent =
+        mode === "view" ? "Detalle del negocio" : "Editar negocio";
+    }
   }
   setInputValue(businessForm, "name", business.name);
   setInputValue(businessForm, "slug", business.slug);
@@ -378,11 +640,15 @@ const setBusinessForm = (business?: Business) => {
   setInputValue(businessForm, "instagram", business.instagram ?? "");
 };
 
-const setBranchForm = (branch?: Branch) => {
+const setBranchForm = (
+  branch?: Branch,
+  options: { mode?: FormMode; readOnly?: boolean; title?: string } = {},
+) => {
   if (!branchForm) return;
   if (!branch) {
     branchForm.reset();
     branchForm.dataset.editId = "";
+    setFormReadOnly(branchForm, false);
     setMode(branchForm, branchMode, null, "create");
     if (branchModalTitle) {
       branchModalTitle.textContent = "Crear sede";
@@ -392,10 +658,17 @@ const setBranchForm = (branch?: Branch) => {
     }
     return;
   }
+  const mode = options.mode ?? "edit";
   branchForm.dataset.editId = branch._id;
-  setMode(branchForm, branchMode, null, "edit");
+  setFormReadOnly(branchForm, options.readOnly ?? false);
+  setMode(branchForm, branchMode, null, mode);
   if (branchModalTitle) {
-    branchModalTitle.textContent = "Editar sede";
+    if (options.title) {
+      branchModalTitle.textContent = options.title;
+    } else {
+      branchModalTitle.textContent =
+        mode === "view" ? "Detalle de la sede" : "Editar sede";
+    }
   }
   setInputValue(branchForm, "businessId", branch.businessId);
   setInputValue(branchForm, "city", branch.city);
@@ -404,11 +677,15 @@ const setBranchForm = (branch?: Branch) => {
   setInputValue(branchForm, "phone", branch.phone ?? "");
 };
 
-const setPromoForm = async (promo?: Promotion) => {
+const setPromoForm = async (
+  promo?: Promotion,
+  options: { mode?: FormMode; readOnly?: boolean; title?: string } = {},
+) => {
   if (!promoForm) return;
   if (!promo) {
     promoForm.reset();
     promoForm.dataset.editId = "";
+    setFormReadOnly(promoForm, false);
     setMode(promoForm, promoMode, null, "create");
     if (promoModalTitle) {
       promoModalTitle.textContent = "Crear promoción";
@@ -419,10 +696,17 @@ const setPromoForm = async (promo?: Promotion) => {
     return;
   }
 
+  const mode = options.mode ?? "edit";
   promoForm.dataset.editId = promo._id;
-  setMode(promoForm, promoMode, null, "edit");
+  setFormReadOnly(promoForm, options.readOnly ?? false);
+  setMode(promoForm, promoMode, null, mode);
   if (promoModalTitle) {
-    promoModalTitle.textContent = "Editar promoción";
+    if (options.title) {
+      promoModalTitle.textContent = options.title;
+    } else {
+      promoModalTitle.textContent =
+        mode === "view" ? "Detalle de la promoción" : "Editar promoción";
+    }
   }
   setInputValue(promoForm, "businessId", promo.businessId);
   if (promo.businessId) {
@@ -442,51 +726,77 @@ const setPromoForm = async (promo?: Promotion) => {
   setInputValue(promoForm, "endDate", formatDateInput(promo.endDate));
   setInputValue(promoForm, "startHour", promo.startHour);
   setInputValue(promoForm, "endHour", promo.endHour);
-  const dayInputs = promoForm.querySelectorAll<HTMLInputElement>('input[name="daysOfWeek"]');
+  const dayInputs = promoForm.querySelectorAll<HTMLInputElement>(
+    'input[name="daysOfWeek"]',
+  );
   dayInputs.forEach((input) => {
     input.checked = promo.daysOfWeek.includes(input.value);
   });
-  const activeInput = promoForm.querySelector<HTMLInputElement>('input[name="active"]');
+  const activeInput = promoForm.querySelector<HTMLInputElement>(
+    'input[name="active"]',
+  );
   if (activeInput) {
     activeInput.checked = promo.active ?? true;
   }
 };
 
-const setCityForm = (city?: City) => {
+const setCityForm = (
+  city?: City,
+  options: { mode?: FormMode; readOnly?: boolean; title?: string } = {},
+) => {
   if (!cityForm) return;
   if (!city) {
     cityForm.reset();
     cityForm.dataset.editId = "";
+    setFormReadOnly(cityForm, false);
     setMode(cityForm, cityMode, null, "create");
     if (cityModalTitle) {
       cityModalTitle.textContent = "Crear ciudad";
     }
     return;
   }
+  const mode = options.mode ?? "edit";
   cityForm.dataset.editId = city._id;
-  setMode(cityForm, cityMode, null, "edit");
+  setFormReadOnly(cityForm, options.readOnly ?? false);
+  setMode(cityForm, cityMode, null, mode);
   if (cityModalTitle) {
-    cityModalTitle.textContent = "Editar ciudad";
+    if (options.title) {
+      cityModalTitle.textContent = options.title;
+    } else {
+      cityModalTitle.textContent =
+        mode === "view" ? "Detalle de la ciudad" : "Editar ciudad";
+    }
   }
   setInputValue(cityForm, "name", city.name);
   setInputValue(cityForm, "countryCode", city.countryCode);
 };
 
-const setCategoryForm = (category?: Category) => {
+const setCategoryForm = (
+  category?: Category,
+  options: { mode?: FormMode; readOnly?: boolean; title?: string } = {},
+) => {
   if (!categoryForm) return;
   if (!category) {
     categoryForm.reset();
     categoryForm.dataset.editId = "";
+    setFormReadOnly(categoryForm, false);
     setMode(categoryForm, categoryMode, null, "create");
     if (categoryModalTitle) {
       categoryModalTitle.textContent = "Crear categoría";
     }
     return;
   }
+  const mode = options.mode ?? "edit";
   categoryForm.dataset.editId = category._id;
-  setMode(categoryForm, categoryMode, null, "edit");
+  setFormReadOnly(categoryForm, options.readOnly ?? false);
+  setMode(categoryForm, categoryMode, null, mode);
   if (categoryModalTitle) {
-    categoryModalTitle.textContent = "Editar categoría";
+    if (options.title) {
+      categoryModalTitle.textContent = options.title;
+    } else {
+      categoryModalTitle.textContent =
+        mode === "view" ? "Detalle de la categoría" : "Editar categoría";
+    }
   }
   setInputValue(categoryForm, "name", category.name);
   setInputValue(categoryForm, "slug", category.slug);
@@ -513,10 +823,37 @@ const setOwnerSectionsVisible = (visible: boolean) => {
   });
 };
 
+const setDashboardLoading = (isLoading: boolean) => {
+  document.documentElement.dataset.dashboardLoading = isLoading
+    ? "true"
+    : "false";
+  if (dashboardLoader) {
+    dashboardLoader.classList.toggle("hidden", !isLoading);
+  }
+  if (dashboardContent) {
+    dashboardContent.classList.toggle("hidden", isLoading);
+  }
+  if (isLoading) {
+    if (dashboardMenu) {
+      dashboardMenu.hidden = true;
+    }
+    if (dashboardToggle) {
+      dashboardToggle.hidden = true;
+    }
+    if (dashboardOverlay) {
+      dashboardOverlay.hidden = true;
+    }
+  }
+};
+
 const setHeaderAuthState = (isAuthenticated: boolean) => {
   const loginLink = document.querySelector<HTMLElement>("[data-nav-login]");
-  const registerLink = document.querySelector<HTMLElement>("[data-nav-register]");
-  const dashboardLink = document.querySelector<HTMLElement>("[data-nav-dashboard]");
+  const registerLink = document.querySelector<HTMLElement>(
+    "[data-nav-register]",
+  );
+  const dashboardLink = document.querySelector<HTMLElement>(
+    "[data-nav-dashboard]",
+  );
   if (loginLink) {
     loginLink.hidden = isAuthenticated;
   }
@@ -525,14 +862,6 @@ const setHeaderAuthState = (isAuthenticated: boolean) => {
   }
   if (dashboardLink) {
     dashboardLink.hidden = !isAuthenticated;
-  }
-};
-
-const hasAuthHint = () => {
-  try {
-    return localStorage.getItem("auth") === "true";
-  } catch {
-    return false;
   }
 };
 
@@ -605,7 +934,8 @@ const removeAdminOnlySections = () => {
 
 const renderOwnerBusinessDetails = () => {
   if (!ownerBusinessPanel) return;
-  const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
+  const business =
+    businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
   if (!business) {
     ownerBusinessPanel.hidden = true;
     return;
@@ -615,16 +945,21 @@ const renderOwnerBusinessDetails = () => {
     ownerBusinessName.textContent = business.name;
   }
   if (ownerBusinessType) {
-    ownerBusinessType.textContent = businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type;
+    ownerBusinessType.textContent =
+      businessTypeLabels[business.type as keyof typeof businessTypeLabels] ??
+      business.type;
   }
   if (ownerBusinessSlug) {
     ownerBusinessSlug.textContent = business.slug;
   }
   if (ownerBusinessCategories) {
-    ownerBusinessCategories.textContent = (business.categories ?? []).join(", ") || "-";
+    ownerBusinessCategories.textContent =
+      (business.categories ?? []).join(", ") || "-";
   }
   if (ownerBusinessInstagram) {
-    ownerBusinessInstagram.textContent = business.instagram ? `@${business.instagram}` : "-";
+    ownerBusinessInstagram.textContent = business.instagram
+      ? `@${business.instagram}`
+      : "-";
   }
   if (ownerBusinessDescription) {
     ownerBusinessDescription.textContent = business.description ?? "-";
@@ -632,7 +967,8 @@ const renderOwnerBusinessDetails = () => {
 };
 
 const updatePromoPagination = (total: number, isAdmin: boolean) => {
-  if (!promoPagination || !promoPageInfo || !promoPagePrev || !promoPageNext) return;
+  if (!promoPagination || !promoPageInfo || !promoPagePrev || !promoPageNext)
+    return;
   if (!isAdmin) {
     promoPagination.hidden = true;
     return;
@@ -660,7 +996,9 @@ const closeAllModals = () => {
   setHidden(categoryModalOverlay, true);
 };
 
-const openModal = (type: "promo" | "branch" | "business" | "city" | "category") => {
+const openModal = (
+  type: "promo" | "branch" | "business" | "city" | "category",
+) => {
   closeAllModals();
   const modalMap = {
     promo: { overlay: promoModalOverlay, modal: promoModal },
@@ -731,7 +1069,11 @@ const focusCreateForm = (target: string) => {
   }
   if (target === "business") {
     if (currentUser?.role !== "ADMIN") {
-      showToast("Acceso restringido", "Solo el admin puede crear nuevos negocios.", "info");
+      showToast(
+        "Acceso restringido",
+        "Solo el admin puede crear nuevos negocios.",
+        "info",
+      );
       return;
     }
     setActiveDashboardTab("business");
@@ -740,7 +1082,11 @@ const focusCreateForm = (target: string) => {
   }
   if (target === "city") {
     if (currentUser?.role !== "ADMIN") {
-      showToast("Acceso restringido", "Solo el admin puede crear ciudades.", "info");
+      showToast(
+        "Acceso restringido",
+        "Solo el admin puede crear ciudades.",
+        "info",
+      );
       return;
     }
     setActiveDashboardTab("cities");
@@ -749,7 +1095,11 @@ const focusCreateForm = (target: string) => {
   }
   if (target === "category") {
     if (currentUser?.role !== "ADMIN") {
-      showToast("Acceso restringido", "Solo el admin puede crear categorías.", "info");
+      showToast(
+        "Acceso restringido",
+        "Solo el admin puede crear categorías.",
+        "info",
+      );
       return;
     }
     setActiveDashboardTab("categories");
@@ -818,7 +1168,8 @@ const renderUser = () => {
     </div>
   `;
 
-  const ownerAccess = currentUser.role === "BUSINESS_OWNER" || currentUser.role === "ADMIN";
+  const ownerAccess =
+    currentUser.role === "BUSINESS_OWNER" || currentUser.role === "ADMIN";
   const isAdmin = currentUser.role === "ADMIN";
   setFormsEnabled(ownerAccess);
   setOwnerSectionsVisible(ownerAccess);
@@ -850,24 +1201,115 @@ const renderUser = () => {
     adminPanel.hidden = !isAdmin;
   }
   if (!ownerAccess) {
-    setMessage(businessMessage, "Necesitas rol BUSINESS_OWNER para crear negocios.");
+    setMessage(
+      businessMessage,
+      "Necesitas rol BUSINESS_OWNER para crear negocios.",
+    );
   }
   if (!isAdmin) {
     renderOwnerBusinessDetails();
   }
 };
 
+const getBusinessCities = (businessId: string) => {
+  return Array.from(
+    new Set(
+      branches
+        .filter((branch) => branch.businessId === businessId)
+        .map((branch) => branch.city),
+    ),
+  ).sort();
+};
+
+const formatBusinessCities = (businessId: string) => {
+  const list = getBusinessCities(businessId);
+  if (list.length === 0) return "Sin sedes";
+  if (list.length <= 2) return list.join(", ");
+  return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
+};
+
+const formatBusinessCategories = (business: Business) => {
+  const categoryMap = new Map(
+    categories.map((category) => [category.slug, category.name]),
+  );
+  const list = (business.categories ?? []).map(
+    (slug) => categoryMap.get(slug) ?? slug,
+  );
+  if (list.length === 0) return "Sin categoría";
+  if (list.length <= 2) return list.join(", ");
+  return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
+};
+
 const getFilteredBusinesses = () => {
   const searchValue = businessFilters.search.trim().toLowerCase();
   return businesses.filter((business) => {
-    const typeMatch = businessFilters.type === "all" || business.type === businessFilters.type;
+    const typeMatch =
+      businessFilters.type === "all" || business.type === businessFilters.type;
+    const categoryMatch =
+      businessFilters.category === "all" ||
+      (business.categories ?? []).includes(businessFilters.category);
+    const businessCities = getBusinessCities(business._id);
+    const cityMatch =
+      businessFilters.city === "all" ||
+      businessCities.includes(businessFilters.city);
+    const verifiedMatch =
+      businessFilters.verified === "all" ||
+      (businessFilters.verified === "verified" && business.verified) ||
+      (businessFilters.verified === "unverified" && !business.verified);
+    const hasInstagram = Boolean((business.instagram ?? "").trim());
+    const instagramMatch =
+      businessFilters.instagram === "all" ||
+      (businessFilters.instagram === "with" && hasInstagram) ||
+      (businessFilters.instagram === "without" && !hasInstagram);
     const textMatch =
       searchValue.length === 0 ||
       business.name.toLowerCase().includes(searchValue) ||
       business.slug.toLowerCase().includes(searchValue) ||
-      (business.description ?? "").toLowerCase().includes(searchValue);
-    return typeMatch && textMatch;
+      (business.description ?? "").toLowerCase().includes(searchValue) ||
+      (business.instagram ?? "").toLowerCase().includes(searchValue);
+    return (
+      typeMatch &&
+      categoryMatch &&
+      cityMatch &&
+      verifiedMatch &&
+      instagramMatch &&
+      textMatch
+    );
   });
+};
+
+const updateBusinessCityFilterOptions = () => {
+  if (!businessCityFilter) return;
+  const selected = businessCityFilter.value || "all";
+  const cities = Array.from(
+    new Set(branches.map((branch) => branch.city)),
+  ).sort();
+  businessCityFilter.innerHTML = `
+    <option value="all">Todas</option>
+    ${cities.map((city) => `<option value="${city}">${city}</option>`).join("")}
+  `;
+  businessCityFilter.value = cities.includes(selected) ? selected : "all";
+};
+
+const updateBusinessCategoryFilterOptions = () => {
+  if (!businessCategoryFilter) return;
+  const selected = businessCategoryFilter.value || "all";
+  const options =
+    categories.length > 0
+      ? categories.map((category) => ({
+          value: category.slug,
+          label: category.name,
+        }))
+      : Array.from(
+          new Set(businesses.flatMap((business) => business.categories ?? [])),
+        ).map((slug) => ({ value: slug, label: slug }));
+  businessCategoryFilter.innerHTML = `
+    <option value="all">Todas</option>
+    ${options.map((item) => `<option value="${item.value}">${item.label}</option>`).join("")}
+  `;
+  businessCategoryFilter.value = options.some((item) => item.value === selected)
+    ? selected
+    : "all";
 };
 
 const renderBusinesses = (list: Business[], total: number) => {
@@ -892,33 +1334,93 @@ const renderBusinesses = (list: Business[], total: number) => {
     return;
   }
   businessList.innerHTML = `
-    <div class="hidden md:grid md:grid-cols-[1.6fr,1fr,1fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
-      <span>Negocio</span>
-      <span>Slug</span>
-      <span>Tipo</span>
-      <span>Acciones</span>
+    <div class="hidden md:block">
+      <table class="w-full table-fixed border-separate border-spacing-y-3">
+        <colgroup>
+          <col class="w-[26%]" />
+          <col class="w-[12%]" />
+          <col class="w-[12%]" />
+          <col class="w-[16%]" />
+          <col class="w-[12%]" />
+          <col class="w-[10%]" />
+          <col class="w-[12%]" />
+        </colgroup>
+        <thead class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          <tr>
+            <th class="px-4 text-left font-semibold">Negocio</th>
+            <th class="px-4 text-left font-semibold">Tipo</th>
+            <th class="px-4 text-left font-semibold">Ciudad</th>
+            <th class="px-4 text-left font-semibold">Categorías</th>
+            <th class="px-4 text-left font-semibold">Instagram</th>
+            <th class="px-4 text-left font-semibold">Estado</th>
+            <th class="px-4 text-left font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list
+            .map(
+              (business) => `
+                <tr class="rounded-2xl bg-white/90">
+                  <td class="rounded-l-2xl border border-ink-900/10 bg-white/90 px-4 py-3 align-top">
+                    <p class="truncate text-sm font-semibold">${business.name}</p>
+                    <p class="mt-1 text-xs text-ink-900/60">${business.slug}</p>
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
+                    ${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type}
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
+                    ${formatBusinessCities(business._id)}
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
+                    ${formatBusinessCategories(business)}
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
+                    ${business.instagram ? `@${business.instagram}` : "—"}
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
+                    ${business.verified ? "Verificado" : "Pendiente"}
+                  </td>
+                  <td class="rounded-r-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+                    <div class="flex flex-wrap gap-2 text-xs">
+                      <button class="action-btn action-view" data-business-select="${business._id}">Ver</button>
+                      <button class="action-btn action-edit" data-business-edit="${business._id}">Editar</button>
+                      <button class="action-btn action-delete" data-business-delete="${business._id}">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              `,
+            )
+            .join("")}
+        </tbody>
+      </table>
     </div>
-    ${list
-      .map(
-        (business) => `
-          <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-            <div class="grid gap-3 md:grid-cols-[1.6fr,1fr,1fr,auto] md:items-center">
-              <div>
-                <p class="text-sm font-semibold">${business.name}</p>
-                <p class="text-xs text-ink-900/60 md:hidden">${business.slug} · ${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type}</p>
+    <div class="grid gap-3 md:hidden">
+      ${list
+        .map(
+          (business) => `
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold truncate">${business.name}</p>
+                  <p class="text-xs text-ink-900/60">${business.slug}</p>
+                  <p class="text-xs text-ink-900/60">
+                    ${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type} ·
+                    ${formatBusinessCities(business._id)}
+                  </p>
+                  <p class="text-xs text-ink-900/60 truncate">${formatBusinessCategories(business)}</p>
+                </div>
+                <span class="text-xs text-ink-900/60">${business.verified ? "Verificado" : "Pendiente"}</span>
               </div>
-              <p class="hidden text-xs text-ink-900/70 md:block">${business.slug}</p>
-              <p class="hidden text-xs text-ink-900/70 md:block">${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type}</p>
-              <div class="flex flex-wrap gap-2 text-xs">
-                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-select="${business._id}">Ver</button>
-                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-edit="${business._id}">Editar</button>
-                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-business-delete="${business._id}">Eliminar</button>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <button class="action-btn action-view" data-business-select="${business._id}">Ver</button>
+                <button class="action-btn action-edit" data-business-edit="${business._id}">Editar</button>
+                <button class="action-btn action-delete" data-business-delete="${business._id}">Eliminar</button>
               </div>
             </div>
-          </div>
-        `
-      )
-      .join("")}
+          `,
+        )
+        .join("")}
+    </div>
   `;
 };
 
@@ -927,12 +1429,14 @@ const populateBusinessSelects = () => {
   businessSelects.forEach((select) => {
     const selected = select.value;
     if (businesses.length === 0) {
-      select.innerHTML = "<option value=\"\">Sin negocios</option>";
+      select.innerHTML = '<option value="">Sin negocios</option>';
       select.disabled = true;
       return;
     }
     if (!isAdmin && currentBusinessId) {
-      const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
+      const business =
+        businesses.find((item) => item._id === currentBusinessId) ??
+        businesses[0];
       select.innerHTML = `<option value="${business._id}">${business.name}</option>`;
       select.value = business._id;
       select.disabled = true;
@@ -940,7 +1444,10 @@ const populateBusinessSelects = () => {
     }
     select.disabled = false;
     select.innerHTML = businesses
-      .map((business) => `<option value="${business._id}">${business.name}</option>`)
+      .map(
+        (business) =>
+          `<option value="${business._id}">${business.name}</option>`,
+      )
       .join("");
     if (selected) {
       select.value = selected;
@@ -948,9 +1455,14 @@ const populateBusinessSelects = () => {
   });
 };
 
-const populateBranchSelect = (businessId: string, branchItems: Branch[] = branches) => {
+const populateBranchSelect = (
+  businessId: string,
+  branchItems: Branch[] = branches,
+) => {
   if (!branchSelect) return;
-  const filtered = branchItems.filter((branch) => branch.businessId === businessId);
+  const filtered = branchItems.filter(
+    (branch) => branch.businessId === businessId,
+  );
   branchSelect.innerHTML = `<option value="">Global</option>`;
   filtered.forEach((branch) => {
     const option = document.createElement("option");
@@ -965,10 +1477,13 @@ const getFilteredBranches = () => {
   const searchValue = branchFilters.search.trim().toLowerCase();
   return branches.filter((branch) => {
     const businessMatch =
-      branchFilters.businessId === "all" || branch.businessId === branchFilters.businessId;
-    const cityMatch = branchFilters.city === "all" || branch.city === branchFilters.city;
+      branchFilters.businessId === "all" ||
+      branch.businessId === branchFilters.businessId;
+    const cityMatch =
+      branchFilters.city === "all" || branch.city === branchFilters.city;
     const textMatch =
-      searchValue.length === 0 || branch.address.toLowerCase().includes(searchValue);
+      searchValue.length === 0 ||
+      branch.address.toLowerCase().includes(searchValue);
     return businessMatch && cityMatch && textMatch;
   });
 };
@@ -1009,38 +1524,72 @@ const renderBranches = (list: Branch[], total: number) => {
   }
   const businessMap = new Map(businesses.map((item) => [item._id, item]));
   branchList.innerHTML = `
-    <div class="hidden md:grid md:grid-cols-[1.2fr,1fr,1fr,1.4fr,1fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
-      <span>Negocio</span>
-      <span>Ciudad</span>
-      <span>Zona</span>
-      <span>Dirección</span>
-      <span>Contacto</span>
-      <span>Acciones</span>
+    <div class="hidden md:block">
+      <table class="w-full table-fixed border-separate border-spacing-y-3">
+        <colgroup>
+          <col class="w-[22%]" />
+          <col class="w-[12%]" />
+          <col class="w-[12%]" />
+          <col class="w-[26%]" />
+          <col class="w-[16%]" />
+          <col class="w-[12%]" />
+        </colgroup>
+        <thead class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          <tr>
+            <th class="px-4 text-left font-semibold">Negocio</th>
+            <th class="px-4 text-left font-semibold">Ciudad</th>
+            <th class="px-4 text-left font-semibold">Zona</th>
+            <th class="px-4 text-left font-semibold">Dirección</th>
+            <th class="px-4 text-left font-semibold">Contacto</th>
+            <th class="px-4 text-left font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list
+            .map(
+              (branch) => `
+                <tr class="rounded-2xl bg-white/90">
+                  <td class="rounded-l-2xl border border-ink-900/10 bg-white/90 px-4 py-3 align-top">
+                    <p class="truncate text-sm font-semibold">${businessMap.get(branch.businessId)?.name ?? "Negocio"}</p>
+                    <p class="mt-1 text-xs text-ink-900/60">${branch.city}</p>
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">${branch.city}</td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">${branch.zone ?? "Sin zona"}</td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">${branch.address}</td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">${branch.phone ?? "Sin teléfono"}</td>
+                  <td class="rounded-r-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+                    <div class="flex flex-wrap gap-2 text-xs">
+                      <button class="action-btn action-view" data-branch-view="${branch._id}">Ver</button>
+                      <button class="action-btn action-edit" data-branch-edit="${branch._id}">Editar</button>
+                      <button class="action-btn action-delete" data-branch-delete="${branch._id}">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              `,
+            )
+            .join("")}
+        </tbody>
+      </table>
     </div>
-    ${list
-      .map(
-        (branch) => `
-          <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-            <div class="grid gap-3 md:grid-cols-[1.2fr,1fr,1fr,1.4fr,1fr,auto] md:items-center">
-              <div>
-                <p class="text-sm font-semibold">${businessMap.get(branch.businessId)?.name ?? "Negocio"}</p>
-                <p class="text-xs text-ink-900/60 md:hidden">${branch.city}</p>
-                <p class="text-xs text-ink-900/60 md:hidden">${branch.zone ?? "Sin zona"}</p>
-                <p class="text-xs text-ink-900/60 md:hidden">${branch.address}</p>
-              </div>
-              <p class="hidden text-xs text-ink-900/70 md:block">${branch.city}</p>
-              <p class="hidden text-xs text-ink-900/70 md:block">${branch.zone ?? "Sin zona"}</p>
-              <p class="hidden text-xs text-ink-900/70 md:block">${branch.address}</p>
-              <p class="hidden text-xs text-ink-900/70 md:block">${branch.phone ?? "Sin teléfono"}</p>
-              <div class="flex flex-wrap gap-2 text-xs">
-                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-branch-edit="${branch._id}">Editar</button>
-                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-branch-delete="${branch._id}">Eliminar</button>
+    <div class="grid gap-3 md:hidden">
+      ${list
+        .map(
+          (branch) => `
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-sm font-semibold">${businessMap.get(branch.businessId)?.name ?? "Negocio"}</p>
+              <p class="text-xs text-ink-900/60">${branch.city} · ${branch.zone ?? "Sin zona"}</p>
+              <p class="text-xs text-ink-900/60">${branch.address}</p>
+              <p class="text-xs text-ink-900/60">${branch.phone ?? "Sin teléfono"}</p>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <button class="action-btn action-view" data-branch-view="${branch._id}">Ver</button>
+                <button class="action-btn action-edit" data-branch-edit="${branch._id}">Editar</button>
+                <button class="action-btn action-delete" data-branch-delete="${branch._id}">Eliminar</button>
               </div>
             </div>
-          </div>
-        `
-      )
-      .join("")}
+          `,
+        )
+        .join("")}
+    </div>
   `;
 };
 
@@ -1070,7 +1619,10 @@ const updatePromoBusinessFilterOptions = () => {
   promoBusinessFilter.innerHTML = `
     <option value="all">Todos</option>
     ${businesses
-      .map((business) => `<option value="${business._id}">${business.name}</option>`)
+      .map(
+        (business) =>
+          `<option value="${business._id}">${business.name}</option>`,
+      )
       .join("")}
   `;
   promoBusinessFilter.value = currentValue;
@@ -1080,12 +1632,14 @@ const getFilteredPromotions = () => {
   const searchValue = promoFilters.search.trim().toLowerCase();
   return promotions.filter((promo) => {
     const businessMatch =
-      promoFilters.businessId === "all" || promo.businessId === promoFilters.businessId;
+      promoFilters.businessId === "all" ||
+      promo.businessId === promoFilters.businessId;
     const statusMatch =
       promoFilters.status === "all" ||
       (promoFilters.status === "active" && (promo.active ?? true)) ||
       (promoFilters.status === "inactive" && !(promo.active ?? true));
-    const typeMatch = promoFilters.type === "all" || promo.promoType === promoFilters.type;
+    const typeMatch =
+      promoFilters.type === "all" || promo.promoType === promoFilters.type;
     const textMatch =
       searchValue.length === 0 ||
       promo.title.toLowerCase().includes(searchValue) ||
@@ -1126,49 +1680,102 @@ const renderPromotions = (promos: Promotion[], total: number) => {
   }
   const businessMap = new Map(businesses.map((item) => [item._id, item]));
   promoList.innerHTML = `
-    <div class="hidden md:grid md:grid-cols-[1.6fr,0.8fr,0.8fr,auto] md:gap-4 md:px-4 md:text-xs md:uppercase md:tracking-[0.2em] text-ink-900/50">
-      <span>Promoción</span>
-      <span>Tipo</span>
-      <span>Estado</span>
-      <span>Acciones</span>
+    <div class="hidden md:block">
+      <table class="w-full table-fixed border-separate border-spacing-y-3">
+        <colgroup>
+          <col class="w-[46%]" />
+          <col class="w-[16%]" />
+          <col class="w-[16%]" />
+          <col class="w-[22%]" />
+        </colgroup>
+        <thead class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          <tr>
+            <th class="px-4 text-left font-semibold">Promoción</th>
+            <th class="px-4 text-left font-semibold">Tipo</th>
+            <th class="px-4 text-left font-semibold">Estado</th>
+            <th class="px-4 text-left font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${promos
+            .map((promo) => {
+              const isActive = promo.active ?? true;
+              const statusLabel = isActive ? "Activa" : "Inactiva";
+              const dateLabel =
+                promo.startDate && promo.endDate
+                  ? `${promo.startDate.slice(0, 10)} → ${promo.endDate.slice(0, 10)}`
+                  : "Sin fechas";
+              const promoBusiness = isAdmin
+                ? businessMap.get(promo.businessId)
+                : businessMap.get(currentBusinessId);
+              const businessName = promoBusiness?.name ?? "Negocio";
+              const instagramHandle = (promoBusiness?.instagram ?? "")
+                .replace("@", "")
+                .trim();
+              const instagramLink = instagramHandle
+                ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
+                : "";
+              return `
+                <tr class="rounded-2xl bg-white/90">
+                  <td class="rounded-l-2xl border border-ink-900/10 bg-white/90 px-4 py-3 align-top">
+                    <p class="truncate text-sm font-semibold">${promo.title}</p>
+                    <p class="text-xs text-ink-900/60">${dateLabel}</p>
+                    <p class="text-xs text-ink-900/60">${businessName}</p>
+                    ${instagramLink ? `<div class="mt-1 text-xs text-ink-900/60">${instagramLink}</div>` : ""}
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
+                    ${promoTypeLabels[promo.promoType as keyof typeof promoTypeLabels] ?? promo.promoType}
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3">
+                    <span class="w-fit rounded-full border border-ink-900/20 px-3 py-1 text-xs">
+                      ${statusLabel}
+                    </span>
+                  </td>
+                  <td class="rounded-r-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+                    <div class="flex flex-wrap gap-2 text-xs">
+                      <button class="action-btn action-view" data-promo-view="${promo._id}">Ver</button>
+                      <button class="action-btn action-edit" data-promo-edit="${promo._id}">Editar</button>
+                      <button class="action-btn action-delete" data-promo-delete="${promo._id}">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            })
+            .join("")}
+        </tbody>
+      </table>
     </div>
-    ${promos
-      .map((promo) => {
-        const isActive = promo.active ?? true;
-        const statusLabel = isActive ? "Activa" : "Inactiva";
-        const dateLabel = promo.startDate && promo.endDate
-          ? `${promo.startDate.slice(0, 10)} → ${promo.endDate.slice(0, 10)}`
-          : "Sin fechas";
-        const promoBusiness = isAdmin
-          ? businessMap.get(promo.businessId)
-          : businessMap.get(currentBusinessId);
-        const businessName = promoBusiness?.name ?? "Negocio";
-        const instagramHandle = (promoBusiness?.instagram ?? "").replace("@", "").trim();
-        const instagramLink = instagramHandle
-          ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
-          : "";
-        return `
-          <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
-            <div class="grid gap-3 md:grid-cols-[1.6fr,0.8fr,0.8fr,auto] md:items-center">
-              <div>
-                <p class="text-sm font-semibold">${promo.title}</p>
-                <p class="text-xs text-ink-900/60">${dateLabel}</p>
-                <p class="text-xs text-ink-900/60">${businessName}</p>
-                ${instagramLink ? `<div class="mt-1 text-xs text-ink-900/60">${instagramLink}</div>` : ""}
-              </div>
-              <p class="hidden text-xs text-ink-900/70 md:block">${promoTypeLabels[promo.promoType as keyof typeof promoTypeLabels] ?? promo.promoType}</p>
-              <span class="hidden w-fit rounded-full border border-ink-900/20 px-3 py-1 text-xs md:inline-flex">
+    <div class="grid gap-3 md:hidden">
+      ${promos
+        .map((promo) => {
+          const isActive = promo.active ?? true;
+          const statusLabel = isActive ? "Activa" : "Inactiva";
+          const dateLabel =
+            promo.startDate && promo.endDate
+              ? `${promo.startDate.slice(0, 10)} → ${promo.endDate.slice(0, 10)}`
+              : "Sin fechas";
+          const promoBusiness = isAdmin
+            ? businessMap.get(promo.businessId)
+            : businessMap.get(currentBusinessId);
+          const businessName = promoBusiness?.name ?? "Negocio";
+          return `
+            <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+              <p class="text-sm font-semibold">${promo.title}</p>
+              <p class="text-xs text-ink-900/60">${dateLabel}</p>
+              <p class="text-xs text-ink-900/60">${businessName}</p>
+              <span class="mt-2 inline-flex w-fit rounded-full border border-ink-900/20 px-3 py-1 text-xs">
                 ${statusLabel}
               </span>
-              <div class="flex flex-wrap gap-2 text-xs">
-                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-promo-edit="${promo._id}">Editar</button>
-                <button class="rounded-full border border-ink-900/20 px-3 py-1" data-promo-delete="${promo._id}">Eliminar</button>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                <button class="action-btn action-view" data-promo-view="${promo._id}">Ver</button>
+                <button class="action-btn action-edit" data-promo-edit="${promo._id}">Editar</button>
+                <button class="action-btn action-delete" data-promo-delete="${promo._id}">Eliminar</button>
               </div>
             </div>
-          </div>
-        `;
-      })
-      .join("")}
+          `;
+        })
+        .join("")}
+    </div>
   `;
 };
 
@@ -1191,7 +1798,9 @@ const updatePromotionsView = () => {
 
 const updateBranchCityFilterOptions = () => {
   if (!branchCityFilter) return;
-  const cities = Array.from(new Set(branches.map((branch) => branch.city))).sort();
+  const cities = Array.from(
+    new Set(branches.map((branch) => branch.city)),
+  ).sort();
   const currentValue = branchCityFilter.value;
   branchCityFilter.innerHTML = `
     <option value="all">Todas</option>
@@ -1216,14 +1825,23 @@ const updateBranchBusinessFilterOptions = () => {
   branchBusinessFilter.innerHTML = `
     <option value="all">Todos</option>
     ${businesses
-      .map((business) => `<option value="${business._id}">${business.name}</option>`)
+      .map(
+        (business) =>
+          `<option value="${business._id}">${business.name}</option>`,
+      )
       .join("")}
   `;
   branchBusinessFilter.value = currentValue;
 };
 
 const updateBranchPagination = (total: number, isAdmin: boolean) => {
-  if (!branchPagination || !branchPageInfo || !branchPagePrev || !branchPageNext) return;
+  if (
+    !branchPagination ||
+    !branchPageInfo ||
+    !branchPagePrev ||
+    !branchPageNext
+  )
+    return;
   if (!isAdmin) {
     branchPagination.hidden = true;
     return;
@@ -1246,11 +1864,14 @@ const updateBranchesView = () => {
     branchKpiTotal.textContent = String(total);
   }
   if (branchKpiCities) {
-    branchKpiCities.textContent = String(new Set(branches.map((branch) => branch.city)).size);
+    branchKpiCities.textContent = String(
+      new Set(branches.map((branch) => branch.city)).size,
+    );
   }
   if (branchKpiPhones) {
     branchKpiPhones.textContent = String(
-      branches.filter((branch) => (branch.phone ?? "").trim().length > 0).length
+      branches.filter((branch) => (branch.phone ?? "").trim().length > 0)
+        .length,
     );
   }
   const isAdmin = currentUser?.role === "ADMIN";
@@ -1268,6 +1889,8 @@ const updateBranchesView = () => {
 };
 
 const updateBusinessesView = () => {
+  updateBusinessCityFilterOptions();
+  updateBusinessCategoryFilterOptions();
   const total = businesses.length;
   if (businessKpiTotal) {
     businessKpiTotal.textContent = String(total);
@@ -1278,10 +1901,42 @@ const updateBusinessesView = () => {
   if (businessKpiPromos) {
     businessKpiPromos.textContent = String(promotions.length);
   }
-  renderBusinesses(getFilteredBusinesses(), total);
-  if (currentUser?.role !== "ADMIN") {
+  const filtered = getFilteredBusinesses();
+  const isAdmin = currentUser?.role === "ADMIN";
+  if (isAdmin) {
+    const start = (adminBusinessPage - 1) * ADMIN_BUSINESS_PAGE_SIZE;
+    const paged = filtered.slice(start, start + ADMIN_BUSINESS_PAGE_SIZE);
+    renderBusinesses(paged, total);
+    updateBusinessPagination(filtered.length, true);
+  } else {
+    renderBusinesses(filtered, total);
+    updateBusinessPagination(0, false);
+  }
+  if (!isAdmin) {
     renderOwnerBusinessDetails();
   }
+};
+
+const updateBusinessPagination = (total: number, isAdmin: boolean) => {
+  if (
+    !businessPagination ||
+    !businessPageInfo ||
+    !businessPagePrev ||
+    !businessPageNext
+  )
+    return;
+  if (!isAdmin) {
+    businessPagination.hidden = true;
+    return;
+  }
+  const totalPages = Math.max(1, Math.ceil(total / ADMIN_BUSINESS_PAGE_SIZE));
+  if (adminBusinessPage > totalPages) {
+    adminBusinessPage = totalPages;
+  }
+  businessPageInfo.textContent = `Página ${adminBusinessPage} de ${totalPages}`;
+  businessPagePrev.disabled = adminBusinessPage <= 1;
+  businessPageNext.disabled = adminBusinessPage >= totalPages;
+  businessPagination.hidden = totalPages <= 1;
 };
 
 const loadUser = async () => {
@@ -1294,7 +1949,7 @@ const loadUser = async () => {
     currentUser = null;
   }
   if (!currentUser) {
-    setHeaderAuthState(hasAuthHint());
+    setHeaderAuthState(false);
   }
   renderUser();
 };
@@ -1302,16 +1957,40 @@ const loadUser = async () => {
 const loadBusinesses = async () => {
   if (!currentUser) return;
   renderLoadingMessage(businessList, "Cargando negocios...");
-  businessSelects.forEach((select) => setSelectLoading(select, "Cargando negocios..."));
+  businessSelects.forEach((select) =>
+    setSelectLoading(select, "Cargando negocios..."),
+  );
   const isAdmin = currentUser.role === "ADMIN";
-  const response = await apiFetch<Business[]>(isAdmin ? "/businesses" : "/businesses/mine");
+  adminBusinessPage = 1;
+  const response = await apiFetch<Business[]>(
+    isAdmin ? "/businesses" : "/businesses/mine",
+  );
   businesses = response;
-  businessFilters = { search: "", type: "all" };
+  businessFilters = {
+    search: "",
+    type: "all",
+    city: "all",
+    category: "all",
+    verified: "all",
+    instagram: "all",
+  };
   if (businessSearchInput) {
     businessSearchInput.value = "";
   }
   if (businessTypeFilter) {
     businessTypeFilter.value = "all";
+  }
+  if (businessCityFilter) {
+    businessCityFilter.value = "all";
+  }
+  if (businessCategoryFilter) {
+    businessCategoryFilter.value = "all";
+  }
+  if (businessVerifiedFilter) {
+    businessVerifiedFilter.value = "all";
+  }
+  if (businessInstagramFilter) {
+    businessInstagramFilter.value = "all";
   }
   if (!currentBusinessId && businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
@@ -1346,7 +2025,7 @@ const loadBranches = async (businessId: string) => {
   renderLoadingMessage(branchList, "Cargando sedes...");
   setSelectLoading(branchSelect, "Cargando sedes...");
   const response = await apiFetch<Branch[]>(
-    businessId ? `/branches?businessId=${businessId}` : "/branches"
+    businessId ? `/branches?businessId=${businessId}` : "/branches",
   );
   branches = response;
   branchFilters = { search: "", city: "all", businessId: "all" };
@@ -1365,7 +2044,7 @@ const loadBranches = async (businessId: string) => {
 const loadPromotions = async (businessId?: string): Promise<Promotion[]> => {
   renderLoadingMessage(promoList, "Cargando promociones...");
   const response = await apiFetch<Promotion[]>(
-    businessId ? `/promotions?businessId=${businessId}` : "/promotions"
+    businessId ? `/promotions?businessId=${businessId}` : "/promotions",
   );
   promotions = response;
   return response;
@@ -1374,12 +2053,15 @@ const loadPromotions = async (businessId?: string): Promise<Promotion[]> => {
 const loadBranchOptionsForBusiness = async (businessId: string) => {
   if (!branchSelect) return;
   setSelectLoading(branchSelect, "Cargando sedes...");
-  const response = await apiFetch<Branch[]>(`/branches?businessId=${businessId}`);
+  const response = await apiFetch<Branch[]>(
+    `/branches?businessId=${businessId}`,
+  );
   populateBranchSelect(businessId, response);
 };
 
 const updateCityPagination = (total: number) => {
-  if (!cityPagination || !cityPageInfo || !cityPagePrev || !cityPageNext) return;
+  if (!cityPagination || !cityPageInfo || !cityPagePrev || !cityPageNext)
+    return;
   const totalPages = Math.max(1, Math.ceil(total / ADMIN_CITY_PAGE_SIZE));
   if (adminCityPage > totalPages) {
     adminCityPage = totalPages;
@@ -1393,7 +2075,8 @@ const updateCityPagination = (total: number) => {
 const renderCities = () => {
   if (!cityList) return;
   if (cities.length === 0) {
-    cityList.innerHTML = "<p class=\"text-ink-900/60\">Sin ciudades registradas.</p>";
+    cityList.innerHTML =
+      '<p class="text-ink-900/60">Sin ciudades registradas.</p>';
     if (cityKpiTotal) {
       cityKpiTotal.textContent = "0";
     }
@@ -1410,7 +2093,7 @@ const renderCities = () => {
   }
   if (cityKpiCountries) {
     cityKpiCountries.textContent = String(
-      new Set(cities.map((city) => city.countryCode.toUpperCase())).size
+      new Set(cities.map((city) => city.countryCode.toUpperCase())).size,
     );
   }
   if (cityKpiLast) {
@@ -1418,29 +2101,72 @@ const renderCities = () => {
   }
   const start = (adminCityPage - 1) * ADMIN_CITY_PAGE_SIZE;
   const paged = cities.slice(start, start + ADMIN_CITY_PAGE_SIZE);
-  cityList.innerHTML = paged
-    .map(
-      (city) => `
-        <div class=\"flex items-center justify-between rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-2\">
-          <div>
-            <p class=\"font-semibold\">${city.name}</p>
-            <p class=\"text-xs text-ink-900/60\">${city.countryCode}</p>
-          </div>
-          <div class=\"flex gap-2 text-xs\">
-            <button class=\"underline\" data-city-edit=\"${city._id}\">Editar</button>
-            <button class=\"underline\" data-city-delete=\"${city._id}\">Eliminar</button>
-          </div>
-        </div>
-      `
-    )
-    .join("");
+  cityList.innerHTML = `
+    <div class="hidden md:block">
+      <table class="w-full table-fixed border-separate border-spacing-y-3">
+        <colgroup>
+          <col class="w-[55%]" />
+          <col class="w-[15%]" />
+          <col class="w-[30%]" />
+        </colgroup>
+        <thead class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          <tr>
+            <th class="px-4 text-left font-semibold">Ciudad</th>
+            <th class="px-4 text-left font-semibold">País</th>
+            <th class="px-4 text-left font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${paged
+            .map(
+              (city) => `
+                <tr class="rounded-2xl bg-white/70">
+                  <td class="rounded-l-2xl border border-ink-900/10 bg-white/70 px-4 py-2">
+                    <p class="truncate font-semibold">${city.name}</p>
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/70 px-4 py-2 text-xs text-ink-900/70">
+                    ${city.countryCode}
+                  </td>
+                  <td class="rounded-r-2xl border border-ink-900/10 bg-white/70 px-4 py-2">
+                    <div class="flex flex-wrap gap-2 text-xs">
+                      <button class="action-btn action-view" data-city-view="${city._id}">Ver</button>
+                      <button class="action-btn action-edit" data-city-edit="${city._id}">Editar</button>
+                      <button class="action-btn action-delete" data-city-delete="${city._id}">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              `,
+            )
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="grid gap-2 md:hidden">
+      ${paged
+        .map(
+          (city) => `
+            <div class="rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-2">
+              <p class="font-semibold">${city.name}</p>
+              <p class="text-xs text-ink-900/60">${city.countryCode}</p>
+              <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                <button class="action-btn action-view" data-city-view="${city._id}">Ver</button>
+                <button class="action-btn action-edit" data-city-edit="${city._id}">Editar</button>
+                <button class="action-btn action-delete" data-city-delete="${city._id}">Eliminar</button>
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
   updateCityPagination(cities.length);
 };
 
 const renderCategories = () => {
   if (!categoryList) return;
   if (categories.length === 0) {
-    categoryList.innerHTML = "<p class=\"text-ink-900/60\">Sin categorías registradas.</p>";
+    categoryList.innerHTML =
+      '<p class="text-ink-900/60">Sin categorías registradas.</p>';
     if (categoryKpiTotal) {
       categoryKpiTotal.textContent = "0";
     }
@@ -1457,7 +2183,7 @@ const renderCategories = () => {
   }
   if (categoryKpiSlugs) {
     categoryKpiSlugs.textContent = String(
-      categories.filter((category) => category.slug.trim().length > 0).length
+      categories.filter((category) => category.slug.trim().length > 0).length,
     );
   }
   if (categoryKpiLast) {
@@ -1465,27 +2191,75 @@ const renderCategories = () => {
   }
   const start = (adminCategoryPage - 1) * ADMIN_CATEGORY_PAGE_SIZE;
   const paged = categories.slice(start, start + ADMIN_CATEGORY_PAGE_SIZE);
-  categoryList.innerHTML = paged
-    .map(
-      (category) => `
-        <div class=\"flex items-center justify-between rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-2\">
-          <div>
-            <p class=\"font-semibold\">${category.name}</p>
-            <p class=\"text-xs text-ink-900/60\">${category.slug}</p>
-          </div>
-          <div class=\"flex gap-2 text-xs\">
-            <button class=\"underline\" data-category-edit=\"${category._id}\">Editar</button>
-            <button class=\"underline\" data-category-delete=\"${category._id}\">Eliminar</button>
-          </div>
-        </div>
-      `
-    )
-    .join("");
+  categoryList.innerHTML = `
+    <div class="hidden md:block">
+      <table class="w-full table-fixed border-separate border-spacing-y-3">
+        <colgroup>
+          <col class="w-[45%]" />
+          <col class="w-[30%]" />
+          <col class="w-[25%]" />
+        </colgroup>
+        <thead class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          <tr>
+            <th class="px-4 text-left font-semibold">Categoría</th>
+            <th class="px-4 text-left font-semibold">Slug</th>
+            <th class="px-4 text-left font-semibold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${paged
+            .map(
+              (category) => `
+                <tr class="rounded-2xl bg-white/70">
+                  <td class="rounded-l-2xl border border-ink-900/10 bg-white/70 px-4 py-2">
+                    <p class="truncate font-semibold">${category.name}</p>
+                  </td>
+                  <td class="border-y border-l border-ink-900/10 bg-white/70 px-4 py-2 text-xs text-ink-900/70">
+                    ${category.slug}
+                  </td>
+                  <td class="rounded-r-2xl border border-ink-900/10 bg-white/70 px-4 py-2">
+                    <div class="flex flex-wrap gap-2 text-xs">
+                      <button class="action-btn action-view" data-category-view="${category._id}">Ver</button>
+                      <button class="action-btn action-edit" data-category-edit="${category._id}">Editar</button>
+                      <button class="action-btn action-delete" data-category-delete="${category._id}">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              `,
+            )
+            .join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="grid gap-2 md:hidden">
+      ${paged
+        .map(
+          (category) => `
+            <div class="rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-2">
+              <p class="font-semibold">${category.name}</p>
+              <p class="text-xs text-ink-900/60">${category.slug}</p>
+              <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                <button class="action-btn action-view" data-category-view="${category._id}">Ver</button>
+                <button class="action-btn action-edit" data-category-edit="${category._id}">Editar</button>
+                <button class="action-btn action-delete" data-category-delete="${category._id}">Eliminar</button>
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
   updateCategoryPagination(categories.length);
 };
 
 const updateCategoryPagination = (total: number) => {
-  if (!categoryPagination || !categoryPageInfo || !categoryPagePrev || !categoryPageNext) return;
+  if (
+    !categoryPagination ||
+    !categoryPageInfo ||
+    !categoryPagePrev ||
+    !categoryPageNext
+  )
+    return;
   const totalPages = Math.max(1, Math.ceil(total / ADMIN_CATEGORY_PAGE_SIZE));
   if (adminCategoryPage > totalPages) {
     adminCategoryPage = totalPages;
@@ -1507,8 +2281,10 @@ const loadCities = async () => {
       branchCitySelect,
       [
         `<option value=\"\">Selecciona una ciudad</option>`,
-        ...cities.map((city) => `<option value=\"${city.name}\">${city.name}</option>`),
-      ].join("")
+        ...cities.map(
+          (city) => `<option value=\"${city.name}\">${city.name}</option>`,
+        ),
+      ].join(""),
     );
   }
 };
@@ -1522,10 +2298,13 @@ const loadCategories = async () => {
   if (categorySuggestions) {
     setSelectReady(
       categorySuggestions,
-      categories.map((category) => `<option value="${category.slug}">${category.name}</option>`).join(
-        ""
-      ),
-      false
+      categories
+        .map(
+          (category) =>
+            `<option value="${category.slug}">${category.name}</option>`,
+        )
+        .join(""),
+      false,
     );
   }
 };
@@ -1534,12 +2313,30 @@ const wireAdminActions = () => {
   if (cityList) {
     cityList.addEventListener("click", async (event) => {
       const target = event.target as HTMLElement;
+      const viewId = target.dataset.cityView;
       const editId = target.dataset.cityEdit;
       const id = target.dataset.cityDelete;
+      if (viewId) {
+        const city = cities.find((item) => item._id === viewId);
+        if (city) {
+          setCityForm(city, {
+            mode: "view",
+            readOnly: true,
+            title: "Detalle de la ciudad",
+          });
+          openModal("city");
+        }
+        return;
+      }
       if (editId) {
         const city = cities.find((item) => item._id === editId);
         if (city) {
-          setCityForm(city);
+          setCityForm(city, {
+            mode: "edit",
+            readOnly: false,
+            title: "Editar ciudad",
+          });
+          openModal("city");
         }
       }
       if (!id) return;
@@ -1552,12 +2349,30 @@ const wireAdminActions = () => {
   if (categoryList) {
     categoryList.addEventListener("click", async (event) => {
       const target = event.target as HTMLElement;
+      const viewId = target.dataset.categoryView;
       const editId = target.dataset.categoryEdit;
       const id = target.dataset.categoryDelete;
+      if (viewId) {
+        const category = categories.find((item) => item._id === viewId);
+        if (category) {
+          setCategoryForm(category, {
+            mode: "view",
+            readOnly: true,
+            title: "Detalle de la categoría",
+          });
+          openModal("category");
+        }
+        return;
+      }
       if (editId) {
         const category = categories.find((item) => item._id === editId);
         if (category) {
-          setCategoryForm(category);
+          setCategoryForm(category, {
+            mode: "edit",
+            readOnly: false,
+            title: "Editar categoría",
+          });
+          openModal("category");
         }
       }
       if (!id) return;
@@ -1572,18 +2387,27 @@ const handleBusinessForm = () => {
   if (!businessForm) return;
   businessForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (businessForm.dataset.mode === "view") {
+      return;
+    }
     const businessEditing = businessForm.dataset.mode === "edit";
-    setMessage(businessMessage, businessEditing ? "Actualizando negocio..." : "Guardando negocio...");
+    setMessage(
+      businessMessage,
+      businessEditing ? "Actualizando negocio..." : "Guardando negocio...",
+    );
 
     const data = new FormData(businessForm);
     const categoryValues = Array.from(
-      businessForm.querySelectorAll<HTMLSelectElement>("[name='categories'] option:checked")
+      businessForm.querySelectorAll<HTMLSelectElement>(
+        "[name='categories'] option:checked",
+      ),
     ).map((option) => option.value);
     const slug = normalizeSlug(String(data.get("slug") ?? ""));
     const slugConflict = businesses.some(
       (business) =>
         business.slug.toLowerCase() === slug &&
-        (!businessForm.dataset.editId || business._id !== businessForm.dataset.editId)
+        (!businessForm.dataset.editId ||
+          business._id !== businessForm.dataset.editId),
     );
     if (slugConflict) {
       const message = "Ese slug ya existe en tus negocios.";
@@ -1602,11 +2426,17 @@ const handleBusinessForm = () => {
           description: data.get("description"),
           instagram: data.get("instagram"),
         };
-        if (businessForm.dataset.mode === "edit" && businessForm.dataset.editId) {
-          await apiFetch<Business>(`/businesses/${businessForm.dataset.editId}`, {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-          });
+        if (
+          businessForm.dataset.mode === "edit" &&
+          businessForm.dataset.editId
+        ) {
+          await apiFetch<Business>(
+            `/businesses/${businessForm.dataset.editId}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify(payload),
+            },
+          );
         } else {
           await apiFetch<Business>("/businesses", {
             method: "POST",
@@ -1616,7 +2446,7 @@ const handleBusinessForm = () => {
         businessForm.reset();
         setMessage(
           businessMessage,
-          businessEditing ? "Negocio actualizado." : "Negocio creado."
+          businessEditing ? "Negocio actualizado." : "Negocio creado.",
         );
         setBusinessForm();
         await loadBusinesses();
@@ -1626,11 +2456,12 @@ const handleBusinessForm = () => {
         showToast(
           "Listo",
           businessEditing ? "Negocio actualizado." : "Negocio creado.",
-          "success"
+          "success",
         );
         closeAllModals();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Error creando negocio";
+        const message =
+          error instanceof Error ? error.message : "Error creando negocio";
         setMessage(businessMessage, message);
         showToast("Error", message, "error");
       }
@@ -1642,8 +2473,14 @@ const handleBranchForm = () => {
   if (!branchForm) return;
   branchForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (branchForm.dataset.mode === "view") {
+      return;
+    }
     const branchEditing = branchForm.dataset.mode === "edit";
-    setMessage(branchMessage, branchEditing ? "Actualizando sede..." : "Guardando sede...");
+    setMessage(
+      branchMessage,
+      branchEditing ? "Actualizando sede..." : "Guardando sede...",
+    );
 
     const data = new FormData(branchForm);
     await withLoading(branchForm, async () => {
@@ -1667,7 +2504,10 @@ const handleBranchForm = () => {
           });
         }
         branchForm.reset();
-        setMessage(branchMessage, branchEditing ? "Sede actualizada." : "Sede creada.");
+        setMessage(
+          branchMessage,
+          branchEditing ? "Sede actualizada." : "Sede creada.",
+        );
         setBranchForm();
         const businessId = String(data.get("businessId") ?? "");
         if (businessId) {
@@ -1676,10 +2516,15 @@ const handleBranchForm = () => {
           await loadPromotions(businessId);
           updatePromotionsView();
         }
-        showToast("Listo", branchEditing ? "Sede actualizada." : "Sede creada.", "success");
+        showToast(
+          "Listo",
+          branchEditing ? "Sede actualizada." : "Sede creada.",
+          "success",
+        );
         closeAllModals();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Error creando sede";
+        const message =
+          error instanceof Error ? error.message : "Error creando sede";
         setMessage(branchMessage, message);
         showToast("Error", message, "error");
       }
@@ -1691,15 +2536,25 @@ const handlePromoForm = () => {
   if (!promoForm) return;
   promoForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (promoForm.dataset.mode === "view") {
+      return;
+    }
     const promoEditing = promoForm.dataset.mode === "edit";
-    setMessage(promoMessage, promoEditing ? "Actualizando promoción..." : "Guardando promoción...");
+    setMessage(
+      promoMessage,
+      promoEditing ? "Actualizando promoción..." : "Guardando promoción...",
+    );
 
     const data = new FormData(promoForm);
     const days = data.getAll("daysOfWeek").map((day) => String(day));
     const startDate = String(data.get("startDate"));
     const endDate = String(data.get("endDate"));
-    const startDateIso = startDate ? new Date(`${startDate}T00:00:00`).toISOString() : "";
-    const endDateIso = endDate ? new Date(`${endDate}T23:59:59`).toISOString() : "";
+    const startDateIso = startDate
+      ? new Date(`${startDate}T00:00:00`).toISOString()
+      : "";
+    const endDateIso = endDate
+      ? new Date(`${endDate}T23:59:59`).toISOString()
+      : "";
     if (days.length === 0) {
       const message = "Selecciona al menos un día de la semana.";
       setMessage(promoMessage, message);
@@ -1707,12 +2562,18 @@ const handlePromoForm = () => {
       return;
     }
     if (startDate && endDate && !isValidDateRange(startDateIso, endDateIso)) {
-      const message = "La fecha de fin debe ser posterior a la fecha de inicio.";
+      const message =
+        "La fecha de fin debe ser posterior a la fecha de inicio.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
       return;
     }
-    if (!isValidTimeRange(String(data.get("startHour") ?? ""), String(data.get("endHour") ?? ""))) {
+    if (
+      !isValidTimeRange(
+        String(data.get("startHour") ?? ""),
+        String(data.get("endHour") ?? ""),
+      )
+    ) {
       const message = "La hora fin debe ser posterior a la hora inicio.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
@@ -1747,7 +2608,10 @@ const handlePromoForm = () => {
           });
         }
         promoForm.reset();
-        setMessage(promoMessage, promoEditing ? "Promoción actualizada." : "Promoción creada.");
+        setMessage(
+          promoMessage,
+          promoEditing ? "Promoción actualizada." : "Promoción creada.",
+        );
         setPromoForm();
         if (currentBusinessId) {
           await loadPromotions(currentBusinessId);
@@ -1756,11 +2620,12 @@ const handlePromoForm = () => {
         showToast(
           "Listo",
           promoEditing ? "Promoción actualizada." : "Promoción creada.",
-          "success"
+          "success",
         );
         closeAllModals();
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Error creando promoción";
+        const message =
+          error instanceof Error ? error.message : "Error creando promoción";
         setMessage(promoMessage, message);
         showToast("Error", message, "error");
       }
@@ -1772,8 +2637,14 @@ const handleCityForm = () => {
   if (!cityForm) return;
   cityForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (cityForm.dataset.mode === "view") {
+      return;
+    }
     const cityEditing = cityForm.dataset.mode === "edit";
-    setMessage(cityMessage, cityEditing ? "Actualizando ciudad..." : "Guardando ciudad...");
+    setMessage(
+      cityMessage,
+      cityEditing ? "Actualizando ciudad..." : "Guardando ciudad...",
+    );
     const data = new FormData(cityForm);
     await withLoading(cityForm, async () => {
       try {
@@ -1793,12 +2664,20 @@ const handleCityForm = () => {
           });
         }
         cityForm.reset();
-        setMessage(cityMessage, cityEditing ? "Ciudad actualizada." : "Ciudad creada.");
+        setMessage(
+          cityMessage,
+          cityEditing ? "Ciudad actualizada." : "Ciudad creada.",
+        );
         setCityForm();
         await loadCities();
-        showToast("Listo", cityEditing ? "Ciudad actualizada." : "Ciudad creada.", "success");
+        showToast(
+          "Listo",
+          cityEditing ? "Ciudad actualizada." : "Ciudad creada.",
+          "success",
+        );
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Error creando ciudad";
+        const message =
+          error instanceof Error ? error.message : "Error creando ciudad";
         setMessage(cityMessage, message);
         showToast("Error", message, "error");
       }
@@ -1810,8 +2689,14 @@ const handleCategoryForm = () => {
   if (!categoryForm) return;
   categoryForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (categoryForm.dataset.mode === "view") {
+      return;
+    }
     const categoryEditing = categoryForm.dataset.mode === "edit";
-    setMessage(categoryMessage, categoryEditing ? "Actualizando categoría..." : "Guardando categoría...");
+    setMessage(
+      categoryMessage,
+      categoryEditing ? "Actualizando categoría..." : "Guardando categoría...",
+    );
     const data = new FormData(categoryForm);
     await withLoading(categoryForm, async () => {
       try {
@@ -1819,11 +2704,17 @@ const handleCategoryForm = () => {
           name: data.get("name"),
           slug: String(data.get("slug") ?? "").toLowerCase(),
         };
-        if (categoryForm.dataset.mode === "edit" && categoryForm.dataset.editId) {
-          await apiFetch<Category>(`/categories/${categoryForm.dataset.editId}`, {
-            method: "PATCH",
-            body: JSON.stringify(payload),
-          });
+        if (
+          categoryForm.dataset.mode === "edit" &&
+          categoryForm.dataset.editId
+        ) {
+          await apiFetch<Category>(
+            `/categories/${categoryForm.dataset.editId}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify(payload),
+            },
+          );
         } else {
           await apiFetch<Category>("/categories", {
             method: "POST",
@@ -1833,17 +2724,18 @@ const handleCategoryForm = () => {
         categoryForm.reset();
         setMessage(
           categoryMessage,
-          categoryEditing ? "Categoría actualizada." : "Categoría creada."
+          categoryEditing ? "Categoría actualizada." : "Categoría creada.",
         );
         setCategoryForm();
         await loadCategories();
         showToast(
           "Listo",
           categoryEditing ? "Categoría actualizada." : "Categoría creada.",
-          "success"
+          "success",
         );
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Error creando categoría";
+        const message =
+          error instanceof Error ? error.message : "Error creando categoría";
         setMessage(categoryMessage, message);
         showToast("Error", message, "error");
       }
@@ -1883,7 +2775,11 @@ const wireBusinessActions = () => {
       if (currentUser?.role === "ADMIN") {
         const business = businesses.find((item) => item._id === selectId);
         if (business) {
-          setBusinessForm(business);
+          setBusinessForm(business, {
+            mode: "view",
+            readOnly: true,
+            title: "Detalle del negocio",
+          });
           setActiveDashboardTab("business");
           openModal("business");
         }
@@ -1901,7 +2797,11 @@ const wireBusinessActions = () => {
     if (editId) {
       const business = businesses.find((item) => item._id === editId);
       if (business) {
-        setBusinessForm(business);
+        setBusinessForm(business, {
+          mode: "edit",
+          readOnly: false,
+          title: "Editar negocio",
+        });
         setActiveDashboardTab("business");
         openModal("business");
         currentBusinessId = business._id;
@@ -1915,28 +2815,30 @@ const wireBusinessActions = () => {
     }
 
     if (deleteId) {
-      const confirmed = window.confirm("¿Eliminar este negocio? También perderás sus sedes y promos.");
+      const confirmed = window.confirm(
+        "¿Eliminar este negocio? También perderás sus sedes y promos.",
+      );
       if (!confirmed) return;
       businesses = businesses.filter((business) => business._id !== deleteId);
       updateBusinessesView();
       await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
       showToast("Listo", "Negocio eliminado.", "success");
       await loadBusinesses();
-  if (businesses.length > 0) {
-    currentBusinessId = businesses[0]._id;
-    await loadBranches(currentBusinessId);
-    await loadPromotions(currentBusinessId);
-    updatePromotionsView();
-    updateBusinessesView();
-  } else {
-    currentBusinessId = "";
-    branches = [];
-    updateBranchCityFilterOptions();
-    updateBranchesView();
-    promotions = [];
-    updatePromotionsView();
-    updateBusinessesView();
-  }
+      if (businesses.length > 0) {
+        currentBusinessId = businesses[0]._id;
+        await loadBranches(currentBusinessId);
+        await loadPromotions(currentBusinessId);
+        updatePromotionsView();
+        updateBusinessesView();
+      } else {
+        currentBusinessId = "";
+        branches = [];
+        updateBranchCityFilterOptions();
+        updateBranchesView();
+        promotions = [];
+        updatePromotionsView();
+        updateBusinessesView();
+      }
     }
   });
 };
@@ -1944,9 +2846,15 @@ const wireBusinessActions = () => {
 const wireOwnerBusinessEdit = () => {
   if (!ownerBusinessEdit) return;
   ownerBusinessEdit.addEventListener("click", async () => {
-    const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
+    const business =
+      businesses.find((item) => item._id === currentBusinessId) ??
+      businesses[0];
     if (!business) return;
-    setBusinessForm(business);
+    setBusinessForm(business, {
+      mode: "edit",
+      readOnly: false,
+      title: "Editar negocio",
+    });
     setActiveDashboardTab("business");
     openModal("business");
   });
@@ -1956,12 +2864,39 @@ const wireBranchActions = () => {
   if (!branchList) return;
   branchList.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
+    const viewId = target.dataset.branchView;
     const editId = target.dataset.branchEdit;
     const deleteId = target.dataset.branchDelete;
+    if (viewId) {
+      const branch = branches.find((item) => item._id === viewId);
+      if (branch) {
+        setBranchForm(branch, {
+          mode: "view",
+          readOnly: true,
+          title: "Detalle de la sede",
+        });
+        setActiveDashboardTab("branches");
+        openModal("branch");
+        if (currentUser?.role === "ADMIN") {
+          await loadBranchOptionsForBusiness(branch.businessId);
+          return;
+        }
+        currentBusinessId = branch.businessId;
+        businessSelects.forEach((select) => {
+          select.value = branch.businessId;
+        });
+        await loadBranches(branch.businessId);
+      }
+      return;
+    }
     if (editId) {
       const branch = branches.find((item) => item._id === editId);
       if (branch) {
-        setBranchForm(branch);
+        setBranchForm(branch, {
+          mode: "edit",
+          readOnly: false,
+          title: "Editar sede",
+        });
         setActiveDashboardTab("branches");
         openModal("branch");
         if (currentUser?.role === "ADMIN") {
@@ -1992,7 +2927,9 @@ const wirePromoActions = () => {
   if (!promoList) return;
   promoList.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
-    const instagramLink = target.closest<HTMLAnchorElement>("[data-instagram-link]");
+    const instagramLink = target.closest<HTMLAnchorElement>(
+      "[data-instagram-link]",
+    );
     if (instagramLink) {
       const handle = instagramLink.dataset.instagramHandle ?? "";
       if (handle && isMobileDevice()) {
@@ -2005,8 +2942,26 @@ const wirePromoActions = () => {
       }
       return;
     }
+    const viewId = target.dataset.promoView;
     const editId = target.dataset.promoEdit;
     const deleteId = target.dataset.promoDelete;
+    if (viewId) {
+      let promo = promotions.find((item) => item._id === viewId);
+      if (!promo && currentBusinessId) {
+        const promos = await loadPromotions(currentBusinessId);
+        promo = promos.find((item) => item._id === viewId);
+      }
+      if (promo) {
+        await setPromoForm(promo, {
+          mode: "view",
+          readOnly: true,
+          title: "Detalle de la promoción",
+        });
+        setActiveDashboardTab("promos");
+        openModal("promo");
+      }
+      return;
+    }
     if (editId) {
       let promo = promotions.find((item) => item._id === editId);
       if (!promo && currentBusinessId) {
@@ -2014,7 +2969,11 @@ const wirePromoActions = () => {
         promo = promos.find((item) => item._id === editId);
       }
       if (promo) {
-        await setPromoForm(promo);
+        await setPromoForm(promo, {
+          mode: "edit",
+          readOnly: false,
+          title: "Editar promoción",
+        });
         setActiveDashboardTab("promos");
         openModal("promo");
       }
@@ -2103,7 +3062,7 @@ const wireDashboardDelegates = () => {
 const wireDashboardModal = () => {
   const wireModal = (
     overlay: HTMLElement | null,
-    closeButton: HTMLButtonElement | null
+    closeButton: HTMLButtonElement | null,
   ) => {
     if (!overlay) return;
     const closeModal = () => closeAllModals();
@@ -2168,6 +3127,18 @@ const wireBranchPagination = () => {
   });
 };
 
+const wireBusinessPagination = () => {
+  if (!businessPagePrev || !businessPageNext) return;
+  businessPagePrev.addEventListener("click", () => {
+    adminBusinessPage = Math.max(1, adminBusinessPage - 1);
+    updateBusinessesView();
+  });
+  businessPageNext.addEventListener("click", () => {
+    adminBusinessPage += 1;
+    updateBusinessesView();
+  });
+};
+
 const wireCityPagination = () => {
   if (!cityPagePrev || !cityPageNext) return;
   cityPagePrev.addEventListener("click", () => {
@@ -2214,55 +3185,70 @@ const wireBusinessFilters = () => {
     businessFilters = {
       search: businessSearchInput.value,
       type: businessTypeFilter.value,
+      city: businessCityFilter?.value ?? "all",
+      category: businessCategoryFilter?.value ?? "all",
+      verified: businessVerifiedFilter?.value ?? "all",
+      instagram: businessInstagramFilter?.value ?? "all",
     };
+    adminBusinessPage = 1;
     updateBusinessesView();
   };
   businessSearchInput.addEventListener("input", updateFilters);
   businessTypeFilter.addEventListener("change", updateFilters);
+  businessCityFilter?.addEventListener("change", updateFilters);
+  businessCategoryFilter?.addEventListener("change", updateFilters);
+  businessVerifiedFilter?.addEventListener("change", updateFilters);
+  businessInstagramFilter?.addEventListener("change", updateFilters);
 };
 
 (async () => {
-  setBusinessForm();
-  setBranchForm();
-  setPromoForm();
-  setCityForm();
-  setCategoryForm();
-  closeAllModals();
-  await loadUser();
-  if (currentUser) {
-    await loadBusinesses();
-    await loadCities();
-    await loadCategories();
-  }
-  updateBusinessesView();
-  populateBusinessSelects();
-  updateBranchesView();
-  updatePromotionsView();
-  wireSelectors();
-  wireBusinessActions();
-  wireBranchActions();
-  wirePromoActions();
-  wireEmptyStateActions();
-  wireCancelButtons();
-  wireDashboardTabs();
-  wireDashboardCreateButtons();
-  wireDashboardDelegates();
-  wireDashboardMenu();
-  wireDashboardModal();
-  wirePromoFilters();
-  wirePromoPagination();
-  wireBranchFilters();
-  wireBranchPagination();
-  wireBusinessFilters();
-  wireCityPagination();
-  wireCategoryPagination();
-  wireOwnerBusinessEdit();
-  handleBusinessForm();
-  handleBranchForm();
-  handlePromoForm();
-  if (currentUser?.role === "ADMIN") {
-    handleCityForm();
-    handleCategoryForm();
-    wireAdminActions();
+  setDashboardLoading(true);
+  try {
+    setBusinessForm();
+    setBranchForm();
+    setPromoForm();
+    setCityForm();
+    setCategoryForm();
+    closeAllModals();
+    await loadUser();
+    if (currentUser) {
+      await loadBusinesses();
+      await loadCities();
+      await loadCategories();
+    }
+    updateBusinessesView();
+    populateBusinessSelects();
+    updateBranchesView();
+    updatePromotionsView();
+    wireSelectors();
+    wireBusinessActions();
+    wireBranchActions();
+    wirePromoActions();
+    wireEmptyStateActions();
+    wireCancelButtons();
+    wireDashboardTabs();
+    wireDashboardCreateButtons();
+    wireDashboardDelegates();
+    wireDashboardMenu();
+    wireDashboardModal();
+    wirePromoFilters();
+    wirePromoPagination();
+    wireBranchFilters();
+    wireBranchPagination();
+    wireBusinessFilters();
+    wireBusinessPagination();
+    wireCityPagination();
+    wireCategoryPagination();
+    wireOwnerBusinessEdit();
+    handleBusinessForm();
+    handleBranchForm();
+    handlePromoForm();
+    if (currentUser?.role === "ADMIN") {
+      handleCityForm();
+      handleCategoryForm();
+      wireAdminActions();
+    }
+  } finally {
+    setDashboardLoading(false);
   }
 })();

@@ -1,4 +1,10 @@
-import { IsArray, IsEnum, IsOptional, IsString, MinLength } from "class-validator";
+import {
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MinLength,
+} from "class-validator";
 import { BusinessType } from "@mispromos/shared";
 
 export class UpdateBusinessDto {

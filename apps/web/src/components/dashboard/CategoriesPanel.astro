@@ -1,0 +1,64 @@
+---
+
+---
+
+<section
+  class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+  data-dashboard-panel="categories"
+  data-admin-only
+  hidden
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-xl font-semibold">Categorías</h2>
+      <p class="text-sm text-ink-900/60">
+        Gestiona el catálogo de categorías públicas.
+      </p>
+    </div>
+    <button
+      class="button-primary"
+      type="button"
+      data-dashboard-create="category"
+    >
+      Crear categoría
+    </button>
+  </div>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total</p>
+      <p class="text-2xl font-semibold" data-category-kpi-total>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Con slug</p>
+      <p class="text-2xl font-semibold" data-category-kpi-slugs>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Última creación
+      </p>
+      <p class="text-2xl font-semibold" data-category-kpi-last>--</p>
+    </div>
+  </div>
+  <div class="mt-5 grid gap-2 text-sm" data-category-list></div>
+  <div
+    class="mt-4 flex items-center justify-between text-sm text-ink-900/60"
+    data-category-pagination
+    hidden
+  >
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-category-page-prev
+    >
+      Anterior
+    </button>
+    <span data-category-page-info>Página 1</span>
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-category-page-next
+    >
+      Siguiente
+    </button>
+  </div>
+</section>

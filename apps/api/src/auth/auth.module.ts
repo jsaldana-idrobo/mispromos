@@ -24,19 +24,27 @@ import { AuthSeedService } from "./auth-seed.service";
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const expiresInSeconds = Number(
-          configService.get<string>("JWT_EXPIRES_IN_SECONDS") ?? "604800"
+          configService.get<string>("JWT_EXPIRES_IN_SECONDS") ?? "604800",
         );
         return {
           secret: configService.get<string>("JWT_SECRET") ?? "dev-secret",
           signOptions: {
-            expiresIn: Number.isFinite(expiresInSeconds) ? expiresInSeconds : 604800,
+            expiresIn: Number.isFinite(expiresInSeconds)
+              ? expiresInSeconds
+              : 604800,
           },
         };
       },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, AuthSeedService],
+  providers: [
+    AuthService,
+    JwtAuthGuard,
+    OptionalJwtAuthGuard,
+    RolesGuard,
+    AuthSeedService,
+  ],
   exports: [AuthService, JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}

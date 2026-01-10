@@ -46,16 +46,24 @@ export class PromotionController {
     const query = req.query as Record<string, string | undefined>;
     const city = query.city?.trim() || undefined;
     const at = query.at?.trim() || undefined;
-    const promoType = Object.values(PromotionType).includes(query.promoType as PromotionType)
+    const promoType = Object.values(PromotionType).includes(
+      query.promoType as PromotionType,
+    )
       ? (query.promoType as PromotionType)
       : undefined;
     const category = query.category?.trim() || undefined;
-    const businessType = Object.values(BusinessType).includes(query.businessType as BusinessType)
+    const businessType = Object.values(BusinessType).includes(
+      query.businessType as BusinessType,
+    )
       ? (query.businessType as BusinessType)
       : undefined;
     const q = query.q?.trim() || undefined;
-    const offset = Number.isFinite(Number(query.offset)) ? Number(query.offset) : undefined;
-    const limit = Number.isFinite(Number(query.limit)) ? Number(query.limit) : undefined;
+    const offset = Number.isFinite(Number(query.offset))
+      ? Number(query.offset)
+      : undefined;
+    const limit = Number.isFinite(Number(query.limit))
+      ? Number(query.limit)
+      : undefined;
     return this.promotionService.findActiveByCity(
       city,
       at,
@@ -64,7 +72,7 @@ export class PromotionController {
       businessType,
       q,
       offset,
-      limit
+      limit,
     );
   }
 
@@ -76,7 +84,11 @@ export class PromotionController {
   @Patch(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.BUSINESS_OWNER, UserRole.ADMIN)
-  update(@Param("id") id: string, @Body() dto: UpdatePromotionDto, @Req() req: AuthRequest) {
+  update(
+    @Param("id") id: string,
+    @Body() dto: UpdatePromotionDto,
+    @Req() req: AuthRequest,
+  ) {
     if (!req.user) {
       throw new UnauthorizedException("No autenticado");
     }

@@ -1,0 +1,47 @@
+---
+const { isAuthenticated = false } = Astro.props;
+---
+
+<header class="border-b border-ink-900/10 bg-sand-100/70 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <a href="/" class="flex items-center gap-3">
+      <span class="text-xl font-display font-bold tracking-tight"
+        >Mis promos</span
+      >
+    </a>
+    <nav class="flex items-center gap-4 text-sm font-medium">
+      <a
+        href="/dashboard"
+        class="transition hover:text-ink-700"
+        data-nav-dashboard
+        hidden={!isAuthenticated}
+      >
+        Dashboard
+      </a>
+      <a
+        href="/register"
+        class="button-secondary"
+        data-nav-register
+        hidden={isAuthenticated}
+      >
+        Soy un negocio
+      </a>
+      <a
+        href="/login"
+        class="rounded-full border border-ink-900/20 px-4 py-2 transition hover:border-ink-900/50"
+        data-nav-login
+        hidden={isAuthenticated}
+      >
+        Entrar
+      </a>
+      <button
+        class="rounded-full border border-ink-900/20 px-4 py-2 transition hover:border-ink-900/50"
+        type="button"
+        data-nav-logout
+        hidden={!isAuthenticated}
+      >
+        Salir
+      </button>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,104 @@
+---
+const { promoTypes = [], promoTypeLabels = {} } = Astro.props;
+---
+
+<section
+  class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+  data-dashboard-panel="promos"
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-xl font-semibold" data-dashboard-promo-title>
+        Mis promociones
+      </h2>
+      <p class="text-sm text-ink-900/60" data-dashboard-promo-subtitle>
+        Gestiona las promos activas de tu negocio.
+      </p>
+    </div>
+    <button class="button-primary" type="button" data-dashboard-create="promo">
+      Crear nueva promoción
+    </button>
+  </div>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Total</p>
+      <p class="text-2xl font-semibold" data-promo-kpi-total>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Activas</p>
+      <p class="text-2xl font-semibold" data-promo-kpi-active>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Inactivas
+      </p>
+      <p class="text-2xl font-semibold" data-promo-kpi-inactive>0</p>
+    </div>
+  </div>
+  <div
+    class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.2fr,1fr,1fr,1fr]"
+  >
+    <label class="grid gap-2 text-sm font-semibold">
+      Buscar promo
+      <input
+        class="input-field"
+        name="search"
+        placeholder="Ej: 2x1, almuerzo..."
+        data-promo-search
+      />
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Estado
+      <select class="input-field" name="status" data-promo-status>
+        <option value="all">Todas</option>
+        <option value="active">Activas</option>
+        <option value="inactive">Inactivas</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Tipo
+      <select class="input-field" name="promoType" data-promo-type>
+        <option value="all">Todos</option>
+        {
+          promoTypes.map((type) => (
+            <option value={type}>{promoTypeLabels[type]}</option>
+          ))
+        }
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold" data-admin-only hidden>
+      Negocio
+      <select class="input-field" name="business" data-promo-business-filter>
+        <option value="all">Todos</option>
+      </select>
+    </label>
+  </div>
+  <div class="mt-4 grid gap-3" data-promo-list>
+    <div
+      class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+    >
+      Selecciona un negocio para ver promociones.
+    </div>
+  </div>
+  <div
+    class="mt-4 flex items-center justify-between text-sm text-ink-900/60"
+    data-promo-pagination
+    hidden
+  >
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-promo-page-prev
+    >
+      Anterior
+    </button>
+    <span data-promo-page-info>Página 1</span>
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-promo-page-next
+    >
+      Siguiente
+    </button>
+  </div>
+</section>

@@ -1,4 +1,11 @@
-import { IsDateString, IsOptional, IsString, MinLength, IsEnum, IsNumberString } from "class-validator";
+import {
+  IsDateString,
+  IsOptional,
+  IsString,
+  MinLength,
+  IsEnum,
+  IsNumberString,
+} from "class-validator";
 import { PromotionType, BusinessType } from "@mispromos/shared";
 
 export class ActivePromotionsQueryDto {

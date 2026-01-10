@@ -26,14 +26,17 @@ export class PromotionService {
     @InjectModel(Branch.name)
     private readonly branchModel: Model<BranchDocument>,
     @InjectModel(Business.name)
-    private readonly businessModel: Model<BusinessDocument>
+    private readonly businessModel: Model<BusinessDocument>,
   ) {}
 
   private async assertBusinessOwner(businessId: string, actor: Actor) {
     if (actor.role === UserRole.ADMIN) {
       return;
     }
-    const business = await this.businessModel.findById(businessId).select("ownerId").exec();
+    const business = await this.businessModel
+      .findById(businessId)
+      .select("ownerId")
+      .exec();
     if (!business) {
       throw new NotFoundException("Negocio no encontrado");
     }
@@ -42,8 +45,14 @@ export class PromotionService {
     }
   }
 
-  private async assertBranchMatchesBusiness(branchId: string, businessId: string) {
-    const branch = await this.branchModel.findById(branchId).select("businessId").exec();
+  private async assertBranchMatchesBusiness(
+    branchId: string,
+    businessId: string,
+  ) {
+    const branch = await this.branchModel
+      .findById(branchId)
+      .select("businessId")
+      .exec();
     if (!branch) {
       throw new NotFoundException("Sede no encontrada");
     }
@@ -122,7 +131,9 @@ export class PromotionService {
     const hour = Number(values.hour);
     const minute = Number(values.minute);
     const second = Number(values.second);
-    const zonedDate = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+    const zonedDate = new Date(
+      Date.UTC(year, month - 1, day, hour, minute, second),
+    );
     return {
       day: this.getDayOfWeekByIndex(zonedDate.getUTCDay()),
       time: `${values.hour}:${values.minute}`,
@@ -141,7 +152,7 @@ export class PromotionService {
     businessType?: string,
     q?: string,
     offset?: number,
-    limit?: number
+    limit?: number,
   ) {
     const now = at ? new Date(at) : new Date();
     if (Number.isNaN(now.valueOf())) {
@@ -228,7 +239,7 @@ export class PromotionService {
       .exec();
 
     const businessIds = Array.from(
-      new Set(promos.map((promo) => promo.businessId).filter(Boolean))
+      new Set(promos.map((promo) => promo.businessId).filter(Boolean)),
     );
     const businesses = businessIds.length
       ? await this.businessModel
@@ -237,7 +248,9 @@ export class PromotionService {
           .lean()
           .exec()
       : [];
-    const businessMap = new Map(businesses.map((business) => [String(business._id), business]));
+    const businessMap = new Map(
+      businesses.map((business) => [String(business._id), business]),
+    );
 
     return promos.map((promo) => ({
       ...promo,

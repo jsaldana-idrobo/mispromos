@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { JwtService } from "@nestjs/jwt";
 import { Model } from "mongoose";
@@ -13,7 +17,7 @@ export class AuthService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -50,12 +54,24 @@ export class AuthService {
     return user;
   }
 
-  async createAccessToken(payload: { id: string; role: UserRole; email: string }) {
-    return this.jwtService.sign({ sub: payload.id, role: payload.role, email: payload.email });
+  async createAccessToken(payload: {
+    id: string;
+    role: UserRole;
+    email: string;
+  }) {
+    return this.jwtService.sign({
+      sub: payload.id,
+      role: payload.role,
+      email: payload.email,
+    });
   }
 
   async verifyAccessToken(token: string) {
-    return this.jwtService.verify<{ sub: string; role: UserRole; email?: string }>(token);
+    return this.jwtService.verify<{
+      sub: string;
+      role: UserRole;
+      email?: string;
+    }>(token);
   }
 
   async findUserById(id: string) {
@@ -63,7 +79,9 @@ export class AuthService {
   }
 
   async updateUserRole(id: string, role: UserRole) {
-    const updated = await this.userModel.findByIdAndUpdate(id, { role }, { new: true }).exec();
+    const updated = await this.userModel
+      .findByIdAndUpdate(id, { role }, { new: true })
+      .exec();
     return updated;
   }
 }

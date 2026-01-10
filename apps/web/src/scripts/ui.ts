@@ -1,7 +1,9 @@
 export type ToastVariant = "success" | "error" | "info";
 
 const getContainer = () => {
-  let container = document.querySelector<HTMLDivElement>("[data-toast-container]");
+  let container = document.querySelector<HTMLDivElement>(
+    "[data-toast-container]",
+  );
   if (!container) {
     container = document.createElement("div");
     container.dataset.toastContainer = "true";
@@ -15,12 +17,16 @@ const getContainer = () => {
 export const showToast = (
   title: string,
   description?: string,
-  variant: ToastVariant = "info"
+  variant: ToastVariant = "info",
 ) => {
   const container = getContainer();
   const toast = document.createElement("div");
   const variantClass =
-    variant === "success" ? "toast-success" : variant === "error" ? "toast-error" : "";
+    variant === "success"
+      ? "toast-success"
+      : variant === "error"
+        ? "toast-error"
+        : "";
   toast.className = `toast ${variantClass}`;
   toast.innerHTML = `
     <div>
@@ -35,7 +41,11 @@ export const showToast = (
   }, 3600);
 };
 
-export const setButtonLoading = (button: HTMLButtonElement, loading: boolean, text?: string) => {
+export const setButtonLoading = (
+  button: HTMLButtonElement,
+  loading: boolean,
+  text?: string,
+) => {
   if (loading) {
     button.dataset.originalText = button.textContent ?? "";
     button.disabled = true;

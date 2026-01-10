@@ -23,7 +23,10 @@ async function bootstrap() {
   ];
   const originSet = new Set([...allowedOrigins, ...defaultOrigins]);
   app.enableCors({
-    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (!origin) {
         callback(null, true);
         return;
@@ -36,9 +39,11 @@ async function bootstrap() {
       const allowed =
         originSet.has(normalized) ||
         (/^https:\/\/mispromos-web(-git-[a-z0-9-]+)?-juansaldanas-projects\.vercel\.app$/.test(
-          normalized
+          normalized,
         ) &&
-          Array.from(originSet).some((entry) => entry.includes("mispromos-web")));
+          Array.from(originSet).some((entry) =>
+            entry.includes("mispromos-web"),
+          ));
       callback(null, allowed);
     },
     credentials: true,
@@ -49,7 +54,7 @@ async function bootstrap() {
         whitelist: true,
         transform: true,
         forbidUnknownValues: false,
-      })
+      }),
     );
   }
 

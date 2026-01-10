@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { UserRole } from "@mispromos/shared";
@@ -18,14 +22,17 @@ export class BranchService {
     @InjectModel(Branch.name)
     private readonly branchModel: Model<BranchDocument>,
     @InjectModel(Business.name)
-    private readonly businessModel: Model<BusinessDocument>
+    private readonly businessModel: Model<BusinessDocument>,
   ) {}
 
   private async assertBusinessOwner(businessId: string, actor: Actor) {
     if (actor.role === UserRole.ADMIN) {
       return;
     }
-    const business = await this.businessModel.findById(businessId).select("ownerId").exec();
+    const business = await this.businessModel
+      .findById(businessId)
+      .select("ownerId")
+      .exec();
     if (!business) {
       throw new NotFoundException("Negocio no encontrado");
     }

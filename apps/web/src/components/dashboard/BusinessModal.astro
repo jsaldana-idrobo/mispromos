@@ -1,0 +1,74 @@
+---
+const { businessTypes = [], businessTypeLabels = {} } = Astro.props;
+---
+
+<div
+  class="fixed inset-0 z-50 hidden flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+  data-business-modal-overlay
+  hidden
+>
+  <div
+    class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-ink-900/10 bg-white/95 p-6 shadow-2xl"
+    data-business-modal
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          Negocios
+        </p>
+        <h3 class="text-2xl font-semibold" data-business-modal-title>
+          Crear negocio
+        </h3>
+        <p class="mt-1 text-sm text-ink-900/60">
+          Datos principales del negocio.
+        </p>
+      </div>
+      <button
+        class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+        type="button"
+        data-business-modal-close
+      >
+        Cerrar
+      </button>
+    </div>
+    <form class="mt-6 grid gap-4" data-business-form>
+      <div class="flex items-center justify-end text-xs text-ink-900/60"></div>
+      <label class="grid gap-2 text-sm font-semibold">
+        Nombre
+        <input class="input-field" name="name" required />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Slug
+        <input class="input-field" name="slug" required />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Tipo
+        <select class="input-field" name="type" required>
+          {
+            businessTypes.map((type) => (
+              <option value={type}>{businessTypeLabels[type]}</option>
+            ))
+          }
+        </select>
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Categorías (separadas por coma)
+        <select
+          class="input-field"
+          name="categories"
+          data-business-category-select
+          multiple></select>
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Descripción
+        <textarea class="input-field" name="description" rows={2}></textarea>
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Instagram (opcional)
+        <input class="input-field" name="instagram" placeholder="tu_negocio" />
+      </label>
+      <p class="text-sm text-ink-900/60" data-business-message></p>
+      <button class="button-primary" type="submit">Guardar negocio</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,67 @@
+---
+
+---
+
+<div
+  class="fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm lg:hidden"
+  data-dashboard-overlay
+  hidden
+>
+</div>
+<aside
+  class="fixed right-0 top-0 z-50 flex h-full w-72 translate-x-full flex-col gap-6 border-l border-ink-900/10 bg-white p-6 shadow-2xl transition lg:hidden"
+  data-dashboard-menu
+  hidden
+>
+  <div class="flex items-center justify-between">
+    <p class="text-sm font-semibold">Tu panel</p>
+    <button
+      class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+      type="button"
+      data-dashboard-close
+    >
+      Cerrar
+    </button>
+  </div>
+  <nav class="grid gap-2 text-sm">
+    <button
+      class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+      type="button"
+      data-dashboard-tab="business"
+    >
+      <span data-dashboard-business-label>Mi negocio</span>
+    </button>
+    <button
+      class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+      type="button"
+      data-dashboard-tab="promos"
+    >
+      <span data-dashboard-promo-label>Mis promociones</span>
+    </button>
+    <button
+      class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+      type="button"
+      data-dashboard-tab="branches"
+    >
+      <span data-dashboard-branch-label>Mis sucursales</span>
+    </button>
+    <button
+      class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+      type="button"
+      data-dashboard-tab="cities"
+      data-admin-only
+      hidden
+    >
+      Ciudades
+    </button>
+    <button
+      class="rounded-2xl px-4 py-2 text-left text-ink-900/70"
+      type="button"
+      data-dashboard-tab="categories"
+      data-admin-only
+      hidden
+    >
+      Categorías
+    </button>
+  </nav>
+</aside>

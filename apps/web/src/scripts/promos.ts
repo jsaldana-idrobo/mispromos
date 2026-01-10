@@ -26,11 +26,20 @@ type Promotion = {
 };
 
 const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
-const container = document.querySelector<HTMLDivElement>("[data-promos-container]");
-const categorySelect = document.querySelector<HTMLSelectElement>("[data-category-select]");
-const citySelect = document.querySelector<HTMLSelectElement>("[data-city-select]");
-const loadMore = document.querySelector<HTMLDivElement>("[data-promos-load-more]");
-const counter = document.querySelector<HTMLParagraphElement>("[data-promos-counter]");
+const container = document.querySelector<HTMLDivElement>(
+  "[data-promos-container]",
+);
+const categorySelect = document.querySelector<HTMLSelectElement>(
+  "[data-category-select]",
+);
+const citySelect =
+  document.querySelector<HTMLSelectElement>("[data-city-select]");
+const loadMore = document.querySelector<HTMLDivElement>(
+  "[data-promos-load-more]",
+);
+const counter = document.querySelector<HTMLParagraphElement>(
+  "[data-promos-counter]",
+);
 
 const PAGE_SIZE = 10;
 
@@ -64,10 +73,7 @@ if (form && container) {
     other: "Otra",
   };
 
-  const toneMap: Record<
-    string,
-    { emoji: string; tone: string }
-  > = {
+  const toneMap: Record<string, { emoji: string; tone: string }> = {
     pizza: { emoji: "🍕", tone: "promo-tone-sunset" },
     hamburguesas: { emoji: "🍔", tone: "promo-tone-berry" },
     sushi: { emoji: "🍣", tone: "promo-tone-sage" },
@@ -130,13 +136,15 @@ if (form && container) {
     const html = promos
       .map((promo, index) => {
         const businessName = promo.business?.name ?? "Negocio local";
-        const instagramHandle = (promo.business?.instagram ?? "").replace("@", "").trim();
+        const instagramHandle = (promo.business?.instagram ?? "")
+          .replace("@", "")
+          .trim();
         const categories = promo.business?.categories ?? [];
         const category = categories[0];
         const visual = getPromoVisual(category);
         const promoTypeLabel = formatPromoType(promo.promoType);
         const dateRange = `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
-          promo.endDate
+          promo.endDate,
         ).toLocaleDateString()}`;
         const hours = `${promo.startHour} - ${promo.endHour}`;
         const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" · ");
@@ -217,7 +225,8 @@ if (form && container) {
 
   const updateCounter = () => {
     if (!counter) return;
-    counter.textContent = totalLoaded > 0 ? `${totalLoaded} promociones cargadas` : "";
+    counter.textContent =
+      totalLoaded > 0 ? `${totalLoaded} promociones cargadas` : "";
   };
 
   const updateLoadMore = (message: string, loadingState = false) => {
@@ -248,7 +257,7 @@ if (form && container) {
       query.set("limit", String(PAGE_SIZE));
       const queryString = query.toString();
       const promos = await apiFetch<Promotion[]>(
-        `/promotions/active${queryString ? `?${queryString}` : ""}`
+        `/promotions/active${queryString ? `?${queryString}` : ""}`,
       );
       if (!append) {
         totalLoaded = 0;
@@ -265,9 +274,14 @@ if (form && container) {
       offset += promos.length;
       updateCounter();
       hasMore = promos.length === PAGE_SIZE;
-      updateLoadMore(hasMore ? "Desliza para cargar más." : "No hay más promociones.");
+      updateLoadMore(
+        hasMore ? "Desliza para cargar más." : "No hay más promociones.",
+      );
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error consultando promociones";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error consultando promociones";
       renderMessage(message);
       updateLoadMore("");
     } finally {
@@ -304,7 +318,7 @@ if (form && container) {
           fetchPromos(true);
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px" },
     );
     observer.observe(loadMore);
   }
@@ -335,7 +349,8 @@ if (categorySelect) {
       categorySelect.innerHTML = [
         `<option value=\"\">Todas</option>`,
         ...categories.map(
-          (category) => `<option value=\"${category.slug}\">${category.name}</option>`
+          (category) =>
+            `<option value=\"${category.slug}\">${category.name}</option>`,
         ),
       ].join("");
     })
@@ -349,9 +364,12 @@ if (citySelect) {
   apiFetch<City[]>("/cities")
     .then((cities) => {
       const options = cities.map(
-        (city) => `<option value=\"${city.name}\">${city.name}</option>`
+        (city) => `<option value=\"${city.name}\">${city.name}</option>`,
       );
-      citySelect.innerHTML = [`<option value=\"\">Todas</option>`, ...options].join("");
+      citySelect.innerHTML = [
+        `<option value=\"\">Todas</option>`,
+        ...options,
+      ].join("");
       if (initialCity) {
         citySelect.value = initialCity;
       }

@@ -1,0 +1,69 @@
+---
+const { city = "", at = "" } = Astro.props;
+---
+
+<div class="glass-panel rounded-3xl p-6">
+  <div class="grid gap-2">
+    <h1 class="text-3xl font-display">Promociones activas</h1>
+    <p class="text-sm text-ink-900/60">
+      Explora promociones en tiempo real. Usa los filtros para afinar la
+      búsqueda.
+    </p>
+  </div>
+  <form class="mt-6 grid gap-4" data-promos-form>
+    <div class="flex flex-wrap items-end gap-3">
+      <label
+        class="flex min-w-[160px] flex-1 flex-col gap-2 text-sm font-semibold"
+      >
+        Ciudad
+        <select
+          class="input-field"
+          name="city"
+          data-city-select
+          data-initial-city={city}
+        >
+          <option value="">Todas</option>
+        </select>
+      </label>
+      <label
+        class="flex min-w-[160px] flex-1 flex-col gap-2 text-sm font-semibold"
+      >
+        Categoría
+        <select class="input-field" name="category" data-category-select>
+          <option value="">Todas</option>
+        </select>
+      </label>
+      <label
+        class="flex min-w-[160px] flex-1 flex-col gap-2 text-sm font-semibold"
+      >
+        Tipo de promo
+        <select class="input-field" name="promoType">
+          <option value="">Todas</option>
+          <option value="discount">Descuento</option>
+          <option value="2x1">2x1</option>
+          <option value="combo">Combo</option>
+          <option value="other">Otra</option>
+        </select>
+      </label>
+      <label
+        class="flex min-w-[160px] flex-1 flex-col gap-2 text-sm font-semibold"
+      >
+        Buscar
+        <input
+          class="input-field"
+          name="q"
+          placeholder="2x1, combo, hamburguesa"
+        />
+      </label>
+      <label
+        class="flex min-w-[160px] flex-1 flex-col gap-2 text-sm font-semibold"
+      >
+        Fecha y hora
+        <input class="input-field" type="datetime-local" name="at" value={at} />
+      </label>
+      <button class="button-primary w-full sm:w-auto" type="submit"
+        >Aplicar filtros</button
+      >
+    </div>
+  </form>
+</div>

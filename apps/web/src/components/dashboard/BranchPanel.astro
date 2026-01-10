@@ -1,0 +1,94 @@
+---
+
+---
+
+<section
+  class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
+  data-dashboard-panel="branches"
+  hidden
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-xl font-semibold" data-dashboard-branch-title>
+        Mis sucursales
+      </h2>
+      <p class="text-sm text-ink-900/60" data-dashboard-branch-subtitle>
+        Administra las sedes activas de tu negocio.
+      </p>
+    </div>
+    <button class="button-primary" type="button" data-dashboard-create="branch">
+      Crear nueva sede
+    </button>
+  </div>
+  <div class="mt-5 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Total sedes
+      </p>
+      <p class="text-2xl font-semibold" data-branch-kpi-total>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">Ciudades</p>
+      <p class="text-2xl font-semibold" data-branch-kpi-cities>0</p>
+    </div>
+    <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
+      <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+        Con teléfono
+      </p>
+      <p class="text-2xl font-semibold" data-branch-kpi-phones>0</p>
+    </div>
+  </div>
+  <div
+    class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-[1.2fr,1fr,1fr]"
+  >
+    <label class="grid gap-2 text-sm font-semibold">
+      Dirección
+      <input
+        class="input-field"
+        name="search"
+        placeholder="Ej: Calle 10..."
+        data-branch-search
+      />
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Ciudad
+      <select class="input-field" name="city" data-branch-city-filter>
+        <option value="all">Todas</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold" data-admin-only hidden>
+      Negocio
+      <select class="input-field" name="business" data-branch-business-filter>
+        <option value="all">Todos</option>
+      </select>
+    </label>
+  </div>
+  <div class="mt-4 grid gap-3" data-branch-list>
+    <div
+      class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+    >
+      Selecciona un negocio para ver sedes.
+    </div>
+  </div>
+  <div
+    class="mt-4 flex items-center justify-between text-sm text-ink-900/60"
+    data-branch-pagination
+    hidden
+  >
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-branch-page-prev
+    >
+      Anterior
+    </button>
+    <span data-branch-page-info>Página 1</span>
+    <button
+      class="rounded-full border border-ink-900/20 px-4 py-1"
+      type="button"
+      data-branch-page-next
+    >
+      Siguiente
+    </button>
+  </div>
+</section>

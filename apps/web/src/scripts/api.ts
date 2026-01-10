@@ -21,7 +21,10 @@ const parseErrorMessage = (payload: ApiError | undefined) => {
   return payload.message;
 };
 
-export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<T> => {
+export const apiFetch = async <T>(
+  path: string,
+  options?: RequestInit,
+): Promise<T> => {
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
     headers: {
@@ -33,7 +36,9 @@ export const apiFetch = async <T>(path: string, options?: RequestInit): Promise<
 
   const contentType = response.headers.get("content-type") ?? "";
   const isJson = contentType.includes("application/json");
-  const payload = isJson ? ((await response.json()) as T | ApiError) : undefined;
+  const payload = isJson
+    ? ((await response.json()) as T | ApiError)
+    : undefined;
 
   if (!response.ok) {
     const message = parseErrorMessage(payload as ApiError | undefined);

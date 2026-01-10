@@ -1,0 +1,74 @@
+---
+
+---
+
+<div
+  class="fixed inset-0 z-50 hidden flex items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+  data-branch-modal-overlay
+  hidden
+>
+  <div
+    class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-ink-900/10 bg-white/95 p-6 shadow-2xl"
+    data-branch-modal
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          Sucursales
+        </p>
+        <h3 class="text-2xl font-semibold" data-branch-modal-title>
+          Crear sede
+        </h3>
+        <p class="mt-1 text-sm text-ink-900/60">
+          Actualiza direcciones y contacto.
+        </p>
+      </div>
+      <button
+        class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+        type="button"
+        data-branch-modal-close
+      >
+        Cerrar
+      </button>
+    </div>
+    <form class="mt-6 grid gap-4" data-branch-form>
+      <div class="flex items-center justify-end text-xs text-ink-900/60"></div>
+      <label
+        class="grid gap-2 text-sm font-semibold"
+        data-business-select-row="branch"
+      >
+        Negocio
+        <select
+          class="input-field"
+          name="businessId"
+          data-business-select
+          required></select>
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Ciudad
+        <select
+          class="input-field"
+          name="city"
+          data-branch-city-select
+          required
+        >
+          <option value="">Selecciona una ciudad</option>
+        </select>
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Dirección
+        <input class="input-field" name="address" required />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Zona (opcional)
+        <input class="input-field" name="zone" />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Teléfono (opcional)
+        <input class="input-field" name="phone" />
+      </label>
+      <p class="text-sm text-ink-900/60" data-branch-message></p>
+      <button class="button-primary" type="submit">Guardar sede</button>
+    </form>
+  </div>
+</div>

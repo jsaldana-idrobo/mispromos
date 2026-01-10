@@ -9,7 +9,7 @@ import { UpdateCityDto } from "./dto/update-city.dto";
 export class CityService {
   constructor(
     @InjectModel(City.name)
-    private readonly cityModel: Model<CityDocument>
+    private readonly cityModel: Model<CityDocument>,
   ) {}
 
   async create(dto: CreateCityDto) {
@@ -29,7 +29,9 @@ export class CityService {
   }
 
   async update(id: string, dto: UpdateCityDto) {
-    const updated = await this.cityModel.findByIdAndUpdate(id, dto, { new: true }).exec();
+    const updated = await this.cityModel
+      .findByIdAndUpdate(id, dto, { new: true })
+      .exec();
     if (!updated) {
       throw new NotFoundException("Ciudad no encontrada");
     }

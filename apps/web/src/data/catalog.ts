@@ -1,7 +1,10 @@
 export const businessTypes = ["restaurant", "shop", "service", "bar"] as const;
 export const promoTypes = ["discount", "2x1", "combo", "other"] as const;
 
-export const businessTypeLabels: Record<(typeof businessTypes)[number], string> = {
+export const businessTypeLabels: Record<
+  (typeof businessTypes)[number],
+  string
+> = {
   restaurant: "Restaurante",
   shop: "Tienda",
   service: "Servicio",

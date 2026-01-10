@@ -1,0 +1,39 @@
+---
+const {
+  mode = "login",
+  title = "",
+  subtitle = "",
+  submitLabel = "Enviar",
+  hint = "",
+} = Astro.props;
+---
+
+<div class="glass-panel rounded-3xl p-6">
+  {
+    title || subtitle ? (
+      <div class="mb-5 space-y-2">
+        {title ? <h2 class="text-xl font-semibold">{title}</h2> : null}
+        {subtitle ? <p class="text-sm text-ink-900/60">{subtitle}</p> : null}
+      </div>
+    ) : null
+  }
+  <form class="grid gap-4" data-auth-form data-mode={mode}>
+    <label class="grid gap-2 text-sm font-semibold">
+      Email
+      <input class="input-field" type="email" name="email" required />
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Contraseña
+      <input
+        class="input-field"
+        type="password"
+        name="password"
+        minlength="8"
+        required
+      />
+    </label>
+    {hint ? <p class="text-xs text-ink-900/50">{hint}</p> : null}
+    <p class="text-sm text-ink-900/60" data-auth-message></p>
+    <button class="button-primary" type="submit">{submitLabel}</button>
+  </form>
+</div>

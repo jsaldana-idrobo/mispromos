@@ -9,7 +9,7 @@ import { UpdateCategoryDto } from "./dto/update-category.dto";
 export class CategoryService {
   constructor(
     @InjectModel(Category.name)
-    private readonly categoryModel: Model<CategoryDocument>
+    private readonly categoryModel: Model<CategoryDocument>,
   ) {}
 
   async create(dto: CreateCategoryDto) {
@@ -29,7 +29,9 @@ export class CategoryService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    const updated = await this.categoryModel.findByIdAndUpdate(id, dto, { new: true }).exec();
+    const updated = await this.categoryModel
+      .findByIdAndUpdate(id, dto, { new: true })
+      .exec();
     if (!updated) {
       throw new NotFoundException("Categoría no encontrada");
     }

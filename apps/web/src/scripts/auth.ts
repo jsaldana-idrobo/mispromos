@@ -13,7 +13,9 @@ const messageEl = document.querySelector<HTMLElement>("[data-auth-message]");
 const redirectIfAuthenticated = async () => {
   if (!form) return false;
   try {
-    const response = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
+    const response = await fetch(`${API_BASE}/auth/me`, {
+      credentials: "include",
+    });
     if (!response.ok) {
       return false;
     }
@@ -41,7 +43,9 @@ if (form) {
     if (messageEl) {
       messageEl.textContent = "Procesando...";
     }
-    const submitButton = form.querySelector<HTMLButtonElement>("button[type='submit']");
+    const submitButton = form.querySelector<HTMLButtonElement>(
+      "button[type='submit']",
+    );
     if (submitButton) {
       setButtonLoading(submitButton, true, "Ingresando");
     }
@@ -57,11 +61,16 @@ if (form) {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      localStorage.setItem("auth", "true");
+      try {
+        localStorage.setItem("auth", "true");
+      } catch {
+        // ignore storage errors
+      }
       showToast("Listo", "Bienvenido a Mis promos.", "success");
       window.location.href = "/dashboard";
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al autenticar";
+      const message =
+        error instanceof Error ? error.message : "Error al autenticar";
       if (messageEl) {
         messageEl.textContent = message;
       }
