@@ -54,7 +54,7 @@ export class AuthController {
     const isProd = this.configService.get<string>("NODE_ENV") === "production";
     res.cookie("auth", token, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: isProd ? "none" : "lax",
       secure: isProd,
       maxAge: this.getCookieMaxAgeMs(),
     });
@@ -100,9 +100,13 @@ export class AuthController {
   }
 
   @Post("logout")
-  @UseGuards(JwtAuthGuard)
   logout(@Res({ passthrough: true }) res: ResponseWithCookies) {
-    res.clearCookie("auth");
+    const isProd = this.configService.get<string>("NODE_ENV") === "production";
+    res.clearCookie("auth", {
+      httpOnly: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
+    });
     return { ok: true };
   }
 
