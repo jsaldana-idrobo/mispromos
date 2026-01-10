@@ -8,3 +8,4 @@ tmp
 coverage
 .pnp.*
 *.tsbuildinfo
+apps/web/.astro
