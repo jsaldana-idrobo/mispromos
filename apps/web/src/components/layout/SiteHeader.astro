@@ -3,13 +3,13 @@ const { isAuthenticated = false } = Astro.props;
 ---
 
 <header class="border-b border-ink-900/10 bg-sand-100/70 backdrop-blur">
-  <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
     <a href="/" class="flex items-center gap-3">
-      <span class="text-xl font-display font-bold tracking-tight"
-        >Mis promos</span
+      <span class="text-base font-display font-bold tracking-[0.2em] sm:text-xl"
+        >TUS PROMOS</span
       >
     </a>
-    <nav class="flex items-center gap-4 text-sm font-medium">
+    <nav class="flex items-center gap-2 text-xs font-medium sm:gap-4 sm:text-sm">
       <a
         href="/dashboard"
         class="transition hover:text-ink-700"
@@ -20,7 +20,7 @@ const { isAuthenticated = false } = Astro.props;
       </a>
       <a
         href="/register"
-        class="button-secondary"
+        class="rounded-full border border-ink-900/20 px-3 py-1.5 text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         data-nav-register
         hidden={isAuthenticated}
       >
@@ -28,14 +28,14 @@ const { isAuthenticated = false } = Astro.props;
       </a>
       <a
         href="/login"
-        class="rounded-full border border-ink-900/20 px-4 py-2 transition hover:border-ink-900/50"
+        class="rounded-full border border-ink-900/20 px-3 py-1.5 text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         data-nav-login
         hidden={isAuthenticated}
       >
         Entrar
       </a>
       <button
-        class="rounded-full border border-ink-900/20 px-4 py-2 transition hover:border-ink-900/50"
+        class="rounded-full border border-ink-900/20 px-3 py-1.5 text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         type="button"
         data-nav-logout
         hidden={!isAuthenticated}

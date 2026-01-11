@@ -23,7 +23,13 @@ type Promotion = {
   startHour: string | null;
   endHour: string | null;
   active?: boolean;
+  featured?: boolean;
   business?: BusinessSummary | null;
+};
+
+type PromotionsResponse = {
+  items: Promotion[];
+  total: number;
 };
 
 const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
@@ -41,6 +47,12 @@ const loadMore = document.querySelector<HTMLDivElement>(
 const counter = document.querySelector<HTMLParagraphElement>(
   "[data-promos-counter]",
 );
+const filtersToggle = document.querySelector<HTMLButtonElement>(
+  "[data-promos-filters-toggle]",
+);
+const filtersBody = document.querySelector<HTMLElement>(
+  "[data-promos-filters-body]",
+);
 const promoModalOverlay = document.querySelector<HTMLElement>(
   "[data-promos-modal-overlay]",
 );
@@ -50,6 +62,9 @@ const promoModalClose = document.querySelector<HTMLButtonElement>(
 );
 const promoModalTitle = document.querySelector<HTMLElement>(
   "[data-promos-modal-title]",
+);
+const promoModalFeatured = document.querySelector<HTMLElement>(
+  "[data-promos-modal-featured]",
 );
 const promoModalBusiness = document.querySelector<HTMLElement>(
   "[data-promos-modal-business]",
@@ -65,12 +80,6 @@ const promoModalType = document.querySelector<HTMLElement>(
 );
 const promoModalValue = document.querySelector<HTMLElement>(
   "[data-promos-modal-value]",
-);
-const promoModalDates = document.querySelector<HTMLElement>(
-  "[data-promos-modal-dates]",
-);
-const promoModalHours = document.querySelector<HTMLElement>(
-  "[data-promos-modal-hours]",
 );
 const promoModalDays = document.querySelector<HTMLElement>(
   "[data-promos-modal-days]",
@@ -113,6 +122,7 @@ if (form && container) {
   let hasMore = true;
   let offset = 0;
   let totalLoaded = 0;
+  let totalActive = 0;
   let baseQuery = new URLSearchParams();
   const promoTypeLabels: Record<string, string> = {
     discount: "Descuento",
@@ -151,6 +161,52 @@ if (form && container) {
   };
 
   const formatPromoType = (type: string) => promoTypeLabels[type] ?? type;
+  const dayLabels: Record<string, string> = {
+    monday: "Lunes",
+    tuesday: "Martes",
+    wednesday: "Miércoles",
+    thursday: "Jueves",
+    friday: "Viernes",
+    saturday: "Sábado",
+    sunday: "Domingo",
+  };
+  const orderedDays = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
+  const formatDaysShort = (days: string[]) =>
+    orderedDays
+      .filter((day) => days.includes(day))
+      .map((day) => dayLabels[day] ?? day)
+      .join(" · ");
+  const formatDaysFull = (days: string[]) => {
+    const daySet = new Set(days);
+    const hasWeekdays =
+      ["monday", "tuesday", "wednesday", "thursday", "friday"].every((day) =>
+        daySet.has(day),
+      ) && daySet.size === 5;
+    const hasWeekend =
+      ["friday", "saturday", "sunday"].every((day) => daySet.has(day)) &&
+      daySet.size === 3;
+    if (daySet.size === 7) {
+      return "Todos los días";
+    }
+    if (hasWeekdays) {
+      return "Entre semana";
+    }
+    if (hasWeekend) {
+      return "Fin de semana";
+    }
+    return orderedDays
+      .filter((day) => daySet.has(day))
+      .map((day) => dayLabels[day] ?? day)
+      .join(", ");
+  };
 
   const promosById = new Map<string, Promotion>();
 
@@ -173,19 +229,12 @@ if (form && container) {
     const category = categories[0];
     const visual = getPromoVisual(category);
     const promoTypeLabel = formatPromoType(promo.promoType);
-    const dateRange =
-      promo.startDate && promo.endDate
-        ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
-            promo.endDate,
-          ).toLocaleDateString()}`
-        : "Indefinida";
-    const hours =
-      promo.startHour && promo.endHour
-        ? `${promo.startHour} - ${promo.endHour}`
-        : "Todo el día";
-    const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" · ");
+    const days = formatDaysFull(promo.daysOfWeek);
 
     if (promoModalTitle) promoModalTitle.textContent = promo.title;
+    if (promoModalFeatured) {
+      promoModalFeatured.classList.toggle("hidden", !promo.featured);
+    }
     if (promoModalBusiness) promoModalBusiness.textContent = businessName;
     if (promoModalDescription) {
       promoModalDescription.textContent =
@@ -193,8 +242,6 @@ if (form && container) {
     }
     if (promoModalType) promoModalType.textContent = promoTypeLabel;
     if (promoModalValue) promoModalValue.textContent = String(promo.value ?? "");
-    if (promoModalDates) promoModalDates.textContent = dateRange;
-    if (promoModalHours) promoModalHours.textContent = hours;
     if (promoModalDays) promoModalDays.textContent = days;
     if (promoModalTags) {
       promoModalTags.innerHTML = categories.length
@@ -267,6 +314,19 @@ if (form && container) {
     }
   };
 
+  if (filtersToggle && filtersBody) {
+    const updateFiltersToggle = (isOpen: boolean) => {
+      filtersBody.classList.toggle("hidden", !isOpen);
+      filtersToggle.textContent = isOpen ? "Ocultar" : "Mostrar";
+      filtersToggle.setAttribute("aria-expanded", String(isOpen));
+    };
+    updateFiltersToggle(true);
+    filtersToggle.addEventListener("click", () => {
+      const isOpen = !filtersBody.classList.contains("hidden");
+      updateFiltersToggle(!isOpen);
+    });
+  }
+
   const renderPromos = (promos: Promotion[], append = false) => {
     if (promos.length === 0 && !append) {
       renderMessage("No encontramos promos activas con esos filtros.");
@@ -289,18 +349,7 @@ if (form && container) {
         const categories = promo.business?.categories ?? [];
         const category = categories[0];
         const visual = getPromoVisual(category);
-        const promoTypeLabel = formatPromoType(promo.promoType);
-        const dateRange =
-          promo.startDate && promo.endDate
-            ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
-                promo.endDate,
-              ).toLocaleDateString()}`
-            : "Indefinida";
-        const hours =
-          promo.startHour && promo.endHour
-            ? `${promo.startHour} - ${promo.endHour}`
-            : "Todo el día";
-        const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" · ");
+        const days = formatDaysShort(promo.daysOfWeek);
         const value = promo.value ? `<span>${promo.value}</span>` : "";
         const categoryTags = categories
           .slice(0, 3)
@@ -324,17 +373,14 @@ if (form && container) {
                 <h3 class="text-lg font-semibold">${promo.title}</h3>
                 <p class="text-sm text-ink-900/60">${promo.description ?? "Promoción vigente"}</p>
               </div>
-              <span class="promo-badge">${promoTypeLabel}</span>
             </div>
             <div class="mt-3 flex flex-wrap gap-2 text-xs text-ink-900/60">
               <span class="promo-chip">${days}</span>
-              <span class="promo-chip">${hours}</span>
-              <span class="promo-chip">${dateRange}</span>
               ${value ? `<span class="promo-chip">${value}</span>` : ""}
             </div>
-            <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-900/60">
+            <div class="mt-3 flex flex-col gap-3 text-xs text-ink-900/60 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex flex-wrap gap-2">${categoryTags}</div>
-              ${instagramLink}
+              <div class="w-full sm:w-auto">${instagramLink}</div>
             </div>
           </article>
         `;
@@ -381,8 +427,11 @@ if (form && container) {
 
   const updateCounter = () => {
     if (!counter) return;
-    counter.textContent =
-      totalLoaded > 0 ? `${totalLoaded} promociones cargadas` : "";
+    if (totalActive === 0) {
+      counter.textContent = "0 promociones activas para hoy";
+      return;
+    }
+    counter.textContent = `${totalActive} promociones activas para hoy`;
   };
 
   const updateLoadMore = (message: string, loadingState = false) => {
@@ -412,9 +461,11 @@ if (form && container) {
       query.set("offset", String(offset));
       query.set("limit", String(PAGE_SIZE));
       const queryString = query.toString();
-      const promos = await apiFetch<Promotion[]>(
+      const response = await apiFetch<PromotionsResponse>(
         `/promotions/active${queryString ? `?${queryString}` : ""}`,
       );
+      const promos = response.items ?? [];
+      totalActive = response.total ?? 0;
       if (!append) {
         totalLoaded = 0;
         offset = 0;

@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  IsBoolean,
   MinLength,
   ValidateIf,
 } from "class-validator";
@@ -55,6 +56,11 @@ export class CreatePromotionDto {
   @IsUrl()
   @IsOptional()
   imageUrl?: string | null;
+
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  featured?: boolean;
 
   @IsArray()
   @IsEnum(DayOfWeek, { each: true })

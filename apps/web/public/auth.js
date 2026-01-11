@@ -132,7 +132,7 @@ if (form) {
         localStorage.setItem("auth", "true");
       } catch {
       }
-      showToast("Listo", "Bienvenido a Mis promos.", "success");
+      showToast("Listo", "Bienvenido a Tus promos.", "success");
       window.location.href = "/dashboard";
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al autenticar";

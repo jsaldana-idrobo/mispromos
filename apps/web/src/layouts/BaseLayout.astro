@@ -5,7 +5,7 @@ import SiteFooter from "../components/layout/SiteFooter.astro";
 
 const apiBase =
   import.meta.env.PUBLIC_API_BASE ?? "http://localhost:3000/api/v1";
-const title = Astro.props.title ?? "Mis promos";
+const title = Astro.props.title ?? "Tus promos";
 const containerClass = Astro.props.containerClass ?? "max-w-6xl";
 const cookieHeader = Astro.request.headers.get("cookie") ?? "";
 const hasAuthCookie = cookieHeader.includes("auth=");

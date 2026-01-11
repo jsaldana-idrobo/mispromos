@@ -63,6 +63,9 @@ export class PromotionService {
 
   async create(dto: CreatePromotionDto, actor: Actor) {
     await this.assertBusinessOwner(dto.businessId, actor);
+    if (dto.featured !== undefined && actor.role !== UserRole.ADMIN) {
+      throw new ForbiddenException("No autorizado");
+    }
     if (dto.branchId) {
       await this.assertBranchMatchesBusiness(dto.branchId, dto.businessId);
     }
@@ -255,22 +258,27 @@ export class PromotionService {
       ],
     };
 
-    const promos = await this.promotionModel
-      .find({
-        ...branchFilter,
-        ...businessFilter,
-        ...promoTypeFilter,
-        ...queryFilter,
-        active: true,
-        ...dateFilter,
-        ...timeFilter,
-        daysOfWeek: day,
-      })
+    const filter = {
+      ...branchFilter,
+      ...businessFilter,
+      ...promoTypeFilter,
+      ...queryFilter,
+      active: true,
+      ...dateFilter,
+      ...timeFilter,
+      daysOfWeek: day,
+    };
+
+    const [total, promos] = await Promise.all([
+      this.promotionModel.countDocuments(filter).exec(),
+      this.promotionModel
+        .find(filter)
       .sort({ createdAt: -1 })
       .skip(safeOffset)
       .limit(safeLimit)
       .lean()
-      .exec();
+        .exec(),
+    ]);
 
     const businessIds = Array.from(
       new Set(promos.map((promo) => promo.businessId).filter(Boolean)),
@@ -286,10 +294,13 @@ export class PromotionService {
       businesses.map((business) => [String(business._id), business]),
     );
 
-    return promos.map((promo) => ({
-      ...promo,
-      business: businessMap.get(promo.businessId) ?? null,
-    }));
+    return {
+      items: promos.map((promo) => ({
+        ...promo,
+        business: businessMap.get(promo.businessId) ?? null,
+      })),
+      total,
+    };
   }
 
   async findOne(id: string) {
@@ -304,6 +315,9 @@ export class PromotionService {
     const promo = await this.promotionModel.findById(id).exec();
     if (!promo) {
       throw new NotFoundException("Promoción no encontrada");
+    }
+    if (dto.featured !== undefined && actor.role !== UserRole.ADMIN) {
+      throw new ForbiddenException("No autorizado");
     }
     const targetBusinessId = dto.businessId ?? promo.businessId;
     await this.assertBusinessOwner(targetBusinessId, actor);

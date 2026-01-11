@@ -8,7 +8,7 @@ const city = searchParams.get("city") ?? "";
 const at = searchParams.get("at") ?? "";
 ---
 
-<BaseLayout title="Mis promos | Promos activas">
+<BaseLayout title="Tus promos | Promos activas">
   <section class="grid gap-6" data-redeploy="1">
     <PromosFilters city={city} at={at} />
     <PromosResults />

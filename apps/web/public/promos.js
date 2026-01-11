@@ -44,10 +44,15 @@
   var citySelect = document.querySelector("[data-city-select]");
   var loadMore = document.querySelector("[data-promos-load-more]");
   var counter = document.querySelector("[data-promos-counter]");
+  var filtersToggle = document.querySelector("[data-promos-filters-toggle]");
+  var filtersBody = document.querySelector("[data-promos-filters-body]");
   var promoModalOverlay = document.querySelector("[data-promos-modal-overlay]");
   var promoModal = document.querySelector("[data-promos-modal]");
   var promoModalClose = document.querySelector("[data-promos-modal-close]");
   var promoModalTitle = document.querySelector("[data-promos-modal-title]");
+  var promoModalFeatured = document.querySelector(
+    "[data-promos-modal-featured]"
+  );
   var promoModalBusiness = document.querySelector("[data-promos-modal-business]");
   var promoModalDescription = document.querySelector(
     "[data-promos-modal-description]"
@@ -55,8 +60,6 @@
   var promoModalTags = document.querySelector("[data-promos-modal-tags]");
   var promoModalType = document.querySelector("[data-promos-modal-type]");
   var promoModalValue = document.querySelector("[data-promos-modal-value]");
-  var promoModalDates = document.querySelector("[data-promos-modal-dates]");
-  var promoModalHours = document.querySelector("[data-promos-modal-hours]");
   var promoModalDays = document.querySelector("[data-promos-modal-days]");
   var promoModalInstagram = document.querySelector(
     "[data-promos-modal-instagram]"
@@ -76,6 +79,7 @@
     let hasMore = true;
     let offset = 0;
     let totalLoaded = 0;
+    let totalActive = 0;
     let baseQuery = new URLSearchParams();
     const promoTypeLabels = {
       discount: "Descuento",
@@ -110,6 +114,40 @@
       return toneMap[category] ?? defaultTone;
     };
     const formatPromoType = (type) => promoTypeLabels[type] ?? type;
+    const dayLabels = {
+      monday: "Lunes",
+      tuesday: "Martes",
+      wednesday: "Mi\u00E9rcoles",
+      thursday: "Jueves",
+      friday: "Viernes",
+      saturday: "S\u00E1bado",
+      sunday: "Domingo"
+    };
+    const orderedDays = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ];
+    const formatDaysShort = (days) => orderedDays.filter((day) => days.includes(day)).map((day) => dayLabels[day] ?? day).join(" \xB7 ");
+    const formatDaysFull = (days) => {
+      const daySet = new Set(days);
+      const hasWeekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"].every((day) => daySet.has(day)) && daySet.size === 5;
+      const hasWeekend = ["friday", "saturday", "sunday"].every((day) => daySet.has(day)) && daySet.size === 3;
+      if (daySet.size === 7) {
+        return "Todos los d\xEDas";
+      }
+      if (hasWeekdays) {
+        return "Entre semana";
+      }
+      if (hasWeekend) {
+        return "Fin de semana";
+      }
+      return orderedDays.filter((day) => daySet.has(day)).map((day) => dayLabels[day] ?? day).join(", ");
+    };
     const promosById = new Map();
     const setModalFieldVisibility = (wrapper, value) => {
       if (!wrapper) return;
@@ -126,20 +164,17 @@
       const category = categories[0];
       const visual = getPromoVisual(category);
       const promoTypeLabel = formatPromoType(promo.promoType);
-      const dateRange = promo.startDate && promo.endDate ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
-        promo.endDate
-      ).toLocaleDateString()}` : "Indefinida";
-      const hours = promo.startHour && promo.endHour ? `${promo.startHour} - ${promo.endHour}` : "Todo el d\xEDa";
-      const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" \xB7 ");
+      const days = formatDaysFull(promo.daysOfWeek);
       if (promoModalTitle) promoModalTitle.textContent = promo.title;
+      if (promoModalFeatured) {
+        promoModalFeatured.classList.toggle("hidden", !promo.featured);
+      }
       if (promoModalBusiness) promoModalBusiness.textContent = businessName;
       if (promoModalDescription) {
         promoModalDescription.textContent = promo.description ?? "Promoci\xF3n vigente.";
       }
       if (promoModalType) promoModalType.textContent = promoTypeLabel;
       if (promoModalValue) promoModalValue.textContent = String(promo.value ?? "");
-      if (promoModalDates) promoModalDates.textContent = dateRange;
-      if (promoModalHours) promoModalHours.textContent = hours;
       if (promoModalDays) promoModalDays.textContent = days;
       if (promoModalTags) {
         promoModalTags.innerHTML = categories.length ? categories.slice(0, 4).map((item) => `<span class="promo-pill">#${item}</span>`).join("") : `<span class="promo-pill">#local</span>`;
@@ -200,6 +235,18 @@
         counter.textContent = "";
       }
     };
+    if (filtersToggle && filtersBody) {
+      const updateFiltersToggle = (isOpen) => {
+        filtersBody.classList.toggle("hidden", !isOpen);
+        filtersToggle.textContent = isOpen ? "Ocultar" : "Mostrar";
+        filtersToggle.setAttribute("aria-expanded", String(isOpen));
+      };
+      updateFiltersToggle(true);
+      filtersToggle.addEventListener("click", () => {
+        const isOpen = !filtersBody.classList.contains("hidden");
+        updateFiltersToggle(!isOpen);
+      });
+    }
     const renderPromos = (promos, append = false) => {
       if (promos.length === 0 && !append) {
         renderMessage("No encontramos promos activas con esos filtros.");
@@ -217,12 +264,7 @@
         const categories = promo.business?.categories ?? [];
         const category = categories[0];
         const visual = getPromoVisual(category);
-        const promoTypeLabel = formatPromoType(promo.promoType);
-        const dateRange = promo.startDate && promo.endDate ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
-          promo.endDate
-        ).toLocaleDateString()}` : "Indefinida";
-        const hours = promo.startHour && promo.endHour ? `${promo.startHour} - ${promo.endHour}` : "Todo el d\xEDa";
-        const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" \xB7 ");
+        const days = formatDaysShort(promo.daysOfWeek);
         const value = promo.value ? `<span>${promo.value}</span>` : "";
         const categoryTags = categories.slice(0, 3).map((item) => `<span class="promo-pill">#${item}</span>`).join("");
         const instagramLink = instagramHandle ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>` : "";
@@ -239,17 +281,14 @@
                 <h3 class="text-lg font-semibold">${promo.title}</h3>
                 <p class="text-sm text-ink-900/60">${promo.description ?? "Promoci\xF3n vigente"}</p>
               </div>
-              <span class="promo-badge">${promoTypeLabel}</span>
             </div>
             <div class="mt-3 flex flex-wrap gap-2 text-xs text-ink-900/60">
               <span class="promo-chip">${days}</span>
-              <span class="promo-chip">${hours}</span>
-              <span class="promo-chip">${dateRange}</span>
               ${value ? `<span class="promo-chip">${value}</span>` : ""}
             </div>
-            <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-900/60">
+            <div class="mt-3 flex flex-col gap-3 text-xs text-ink-900/60 sm:flex-row sm:items-center sm:justify-between">
               <div class="flex flex-wrap gap-2">${categoryTags}</div>
-              ${instagramLink}
+              <div class="w-full sm:w-auto">${instagramLink}</div>
             </div>
           </article>
         `;
@@ -291,7 +330,11 @@
     };
     const updateCounter = () => {
       if (!counter) return;
-      counter.textContent = totalLoaded > 0 ? `${totalLoaded} promociones cargadas` : "";
+      if (totalActive === 0) {
+        counter.textContent = "0 promociones activas para hoy";
+        return;
+      }
+      counter.textContent = `${totalActive} promociones activas para hoy`;
     };
     const updateLoadMore = (message, loadingState = false) => {
       if (!loadMore) return;
@@ -316,9 +359,11 @@
         query.set("offset", String(offset));
         query.set("limit", String(PAGE_SIZE));
         const queryString = query.toString();
-        const promos = await apiFetch(
-          `/promotions/active${queryString ? `?${queryString}` : ""}`
-        );
+      const response = await apiFetch(
+        `/promotions/active${queryString ? `?${queryString}` : ""}`
+      );
+      const promos = response.items ?? [];
+      totalActive = response.total ?? 0;
         if (!append) {
           totalLoaded = 0;
           offset = 0;

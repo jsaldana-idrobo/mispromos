@@ -59,6 +59,11 @@ export class UpdatePromotionDto {
   @IsOptional()
   imageUrl?: string | null;
 
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  featured?: boolean;
+
   @IsArray()
   @IsEnum(DayOfWeek, { each: true })
   @IsOptional()

@@ -69,6 +69,7 @@ export const promotionSchema = z.object({
   startHour: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
   endHour: z.string().regex(/^\d{2}:\d{2}$/).nullable(),
   active: z.boolean().default(true),
+  featured: z.boolean().default(false),
   createdAt: timestampSchema,
 });
 

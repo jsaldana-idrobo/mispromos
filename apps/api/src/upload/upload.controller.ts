@@ -2,21 +2,28 @@ import {
   BadRequestException,
   Controller,
   Post,
-  Req,
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
-import type { Request } from "express";
-import path from "path";
-import { promises as fs } from "fs";
-import crypto from "crypto";
-import sharp from "sharp";
+import { v2 as cloudinary } from "cloudinary";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_WIDTH = 1200;
-const IMAGE_QUALITY = 80;
+
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+const apiKey = process.env.CLOUDINARY_API_KEY;
+const apiSecret = process.env.CLOUDINARY_API_SECRET;
+const uploadFolder = process.env.CLOUDINARY_FOLDER ?? "mispromos/promos";
+
+if (cloudName && apiKey && apiSecret) {
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+  });
+}
 
 @Controller("uploads")
 export class UploadController {
@@ -39,28 +46,36 @@ export class UploadController {
   )
   async uploadPromoImage(
     @UploadedFile() file: Express.Multer.File | undefined,
-    @Req() request: Request,
   ) {
     if (!file) {
       throw new BadRequestException("No se encontró imagen para subir.");
     }
+    if (!cloudName || !apiKey || !apiSecret) {
+      throw new BadRequestException("Cloudinary no está configurado.");
+    }
 
-    const uploadsRoot = path.join(process.cwd(), "uploads", "promos");
-    await fs.mkdir(uploadsRoot, { recursive: true });
-
-    const fileId = crypto.randomBytes(12).toString("hex");
-    const filename = `${Date.now()}-${fileId}.webp`;
-    const filePath = path.join(uploadsRoot, filename);
-
-    await sharp(file.buffer)
-      .rotate()
-      .resize({ width: MAX_WIDTH, withoutEnlargement: true })
-      .webp({ quality: IMAGE_QUALITY })
-      .toFile(filePath);
-
-    const host = request.get("host");
-    const protocol = request.protocol;
-    const url = `${protocol}://${host}/uploads/promos/${filename}`;
+    const url = await new Promise<string>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: uploadFolder,
+          resource_type: "image",
+          transformation: [
+            { width: MAX_WIDTH, crop: "limit" },
+            { quality: "auto:good", fetch_format: "auto" },
+          ],
+        },
+        (error, result) => {
+          if (error || !result?.secure_url) {
+            reject(
+              error ?? new Error("No se pudo obtener la URL de la imagen."),
+            );
+            return;
+          }
+          resolve(result.secure_url);
+        },
+      );
+      stream.end(file.buffer);
+    });
 
     return { url };
   }

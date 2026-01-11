@@ -46,6 +46,9 @@ export class Promotion {
   @Prop({ default: true })
   active!: boolean;
 
+  @Prop({ default: false })
+  featured!: boolean;
+
   @Prop({ default: () => new Date() })
   createdAt!: Date;
 }

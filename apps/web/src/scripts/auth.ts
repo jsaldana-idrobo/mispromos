@@ -66,7 +66,7 @@ if (form) {
       } catch {
         // ignore storage errors
       }
-      showToast("Listo", "Bienvenido a Mis promos.", "success");
+      showToast("Listo", "Bienvenido a Tus promos.", "success");
       window.location.href = "/dashboard";
     } catch (error) {
       const message =
