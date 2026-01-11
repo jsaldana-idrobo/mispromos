@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsUrl,
   MinLength,
   ValidateIf,
 } from "class-validator";
@@ -38,28 +39,48 @@ export class UpdatePromotionDto {
   @IsOptional()
   value?: string;
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.endDate !== null && object.endDate !== undefined),
+  )
   @IsDateString()
-  @IsOptional()
-  startDate?: string;
+  startDate?: string | null;
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.startDate !== null && object.startDate !== undefined),
+  )
   @IsDateString()
+  endDate?: string | null;
+
+  @IsUrl()
   @IsOptional()
-  endDate?: string;
+  imageUrl?: string | null;
 
   @IsArray()
   @IsEnum(DayOfWeek, { each: true })
   @IsOptional()
   daysOfWeek?: DayOfWeek[];
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.endHour !== null && object.endHour !== undefined),
+  )
   @IsString()
   @MinLength(1)
-  @IsOptional()
-  startHour?: string;
+  startHour?: string | null;
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.startHour !== null && object.startHour !== undefined),
+  )
   @IsString()
   @MinLength(1)
-  @IsOptional()
-  endHour?: string;
+  endHour?: string | null;
 
   @Type(() => Boolean)
   @IsBoolean()

@@ -33,7 +33,14 @@ type ResponseWithCookies = {
       maxAge?: number;
     },
   ) => void;
-  clearCookie: (name: string) => void;
+  clearCookie: (
+    name: string,
+    options?: {
+      httpOnly?: boolean;
+      sameSite?: "lax" | "strict" | "none";
+      secure?: boolean;
+    },
+  ) => void;
 };
 
 @Controller("auth")

@@ -44,6 +44,32 @@
   var citySelect = document.querySelector("[data-city-select]");
   var loadMore = document.querySelector("[data-promos-load-more]");
   var counter = document.querySelector("[data-promos-counter]");
+  var promoModalOverlay = document.querySelector("[data-promos-modal-overlay]");
+  var promoModal = document.querySelector("[data-promos-modal]");
+  var promoModalClose = document.querySelector("[data-promos-modal-close]");
+  var promoModalTitle = document.querySelector("[data-promos-modal-title]");
+  var promoModalBusiness = document.querySelector("[data-promos-modal-business]");
+  var promoModalDescription = document.querySelector(
+    "[data-promos-modal-description]"
+  );
+  var promoModalTags = document.querySelector("[data-promos-modal-tags]");
+  var promoModalType = document.querySelector("[data-promos-modal-type]");
+  var promoModalValue = document.querySelector("[data-promos-modal-value]");
+  var promoModalDates = document.querySelector("[data-promos-modal-dates]");
+  var promoModalHours = document.querySelector("[data-promos-modal-hours]");
+  var promoModalDays = document.querySelector("[data-promos-modal-days]");
+  var promoModalInstagram = document.querySelector(
+    "[data-promos-modal-instagram]"
+  );
+  var promoModalMedia = document.querySelector("[data-promos-modal-media]");
+  var promoModalImage = document.querySelector("[data-promos-modal-image]");
+  var promoModalEmoji = document.querySelector("[data-promos-modal-emoji]");
+  var promoModalFieldValue = document.querySelector(
+    '[data-promos-modal-field="value"]'
+  );
+  var promoModalFieldInstagram = document.querySelector(
+    '[data-promos-modal-field="instagram"]'
+  );
   var PAGE_SIZE = 10;
   if (form && container) {
     let loading = false;
@@ -51,10 +77,6 @@
     let offset = 0;
     let totalLoaded = 0;
     let baseQuery = new URLSearchParams();
-    const toastHost = document.createElement("div");
-    toastHost.className = "toast-host";
-    toastHost.setAttribute("aria-live", "polite");
-    document.body.appendChild(toastHost);
     const promoTypeLabels = {
       discount: "Descuento",
       "2x1": "2x1",
@@ -88,18 +110,87 @@
       return toneMap[category] ?? defaultTone;
     };
     const formatPromoType = (type) => promoTypeLabels[type] ?? type;
-    const showToast = (message) => {
-      const toast = document.createElement("div");
-      toast.className = "toast";
-      toast.textContent = message;
-      toastHost.appendChild(toast);
-      requestAnimationFrame(() => {
-        toast.classList.add("toast-visible");
-      });
-      window.setTimeout(() => {
-        toast.classList.remove("toast-visible");
-        window.setTimeout(() => toast.remove(), 300);
-      }, 2800);
+    const promosById = new Map();
+    const setModalFieldVisibility = (wrapper, value) => {
+      if (!wrapper) return;
+      if (!value) {
+        wrapper.classList.add("hidden");
+        return;
+      }
+      wrapper.classList.remove("hidden");
+    };
+    const openPromoModal = (promo) => {
+      if (!promoModalOverlay || !promoModal) return;
+      const businessName = promo.business?.name ?? "Negocio local";
+      const categories = promo.business?.categories ?? [];
+      const category = categories[0];
+      const visual = getPromoVisual(category);
+      const promoTypeLabel = formatPromoType(promo.promoType);
+      const dateRange = promo.startDate && promo.endDate ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
+        promo.endDate
+      ).toLocaleDateString()}` : "Indefinida";
+      const hours = promo.startHour && promo.endHour ? `${promo.startHour} - ${promo.endHour}` : "Todo el d\xEDa";
+      const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" \xB7 ");
+      if (promoModalTitle) promoModalTitle.textContent = promo.title;
+      if (promoModalBusiness) promoModalBusiness.textContent = businessName;
+      if (promoModalDescription) {
+        promoModalDescription.textContent = promo.description ?? "Promoci\xF3n vigente.";
+      }
+      if (promoModalType) promoModalType.textContent = promoTypeLabel;
+      if (promoModalValue) promoModalValue.textContent = String(promo.value ?? "");
+      if (promoModalDates) promoModalDates.textContent = dateRange;
+      if (promoModalHours) promoModalHours.textContent = hours;
+      if (promoModalDays) promoModalDays.textContent = days;
+      if (promoModalTags) {
+        promoModalTags.innerHTML = categories.length ? categories.slice(0, 4).map((item) => `<span class="promo-pill">#${item}</span>`).join("") : `<span class="promo-pill">#local</span>`;
+      }
+      if (promoModalInstagram) {
+        const instagramHandle = (promo.business?.instagram ?? "").replace("@", "").trim();
+        if (instagramHandle) {
+          promoModalInstagram.textContent = `@${instagramHandle}`;
+          promoModalInstagram.href = `https://instagram.com/${instagramHandle}`;
+        } else {
+          promoModalInstagram.textContent = "";
+          promoModalInstagram.removeAttribute("href");
+        }
+        setModalFieldVisibility(
+          promoModalFieldInstagram,
+          instagramHandle.length > 0 ? instagramHandle : null
+        );
+      }
+      setModalFieldVisibility(
+        promoModalFieldValue,
+        promo.value ? String(promo.value) : null
+      );
+      if (promoModalMedia) {
+        promoModalMedia.className = `h-56 overflow-hidden rounded-3xl border border-ink-900/10 ${visual.tone}`;
+      }
+      if (promo.imageUrl) {
+        if (promoModalImage) {
+          promoModalImage.src = promo.imageUrl;
+          promoModalImage.classList.remove("hidden");
+        }
+        if (promoModalEmoji) {
+          promoModalEmoji.textContent = "";
+          promoModalEmoji.classList.add("hidden");
+        }
+      } else {
+        if (promoModalImage) {
+          promoModalImage.removeAttribute("src");
+          promoModalImage.classList.add("hidden");
+        }
+        if (promoModalEmoji) {
+          promoModalEmoji.textContent = visual.emoji;
+          promoModalEmoji.classList.remove("hidden");
+        }
+      }
+      promoModalOverlay.hidden = false;
+      promoModalOverlay.classList.remove("hidden");
+    };
+    const closePromoModal = () => {
+      if (!promoModalOverlay) return;
+      promoModalOverlay.classList.add("hidden");
+      promoModalOverlay.hidden = true;
     };
     const renderMessage = (message) => {
       container.innerHTML = `
@@ -114,6 +205,12 @@
         renderMessage("No encontramos promos activas con esos filtros.");
         return;
       }
+      if (!append) {
+        promosById.clear();
+      }
+      promos.forEach((promo) => {
+        promosById.set(promo._id, promo);
+      });
       const html = promos.map((promo, index) => {
         const businessName = promo.business?.name ?? "Negocio local";
         const instagramHandle = (promo.business?.instagram ?? "").replace("@", "").trim();
@@ -121,19 +218,20 @@
         const category = categories[0];
         const visual = getPromoVisual(category);
         const promoTypeLabel = formatPromoType(promo.promoType);
-        const dateRange = `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
+        const dateRange = promo.startDate && promo.endDate ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
           promo.endDate
-        ).toLocaleDateString()}`;
-        const hours = `${promo.startHour} - ${promo.endHour}`;
+        ).toLocaleDateString()}` : "Indefinida";
+        const hours = promo.startHour && promo.endHour ? `${promo.startHour} - ${promo.endHour}` : "Todo el d\xEDa";
         const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" \xB7 ");
         const value = promo.value ? `<span>${promo.value}</span>` : "";
         const categoryTags = categories.slice(0, 3).map((item) => `<span class="promo-pill">#${item}</span>`).join("");
         const instagramLink = instagramHandle ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>` : "";
         const delay = Math.min(index * 60, 360);
+        const media = promo.imageUrl ? `<img class="promo-image" src="${promo.imageUrl}" alt="${promo.title}" loading="lazy" />` : `<span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>`;
         return `
-          <article class="promo-card" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
+          <article class="promo-card" data-promo-id="${promo._id}" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
             <div class="promo-media ${visual.tone}">
-              <span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>
+              ${media}
             </div>
             <div class="mt-4 flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -276,23 +374,29 @@
       );
       observer.observe(loadMore);
     }
+    promoModalClose?.addEventListener("click", closePromoModal);
+    promoModalOverlay?.addEventListener("click", (event) => {
+      if (event.target === promoModalOverlay) {
+        closePromoModal();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closePromoModal();
+      }
+    });
     container.addEventListener("click", (event) => {
       const target = event.target;
       if (target.closest("a")) {
         return;
       }
-      const card = target.closest("[data-promo-title]");
+      const card = target.closest("[data-promo-id]");
       if (!card) return;
-      const title = card.dataset.promoTitle ?? "Promo";
-      const business = card.dataset.promoBusiness ?? "tu negocio favorito";
-      const messages = [
-        `\xA1Buen provecho! ${title} te espera en ${business}.`,
-        `Plan perfecto: ${title}. Encu\xE9ntralo en ${business}.`,
-        `Hoy toca antojo: ${title}. Dale un vistazo a ${business}.`,
-        `Promo activada: ${title}. ${business} te espera.`
-      ];
-      const message = messages[Math.floor(Math.random() * messages.length)];
-      showToast(message);
+      const promoId = card.dataset.promoId ?? "";
+      const promo = promosById.get(promoId);
+      if (promo) {
+        openPromoModal(promo);
+      }
     });
   }
   if (categorySelect) {

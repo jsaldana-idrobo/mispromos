@@ -25,20 +25,23 @@ export class Promotion {
   @Prop({ type: MongooseSchema.Types.Mixed })
   value?: number | string;
 
-  @Prop({ required: true })
-  startDate!: Date;
+  @Prop({ type: Date, default: null })
+  startDate?: Date | null;
 
-  @Prop({ required: true })
-  endDate!: Date;
+  @Prop({ type: Date, default: null })
+  endDate?: Date | null;
+
+  @Prop({ type: String, trim: true, default: null })
+  imageUrl?: string | null;
 
   @Prop({ type: [String], required: true, enum: dayOfWeekValues })
   daysOfWeek!: string[];
 
-  @Prop({ required: true })
-  startHour!: string;
+  @Prop({ type: String, default: null })
+  startHour?: string | null;
 
-  @Prop({ required: true })
-  endHour!: string;
+  @Prop({ type: String, default: null })
+  endHour?: string | null;
 
   @Prop({ default: true })
   active!: boolean;

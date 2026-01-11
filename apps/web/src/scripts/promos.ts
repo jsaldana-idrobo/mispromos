@@ -16,11 +16,12 @@ type Promotion = {
   description?: string;
   promoType: string;
   value?: string | number;
-  startDate: string;
-  endDate: string;
+  imageUrl?: string | null;
+  startDate: string | null;
+  endDate: string | null;
   daysOfWeek: string[];
-  startHour: string;
-  endHour: string;
+  startHour: string | null;
+  endHour: string | null;
   active?: boolean;
   business?: BusinessSummary | null;
 };
@@ -39,6 +40,58 @@ const loadMore = document.querySelector<HTMLDivElement>(
 );
 const counter = document.querySelector<HTMLParagraphElement>(
   "[data-promos-counter]",
+);
+const promoModalOverlay = document.querySelector<HTMLElement>(
+  "[data-promos-modal-overlay]",
+);
+const promoModal = document.querySelector<HTMLElement>("[data-promos-modal]");
+const promoModalClose = document.querySelector<HTMLButtonElement>(
+  "[data-promos-modal-close]",
+);
+const promoModalTitle = document.querySelector<HTMLElement>(
+  "[data-promos-modal-title]",
+);
+const promoModalBusiness = document.querySelector<HTMLElement>(
+  "[data-promos-modal-business]",
+);
+const promoModalDescription = document.querySelector<HTMLElement>(
+  "[data-promos-modal-description]",
+);
+const promoModalTags = document.querySelector<HTMLElement>(
+  "[data-promos-modal-tags]",
+);
+const promoModalType = document.querySelector<HTMLElement>(
+  "[data-promos-modal-type]",
+);
+const promoModalValue = document.querySelector<HTMLElement>(
+  "[data-promos-modal-value]",
+);
+const promoModalDates = document.querySelector<HTMLElement>(
+  "[data-promos-modal-dates]",
+);
+const promoModalHours = document.querySelector<HTMLElement>(
+  "[data-promos-modal-hours]",
+);
+const promoModalDays = document.querySelector<HTMLElement>(
+  "[data-promos-modal-days]",
+);
+const promoModalInstagram = document.querySelector<HTMLAnchorElement>(
+  "[data-promos-modal-instagram]",
+);
+const promoModalMedia = document.querySelector<HTMLElement>(
+  "[data-promos-modal-media]",
+);
+const promoModalImage = document.querySelector<HTMLImageElement>(
+  "[data-promos-modal-image]",
+);
+const promoModalEmoji = document.querySelector<HTMLElement>(
+  "[data-promos-modal-emoji]",
+);
+const promoModalFieldValue = document.querySelector<HTMLElement>(
+  "[data-promos-modal-field=\"value\"]",
+);
+const promoModalFieldInstagram = document.querySelector<HTMLElement>(
+  "[data-promos-modal-field=\"instagram\"]",
 );
 
 const PAGE_SIZE = 10;
@@ -61,11 +114,6 @@ if (form && container) {
   let offset = 0;
   let totalLoaded = 0;
   let baseQuery = new URLSearchParams();
-  const toastHost = document.createElement("div");
-  toastHost.className = "toast-host";
-  toastHost.setAttribute("aria-live", "polite");
-  document.body.appendChild(toastHost);
-
   const promoTypeLabels: Record<string, string> = {
     discount: "Descuento",
     "2x1": "2x1",
@@ -104,18 +152,110 @@ if (form && container) {
 
   const formatPromoType = (type: string) => promoTypeLabels[type] ?? type;
 
-  const showToast = (message: string) => {
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.textContent = message;
-    toastHost.appendChild(toast);
-    requestAnimationFrame(() => {
-      toast.classList.add("toast-visible");
-    });
-    window.setTimeout(() => {
-      toast.classList.remove("toast-visible");
-      window.setTimeout(() => toast.remove(), 300);
-    }, 2800);
+  const promosById = new Map<string, Promotion>();
+
+  const setModalFieldVisibility = (
+    wrapper: HTMLElement | null,
+    value: string | null,
+  ) => {
+    if (!wrapper) return;
+    if (!value) {
+      wrapper.classList.add("hidden");
+      return;
+    }
+    wrapper.classList.remove("hidden");
+  };
+
+  const openPromoModal = (promo: Promotion) => {
+    if (!promoModalOverlay || !promoModal) return;
+    const businessName = promo.business?.name ?? "Negocio local";
+    const categories = promo.business?.categories ?? [];
+    const category = categories[0];
+    const visual = getPromoVisual(category);
+    const promoTypeLabel = formatPromoType(promo.promoType);
+    const dateRange =
+      promo.startDate && promo.endDate
+        ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
+            promo.endDate,
+          ).toLocaleDateString()}`
+        : "Indefinida";
+    const hours =
+      promo.startHour && promo.endHour
+        ? `${promo.startHour} - ${promo.endHour}`
+        : "Todo el día";
+    const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" · ");
+
+    if (promoModalTitle) promoModalTitle.textContent = promo.title;
+    if (promoModalBusiness) promoModalBusiness.textContent = businessName;
+    if (promoModalDescription) {
+      promoModalDescription.textContent =
+        promo.description ?? "Promoción vigente.";
+    }
+    if (promoModalType) promoModalType.textContent = promoTypeLabel;
+    if (promoModalValue) promoModalValue.textContent = String(promo.value ?? "");
+    if (promoModalDates) promoModalDates.textContent = dateRange;
+    if (promoModalHours) promoModalHours.textContent = hours;
+    if (promoModalDays) promoModalDays.textContent = days;
+    if (promoModalTags) {
+      promoModalTags.innerHTML = categories.length
+        ? categories
+            .slice(0, 4)
+            .map((item) => `<span class="promo-pill">#${item}</span>`)
+            .join("")
+        : `<span class="promo-pill">#local</span>`;
+    }
+    if (promoModalInstagram) {
+      const instagramHandle = (promo.business?.instagram ?? "")
+        .replace("@", "")
+        .trim();
+      if (instagramHandle) {
+        promoModalInstagram.textContent = `@${instagramHandle}`;
+        promoModalInstagram.href = `https://instagram.com/${instagramHandle}`;
+      } else {
+        promoModalInstagram.textContent = "";
+        promoModalInstagram.removeAttribute("href");
+      }
+      setModalFieldVisibility(
+        promoModalFieldInstagram,
+        instagramHandle.length > 0 ? instagramHandle : null,
+      );
+    }
+    setModalFieldVisibility(
+      promoModalFieldValue,
+      promo.value ? String(promo.value) : null,
+    );
+
+    if (promoModalMedia) {
+      promoModalMedia.className = `h-56 overflow-hidden rounded-3xl border border-ink-900/10 ${visual.tone}`;
+    }
+    if (promo.imageUrl) {
+      if (promoModalImage) {
+        promoModalImage.src = promo.imageUrl;
+        promoModalImage.classList.remove("hidden");
+      }
+      if (promoModalEmoji) {
+        promoModalEmoji.textContent = "";
+        promoModalEmoji.classList.add("hidden");
+      }
+    } else {
+      if (promoModalImage) {
+        promoModalImage.removeAttribute("src");
+        promoModalImage.classList.add("hidden");
+      }
+      if (promoModalEmoji) {
+        promoModalEmoji.textContent = visual.emoji;
+        promoModalEmoji.classList.remove("hidden");
+      }
+    }
+
+    promoModalOverlay.hidden = false;
+    promoModalOverlay.classList.remove("hidden");
+  };
+
+  const closePromoModal = () => {
+    if (!promoModalOverlay) return;
+    promoModalOverlay.classList.add("hidden");
+    promoModalOverlay.hidden = true;
   };
 
   const renderMessage = (message: string) => {
@@ -133,6 +273,13 @@ if (form && container) {
       return;
     }
 
+    if (!append) {
+      promosById.clear();
+    }
+    promos.forEach((promo) => {
+      promosById.set(promo._id, promo);
+    });
+
     const html = promos
       .map((promo, index) => {
         const businessName = promo.business?.name ?? "Negocio local";
@@ -143,10 +290,16 @@ if (form && container) {
         const category = categories[0];
         const visual = getPromoVisual(category);
         const promoTypeLabel = formatPromoType(promo.promoType);
-        const dateRange = `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
-          promo.endDate,
-        ).toLocaleDateString()}`;
-        const hours = `${promo.startHour} - ${promo.endHour}`;
+        const dateRange =
+          promo.startDate && promo.endDate
+            ? `${new Date(promo.startDate).toLocaleDateString()} - ${new Date(
+                promo.endDate,
+              ).toLocaleDateString()}`
+            : "Indefinida";
+        const hours =
+          promo.startHour && promo.endHour
+            ? `${promo.startHour} - ${promo.endHour}`
+            : "Todo el día";
         const days = promo.daysOfWeek.map((day) => day.slice(0, 3)).join(" · ");
         const value = promo.value ? `<span>${promo.value}</span>` : "";
         const categoryTags = categories
@@ -157,10 +310,13 @@ if (form && container) {
           ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
           : "";
         const delay = Math.min(index * 60, 360);
+        const media = promo.imageUrl
+          ? `<img class="promo-image" src="${promo.imageUrl}" alt="${promo.title}" loading="lazy" />`
+          : `<span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>`;
         return `
-          <article class="promo-card" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
+          <article class="promo-card" data-promo-id="${promo._id}" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
             <div class="promo-media ${visual.tone}">
-              <span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>
+              ${media}
             </div>
             <div class="mt-4 flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -323,23 +479,30 @@ if (form && container) {
     observer.observe(loadMore);
   }
 
+  promoModalClose?.addEventListener("click", closePromoModal);
+  promoModalOverlay?.addEventListener("click", (event) => {
+    if (event.target === promoModalOverlay) {
+      closePromoModal();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closePromoModal();
+    }
+  });
+
   container.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
     if (target.closest("a")) {
       return;
     }
-    const card = target.closest<HTMLElement>("[data-promo-title]");
+    const card = target.closest<HTMLElement>("[data-promo-id]");
     if (!card) return;
-    const title = card.dataset.promoTitle ?? "Promo";
-    const business = card.dataset.promoBusiness ?? "tu negocio favorito";
-    const messages = [
-      `¡Buen provecho! ${title} te espera en ${business}.`,
-      `Plan perfecto: ${title}. Encuéntralo en ${business}.`,
-      `Hoy toca antojo: ${title}. Dale un vistazo a ${business}.`,
-      `Promo activada: ${title}. ${business} te espera.`,
-    ];
-    const message = messages[Math.floor(Math.random() * messages.length)];
-    showToast(message);
+    const promoId = card.dataset.promoId ?? "";
+    const promo = promosById.get(promoId);
+    if (promo) {
+      openPromoModal(promo);
+    }
   });
 }
 

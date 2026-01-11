@@ -121,6 +121,11 @@ var branchForm = document.querySelector("[data-branch-form]");
 var branchMessage = document.querySelector("[data-branch-message]");
 var branchMode = document.querySelector("[data-branch-mode]");
 var promoForm = document.querySelector("[data-promo-form]");
+var promoImageFileInput = document.querySelector("[data-promo-image-file]");
+var promoImagePreview = document.querySelector("[data-promo-image-preview]");
+var promoImagePreviewWrapper = document.querySelector(
+  "[data-promo-image-preview-wrapper]"
+);
 var promoMessage = document.querySelector("[data-promo-message]");
 var promoMode = document.querySelector("[data-promo-mode]");
 var promoSearchInput = document.querySelector("[data-promo-search]");
@@ -375,11 +380,43 @@ var setInputValue = (form, name, value) => {
   }
 };
 var formatDateInput = (value) => {
+  if (!value) {
+    return "";
+  }
   const date = new Date(value);
   if (Number.isNaN(date.valueOf())) {
     return "";
   }
   return date.toISOString().slice(0, 10);
+};
+var setPromoImagePreview = (url) => {
+  if (!promoImagePreview || !promoImagePreviewWrapper) return;
+  if (!url) {
+    promoImagePreview.removeAttribute("src");
+    promoImagePreviewWrapper.classList.add("hidden");
+    return;
+  }
+  promoImagePreview.src = url;
+  promoImagePreviewWrapper.classList.remove("hidden");
+};
+var uploadPromoImage = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`${API_BASE}/uploads/promo-image`, {
+    method: "POST",
+    body: formData,
+    credentials: "include"
+  });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => void 0);
+    const message = payload?.message ?? "No pudimos subir la foto de la promoción.";
+    throw new Error(Array.isArray(message) ? message.join(", ") : message);
+  }
+  const payload = await response.json();
+  if (!payload.url) {
+    throw new Error("La respuesta de la subida no incluye la URL.");
+  }
+  return payload.url;
 };
 var setBusinessForm = (business, options = {}) => {
   if (!businessForm) return;
@@ -460,6 +497,10 @@ var setPromoForm = async (promo, options = {}) => {
     promoForm.dataset.editId = "";
     setFormReadOnly(promoForm, false);
     setMode(promoForm, promoMode, null, "create");
+    setPromoImagePreview(null);
+    if (promoImageFileInput) {
+      promoImageFileInput.value = "";
+    }
     if (promoModalTitle) {
       promoModalTitle.textContent = "Crear promoci\xF3n";
     }
@@ -491,12 +532,13 @@ var setPromoForm = async (promo, options = {}) => {
   setInputValue(promoForm, "branchId", promo.branchId ?? "");
   setInputValue(promoForm, "title", promo.title);
   setInputValue(promoForm, "description", promo.description ?? "");
+  setInputValue(promoForm, "imageUrl", promo.imageUrl ?? "");
   setInputValue(promoForm, "promoType", promo.promoType);
   setInputValue(promoForm, "value", promo.value ? String(promo.value) : "");
   setInputValue(promoForm, "startDate", formatDateInput(promo.startDate));
   setInputValue(promoForm, "endDate", formatDateInput(promo.endDate));
-  setInputValue(promoForm, "startHour", promo.startHour);
-  setInputValue(promoForm, "endHour", promo.endHour);
+  setInputValue(promoForm, "startHour", promo.startHour ?? "");
+  setInputValue(promoForm, "endHour", promo.endHour ?? "");
   const dayInputs = promoForm.querySelectorAll('input[name="daysOfWeek"]');
   dayInputs.forEach((input) => {
     input.checked = promo.daysOfWeek.includes(input.value);
@@ -505,6 +547,7 @@ var setPromoForm = async (promo, options = {}) => {
   if (activeInput) {
     activeInput.checked = promo.active ?? true;
   }
+  setPromoImagePreview(promo.imageUrl ?? null);
 };
 var setCityForm = (city, options = {}) => {
   if (!cityForm) return;
@@ -1987,6 +2030,29 @@ var handleBranchForm = () => {
 };
 var handlePromoForm = () => {
   if (!promoForm) return;
+  const promoImageUrlInput = promoForm.querySelector('input[name="imageUrl"]');
+  promoImageUrlInput?.addEventListener("input", () => {
+    const value = promoImageUrlInput.value.trim();
+    setPromoImagePreview(value.length > 0 ? value : null);
+  });
+  promoImageFileInput?.addEventListener("change", async () => {
+    const file = promoImageFileInput.files?.[0];
+    if (!file) return;
+    setMessage(promoMessage, "Subiendo foto...");
+    try {
+      const url = await uploadPromoImage(file);
+      setInputValue(promoForm, "imageUrl", url);
+      setPromoImagePreview(url);
+      setMessage(promoMessage, "");
+      showToast("Listo", "Foto subida.", "success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error subiendo la foto.";
+      setMessage(promoMessage, message);
+      showToast("Error", message, "error");
+    } finally {
+      promoImageFileInput.value = "";
+    }
+  });
   promoForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (promoForm.dataset.mode === "view") {
@@ -1996,23 +2062,41 @@ var handlePromoForm = () => {
     setMessage(promoMessage, promoEditing ? "Actualizando promoci\xF3n..." : "Guardando promoci\xF3n...");
     const data = new FormData(promoForm);
     const days = data.getAll("daysOfWeek").map((day) => String(day));
-    const startDate = String(data.get("startDate"));
-    const endDate = String(data.get("endDate"));
-    const startDateIso = startDate ? (/* @__PURE__ */ new Date(`${startDate}T00:00:00`)).toISOString() : "";
-    const endDateIso = endDate ? (/* @__PURE__ */ new Date(`${endDate}T23:59:59`)).toISOString() : "";
+    const startDateValue = String(data.get("startDate") ?? "");
+    const endDateValue = String(data.get("endDate") ?? "");
+    const startDateIso = startDateValue ? (/* @__PURE__ */ new Date(`${startDateValue}T00:00:00`)).toISOString() : null;
+    const endDateIso = endDateValue ? (/* @__PURE__ */ new Date(`${endDateValue}T23:59:59`)).toISOString() : null;
+    const startHourValue = String(data.get("startHour") ?? "");
+    const endHourValue = String(data.get("endHour") ?? "");
+    const startHour = startHourValue.length > 0 ? startHourValue : null;
+    const endHour = endHourValue.length > 0 ? endHourValue : null;
+    const imageUrlValue = String(data.get("imageUrl") ?? "").trim();
+    const imageUrl = imageUrlValue.length > 0 ? imageUrlValue : null;
     if (days.length === 0) {
       const message = "Selecciona al menos un d\xEDa de la semana.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
       return;
     }
-    if (startDate && endDate && !isValidDateRange(startDateIso, endDateIso)) {
+    if (startDateValue && !endDateValue || !startDateValue && endDateValue) {
+      const message = "Si defines fechas, debes completar inicio y fin.";
+      setMessage(promoMessage, message);
+      showToast("Error", message, "error");
+      return;
+    }
+    if (startHourValue && !endHourValue || !startHourValue && endHourValue) {
+      const message = "Si defines horas, debes completar inicio y fin.";
+      setMessage(promoMessage, message);
+      showToast("Error", message, "error");
+      return;
+    }
+    if (startDateIso && endDateIso && !isValidDateRange(startDateIso, endDateIso)) {
       const message = "La fecha de fin debe ser posterior a la fecha de inicio.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
       return;
     }
-    if (!isValidTimeRange(String(data.get("startHour") ?? ""), String(data.get("endHour") ?? ""))) {
+    if (startHour && endHour && !isValidTimeRange(startHour, endHour)) {
       const message = "La hora fin debe ser posterior a la hora inicio.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
@@ -2025,13 +2109,14 @@ var handlePromoForm = () => {
           branchId: data.get("branchId") || null,
           title: data.get("title"),
           description: data.get("description") || void 0,
+          imageUrl,
           promoType: data.get("promoType"),
           value: data.get("value") || void 0,
           startDate: startDateIso,
           endDate: endDateIso,
           daysOfWeek: days,
-          startHour: data.get("startHour"),
-          endHour: data.get("endHour"),
+          startHour,
+          endHour,
           active: Boolean(data.get("active"))
         };
         if (promoForm.dataset.mode === "edit" && promoForm.dataset.editId) {

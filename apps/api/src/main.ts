@@ -1,5 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
+import express from "express";
+import path from "path";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 import { MongoExceptionFilter } from "./common/filters/mongo-exception.filter";
@@ -57,6 +59,8 @@ async function bootstrap() {
       }),
     );
   }
+
+  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

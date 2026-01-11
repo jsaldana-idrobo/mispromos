@@ -9,3 +9,4 @@ coverage
 .pnp.*
 *.tsbuildinfo
 apps/web/.astro
+uploads

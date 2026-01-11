@@ -22,3 +22,94 @@
   <div class="mt-6 text-center text-sm text-ink-900/60" data-promos-load-more>
   </div>
 </div>
+
+<div
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-ink-900/40 p-4 backdrop-blur-sm"
+  data-promos-modal-overlay
+  hidden
+>
+  <div
+    class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-ink-900/10 bg-white/95 p-6 shadow-2xl"
+    data-promos-modal
+  >
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+          Promoción destacada
+        </p>
+        <h3 class="text-2xl font-semibold" data-promos-modal-title></h3>
+        <p class="mt-1 text-sm text-ink-900/60" data-promos-modal-business></p>
+      </div>
+      <button
+        class="rounded-full border border-ink-900/20 px-3 py-1 text-xs"
+        type="button"
+        data-promos-modal-close
+      >
+        Cerrar
+      </button>
+    </div>
+    <div class="mt-6 grid gap-4">
+      <div
+        class="h-56 overflow-hidden rounded-3xl border border-ink-900/10"
+        data-promos-modal-media
+      >
+        <img
+          class="h-full w-full object-cover"
+          alt="Foto de la promoción"
+          data-promos-modal-image
+        />
+        <div
+          class="flex h-full w-full items-center justify-center text-5xl"
+          data-promos-modal-emoji
+        ></div>
+      </div>
+      <p class="text-sm text-ink-900/70" data-promos-modal-description></p>
+      <div class="grid gap-3 text-sm text-ink-900/70">
+        <div class="flex flex-wrap gap-2" data-promos-modal-tags></div>
+        <div class="grid gap-2 sm:grid-cols-2">
+          <div data-promos-modal-field="type">
+            <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+              Tipo
+            </p>
+            <p data-promos-modal-type></p>
+          </div>
+          <div data-promos-modal-field="value">
+            <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+              Valor
+            </p>
+            <p data-promos-modal-value></p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+              Fechas
+            </p>
+            <p data-promos-modal-dates></p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+              Horario
+            </p>
+            <p data-promos-modal-hours></p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+              Días
+            </p>
+            <p data-promos-modal-days></p>
+          </div>
+          <div data-promos-modal-field="instagram">
+            <p class="text-xs uppercase tracking-[0.2em] text-ink-900/50">
+              Instagram
+            </p>
+            <a
+              class="underline"
+              target="_blank"
+              rel="noreferrer"
+              data-promos-modal-instagram
+            ></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

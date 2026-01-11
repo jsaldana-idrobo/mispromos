@@ -218,6 +218,42 @@ export class PromotionService {
 
     const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
     const safeOffset = Math.max(offset ?? 0, 0);
+    const dateFilter = {
+      $and: [
+        {
+          $or: [
+            { startDate: { $lte: now } },
+            { startDate: null },
+            { startDate: { $exists: false } },
+          ],
+        },
+        {
+          $or: [
+            { endDate: { $gte: now } },
+            { endDate: null },
+            { endDate: { $exists: false } },
+          ],
+        },
+      ],
+    };
+    const timeFilter = {
+      $and: [
+        {
+          $or: [
+            { startHour: { $lte: time } },
+            { startHour: null },
+            { startHour: { $exists: false } },
+          ],
+        },
+        {
+          $or: [
+            { endHour: { $gte: time } },
+            { endHour: null },
+            { endHour: { $exists: false } },
+          ],
+        },
+      ],
+    };
 
     const promos = await this.promotionModel
       .find({
@@ -226,11 +262,9 @@ export class PromotionService {
         ...promoTypeFilter,
         ...queryFilter,
         active: true,
-        startDate: { $lte: now },
-        endDate: { $gte: now },
+        ...dateFilter,
+        ...timeFilter,
         daysOfWeek: day,
-        startHour: { $lte: time },
-        endHour: { $gte: time },
       })
       .sort({ createdAt: -1 })
       .skip(safeOffset)

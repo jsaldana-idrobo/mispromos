@@ -9,6 +9,7 @@ import { PromotionModule } from "./promotion/promotion.module";
 import { AuthModule } from "./auth/auth.module";
 import { CityModule } from "./city/city.module";
 import { CategoryModule } from "./category/category.module";
+import { UploadModule } from "./upload/upload.module";
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CategoryModule } from "./category/category.module";
     AuthModule,
     CityModule,
     CategoryModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsUrl,
   MinLength,
   ValidateIf,
 } from "class-validator";
@@ -35,23 +36,47 @@ export class CreatePromotionDto {
   @IsOptional()
   value?: string;
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.endDate !== null && object.endDate !== undefined),
+  )
   @IsDateString()
-  startDate!: string;
+  startDate?: string | null;
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.startDate !== null && object.startDate !== undefined),
+  )
   @IsDateString()
-  endDate!: string;
+  endDate?: string | null;
+
+  @IsUrl()
+  @IsOptional()
+  imageUrl?: string | null;
 
   @IsArray()
   @IsEnum(DayOfWeek, { each: true })
   daysOfWeek!: DayOfWeek[];
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.endHour !== null && object.endHour !== undefined),
+  )
   @IsString()
   @MinLength(1)
-  startHour!: string;
+  startHour?: string | null;
 
+  @ValidateIf(
+    (object, value) =>
+      (value !== null && value !== undefined) ||
+      (object.startHour !== null && object.startHour !== undefined),
+  )
   @IsString()
   @MinLength(1)
-  endHour!: string;
+  endHour?: string | null;
 
   @Type(() => Boolean)
   @IsBoolean()

@@ -56,6 +56,32 @@ const { promoTypes = [], promoTypeLabels = {}, days = [] } = Astro.props;
         <textarea class="input-field" name="description" rows={2}></textarea>
       </label>
       <label class="grid gap-2 text-sm font-semibold">
+        Foto (url opcional)
+        <input
+          class="input-field"
+          type="url"
+          name="imageUrl"
+          placeholder="https://..."
+        />
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
+        Foto (archivo opcional)
+        <input
+          class="input-field"
+          type="file"
+          name="imageFile"
+          accept="image/*"
+          data-promo-image-file
+        />
+      </label>
+      <div class="hidden" data-promo-image-preview-wrapper>
+        <img
+          class="h-40 w-full rounded-2xl border border-ink-900/10 object-cover"
+          alt="Vista previa de la promoción"
+          data-promo-image-preview
+        />
+      </div>
+      <label class="grid gap-2 text-sm font-semibold">
         Tipo de promo
         <select class="input-field" name="promoType" required>
           {
@@ -85,19 +111,19 @@ const { promoTypes = [], promoTypeLabels = {}, days = [] } = Astro.props;
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="grid gap-2 text-sm font-semibold">
           Inicio (fecha)
-          <input class="input-field" type="date" name="startDate" required />
+          <input class="input-field" type="date" name="startDate" />
         </label>
         <label class="grid gap-2 text-sm font-semibold">
           Fin (fecha)
-          <input class="input-field" type="date" name="endDate" required />
+          <input class="input-field" type="date" name="endDate" />
         </label>
         <label class="grid gap-2 text-sm font-semibold">
-          Hora inicio
-          <input class="input-field" type="time" name="startHour" required />
+          Hora inicio (opcional)
+          <input class="input-field" type="time" name="startHour" />
         </label>
         <label class="grid gap-2 text-sm font-semibold">
-          Hora fin
-          <input class="input-field" type="time" name="endHour" required />
+          Hora fin (opcional)
+          <input class="input-field" type="time" name="endHour" />
         </label>
       </div>
       <label class="flex items-center gap-2 text-sm">
