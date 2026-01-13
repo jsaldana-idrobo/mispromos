@@ -103,6 +103,11 @@ body {
   animation: spin 0.9s linear infinite;
 }
 
+.spinner-primary {
+  border-color: rgba(var(--primary-500), 0.25);
+  border-top-color: rgb(var(--primary-500));
+}
+
 .promo-card {
   position: relative;
   border: 1px solid rgba(46, 41, 52, 0.08);

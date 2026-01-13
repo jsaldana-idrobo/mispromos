@@ -3,31 +3,40 @@
 ---
 
 <div class="rounded-3xl border border-ink-900/10 bg-white/70 p-6">
-  <section class="hidden" data-promos-featured-section>
-    <div class="flex items-center gap-3">
-      <h3 class="text-lg font-semibold">Promociones destacadas</h3>
-      <p class="ml-auto text-right text-sm text-ink-900/60" data-promos-counter>
-      </p>
-    </div>
-    <div
-      class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
-      data-promos-featured
-    >
-    </div>
-  </section>
-  <section class="mt-8">
-    <div class="flex items-center justify-between gap-3">
-      <h3 class="text-lg font-semibold">Todas las promociones</h3>
-    </div>
-    <div class="mt-4 grid gap-4" data-promos-container>
-      <div
-        class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900/70"
-      >
-        Cargando promociones activas...
+  <div
+    class="flex flex-col items-center gap-3 rounded-3xl border border-ink-900/10 bg-white/90 px-6 py-10 text-center text-sm text-ink-900/70 shadow-sm"
+    data-promos-loading
+    role="status"
+    aria-live="polite"
+  >
+    <span class="spinner spinner-primary" aria-hidden="true"></span>
+    <p class="text-sm font-medium">Cargando promociones...</p>
+    <p class="text-xs text-ink-900/50">Buscando destacadas y activas.</p>
+  </div>
+  <div data-promos-content>
+    <section class="hidden" data-promos-featured-section>
+      <div class="flex items-center gap-3">
+        <h3 class="text-lg font-semibold">Promociones destacadas</h3>
+        <p
+          class="ml-auto text-right text-sm text-ink-900/60"
+          data-promos-counter
+        >
+        </p>
       </div>
+      <div
+        class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+        data-promos-featured
+      >
+      </div>
+    </section>
+    <section class="mt-8">
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="text-lg font-semibold">Todas las promociones</h3>
+      </div>
+      <div class="mt-4 grid gap-4" data-promos-container></div>
+    </section>
+    <div class="mt-6 text-center text-sm text-ink-900/60" data-promos-load-more>
     </div>
-  </section>
-  <div class="mt-6 text-center text-sm text-ink-900/60" data-promos-load-more>
   </div>
 </div>
 

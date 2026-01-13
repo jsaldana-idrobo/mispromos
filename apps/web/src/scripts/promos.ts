@@ -36,6 +36,12 @@ const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
 const container = document.querySelector<HTMLDivElement>(
   "[data-promos-container]",
 );
+const loadingBlock = document.querySelector<HTMLElement>(
+  "[data-promos-loading]",
+);
+const contentBlock = document.querySelector<HTMLElement>(
+  "[data-promos-content]",
+);
 const featuredSection = document.querySelector<HTMLElement>(
   "[data-promos-featured-section]",
 );
@@ -131,6 +137,8 @@ if (form && container) {
   let totalLoaded = 0;
   let totalRegular = 0;
   let totalFeatured = 0;
+  let pendingFeatured = false;
+  let pendingPromos = false;
   let baseQuery = new URLSearchParams();
   const promoTypeLabels: Record<string, string> = {
     discount: "Descuento",
@@ -315,10 +323,17 @@ if (form && container) {
     promoModalOverlay.hidden = true;
   };
 
-  const renderMessage = (message: string) => {
-    container.innerHTML = `
-      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900/70">${message}</div>
-    `;
+  const setContentLoading = (isLoading: boolean) => {
+    if (loadingBlock) {
+      loadingBlock.classList.toggle("hidden", !isLoading);
+    }
+    if (contentBlock) {
+      contentBlock.classList.toggle("hidden", isLoading);
+    }
+  };
+
+  const resetResults = () => {
+    container.innerHTML = "";
     if (featuredContainer) {
       featuredIds.clear();
       featuredContainer.innerHTML = "";
@@ -332,14 +347,23 @@ if (form && container) {
     totalRegular = 0;
     totalFeatured = 0;
   };
-  const renderFeaturedLoading = () => {
-    if (!featuredContainer || !featuredSection) return;
-    featuredSection.classList.remove("hidden");
-    featuredContainer.innerHTML = `
-      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-xs text-ink-900/60">
-        Cargando promociones destacadas...
-      </div>
+
+  const renderMessage = (message: string) => {
+    resetResults();
+    container.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900/70">${message}</div>
     `;
+    setContentLoading(false);
+  };
+
+  const updateLoadingState = () => {
+    setContentLoading(pendingFeatured || pendingPromos);
+  };
+
+  const startPrimaryLoad = () => {
+    resetResults();
+    setContentLoading(true);
+    updateLoadMore("");
   };
 
   if (filtersToggle && filtersBody) {
@@ -520,6 +544,10 @@ if (form && container) {
       return;
     }
     loading = true;
+    if (!append) {
+      pendingPromos = true;
+      updateLoadingState();
+    }
     if (append) {
       updateLoadMore("Cargando más promociones...", true);
     } else {
@@ -564,11 +592,17 @@ if (form && container) {
       updateLoadMore("");
     } finally {
       loading = false;
+      if (!append) {
+        pendingPromos = false;
+        updateLoadingState();
+      }
     }
   };
 
   const fetchFeaturedPromos = async () => {
     if (!featuredContainer || !featuredSection) return;
+    pendingFeatured = true;
+    updateLoadingState();
     try {
       const query = new URLSearchParams(baseQuery);
       query.set("featured", "true");
@@ -586,6 +620,9 @@ if (form && container) {
       featuredSection.classList.add("hidden");
       totalFeatured = 0;
       updateCounter();
+    } finally {
+      pendingFeatured = false;
+      updateLoadingState();
     }
   };
 
@@ -599,9 +636,7 @@ if (form && container) {
     hasMore = true;
     offset = 0;
     totalLoaded = 0;
-    renderMessage("Cargando promociones...");
-    updateLoadMore("");
-    renderFeaturedLoading();
+    startPrimaryLoad();
     void Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
   });
 
@@ -609,8 +644,7 @@ if (form && container) {
   if (initialQuery) {
     baseQuery = initialQuery;
   }
-  updateLoadMore("");
-  renderFeaturedLoading();
+  startPrimaryLoad();
   void Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
 
   if (loadMore) {
