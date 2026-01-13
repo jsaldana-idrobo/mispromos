@@ -7,6 +7,8 @@ const apiBase =
   import.meta.env.PUBLIC_API_BASE ?? "http://localhost:3000/api/v1";
 const title = Astro.props.title ?? "Tus promos";
 const containerClass = Astro.props.containerClass ?? "max-w-6xl";
+const logoSrc = Astro.props.logoSrc ?? "/logo.png";
+const logoAlt = Astro.props.logoAlt ?? "Tus promos";
 const cookieHeader = Astro.request.headers.get("cookie") ?? "";
 const hasAuthCookie = cookieHeader.includes("auth=");
 ---
@@ -17,7 +19,14 @@ const hasAuthCookie = cookieHeader.includes("auth=");
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#112d5b" />
+    <meta property="og:title" content={title} />
+    <meta property="og:site_name" content="Tus promos" />
+    <meta property="og:image" content={logoSrc} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:image" content={logoSrc} />
+    <link rel="icon" href={logoSrc} type="image/png" />
+    <link rel="apple-touch-icon" href={logoSrc} />
     <style>
       html[data-auth-loading="true"] [data-nav-login],
       html[data-auth-loading="true"] [data-nav-register],
@@ -45,13 +54,17 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       document.documentElement.dataset.authLoading = "true";
     </script>
   </head>
-  <body class="min-h-screen bg-sand-100 text-ink-900" data-api-base={apiBase}>
-    <div class="min-h-screen bg-radiant">
-      <SiteHeader isAuthenticated={hasAuthCookie} />
+  <body class="min-h-screen bg-white text-ink-900" data-api-base={apiBase}>
+    <div class="min-h-screen bg-white">
+      <SiteHeader
+        isAuthenticated={hasAuthCookie}
+        logoSrc={logoSrc}
+        logoAlt={logoAlt}
+      />
       <main class={`mx-auto w-full px-6 py-10 ${containerClass}`}>
         <slot />
       </main>
-      <SiteFooter />
+      <SiteFooter logoSrc={logoSrc} logoAlt={logoAlt} />
     </div>
     <script type="module">
       const apiBase =

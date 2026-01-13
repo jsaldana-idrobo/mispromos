@@ -3,22 +3,30 @@
 ---
 
 <div class="rounded-3xl border border-ink-900/10 bg-white/70 p-6">
-  <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h2 class="text-lg font-semibold">Resultados</h2>
-      <p class="mt-1 text-sm text-ink-900/60">
-        Promociones activas de negocios locales y sus sedes.
+  <section class="hidden" data-promos-featured-section>
+    <div class="flex items-center gap-3">
+      <h3 class="text-lg font-semibold">Promociones destacadas</h3>
+      <p class="ml-auto text-right text-sm text-ink-900/60" data-promos-counter>
       </p>
     </div>
-    <p class="text-sm text-ink-900/60" data-promos-counter></p>
-  </div>
-  <div class="mt-6 grid gap-4" data-promos-container>
     <div
-      class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+      class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+      data-promos-featured
     >
-      Cargando promociones activas...
     </div>
-  </div>
+  </section>
+  <section class="mt-8">
+    <div class="flex items-center justify-between gap-3">
+      <h3 class="text-lg font-semibold">Todas las promociones</h3>
+    </div>
+    <div class="mt-4 grid gap-4" data-promos-container>
+      <div
+        class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900/70"
+      >
+        Cargando promociones activas...
+      </div>
+    </div>
+  </section>
   <div class="mt-6 text-center text-sm text-ink-900/60" data-promos-load-more>
   </div>
 </div>
@@ -58,18 +66,19 @@
     </div>
     <div class="mt-6 grid gap-4">
       <div
-        class="h-72 overflow-hidden rounded-3xl border border-ink-900/10 sm:h-80 lg:h-[28rem]"
+        class="promo-modal-media h-72 overflow-hidden rounded-3xl border border-ink-900/10 sm:h-80 lg:h-[28rem]"
         data-promos-modal-media
       >
         <img
-          class="h-full w-full object-cover"
+          class="promo-modal-image h-full w-full object-cover"
           alt="Foto de la promoción"
           data-promos-modal-image
         />
         <div
           class="flex h-full w-full items-center justify-center text-5xl"
           data-promos-modal-emoji
-        ></div>
+        >
+        </div>
       </div>
       <p class="text-sm text-ink-900/70" data-promos-modal-description></p>
       <div class="grid gap-3 text-sm text-ink-900/70">
@@ -101,8 +110,7 @@
               class="underline"
               target="_blank"
               rel="noreferrer"
-              data-promos-modal-instagram
-            ></a>
+              data-promos-modal-instagram></a>
           </div>
         </div>
       </div>

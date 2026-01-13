@@ -57,6 +57,13 @@ export class PromotionController {
     )
       ? (query.businessType as BusinessType)
       : undefined;
+    const featuredParam = query.featured?.trim().toLowerCase();
+    const featured =
+      featuredParam === "true"
+        ? true
+        : featuredParam === "false"
+          ? false
+          : undefined;
     const q = query.q?.trim() || undefined;
     const offset = Number.isFinite(Number(query.offset))
       ? Number(query.offset)
@@ -70,6 +77,7 @@ export class PromotionController {
       promoType,
       category,
       businessType,
+      featured,
       q,
       offset,
       limit,

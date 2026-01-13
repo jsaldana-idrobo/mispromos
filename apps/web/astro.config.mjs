@@ -4,5 +4,5 @@ import tailwind from "@astrojs/tailwind";
 export default defineConfig({
   integrations: [tailwind({ applyBaseStyles: true })],
   srcDir: "src",
-  output: "static",
+  output: "server",
 });

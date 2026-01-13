@@ -16,7 +16,11 @@ const { city = "", at = "" } = Astro.props;
       Ocultar
     </button>
   </div>
-  <form class="mt-4 grid gap-4 sm:mt-6" data-promos-form data-promos-filters-body>
+  <form
+    class="mt-4 grid gap-4 sm:mt-6"
+    data-promos-form
+    data-promos-filters-body
+  >
     <div class="flex flex-wrap items-end gap-2 sm:gap-3">
       <label
         class="flex min-w-[140px] flex-1 flex-col gap-1 text-xs font-semibold sm:min-w-[160px] sm:text-sm"
@@ -67,8 +71,9 @@ const { city = "", at = "" } = Astro.props;
         Fecha y hora
         <input class="input-field" type="datetime-local" name="at" value={at} />
       </label>
-      <button class="button-primary w-full sm:w-auto text-xs sm:text-sm" type="submit"
-        >Aplicar filtros</button
+      <button
+        class="button-primary w-full sm:w-auto text-xs sm:text-sm"
+        type="submit">Aplicar filtros</button
       >
     </div>
   </form>

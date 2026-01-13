@@ -5,6 +5,9 @@
   "license": "MIT",
   "packageManager": "pnpm@9.15.9",
   "scripts": {
+    "dev": "pnpm --filter @mispromos/api start:dev & pnpm --filter @mispromos/web dev",
+    "dev:api": "pnpm --filter @mispromos/api start:dev",
+    "dev:web": "pnpm --filter @mispromos/web dev",
     "lint": "echo 'Define lint scripts per workspace'",
     "test": "echo 'Define tests per workspace'",
     "postinstall": "pnpm --filter @mispromos/shared build"

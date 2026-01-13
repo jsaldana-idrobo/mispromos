@@ -1,11 +1,35 @@
 ---
-
+const { logoSrc = "/logo.png", logoAlt = "Tus promos" } = Astro.props;
 ---
 
-<footer class="border-t border-ink-900/10 bg-sand-100/80">
+<footer class="border-t border-ink-900/10 bg-white">
   <div
-    class="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-6 text-sm text-ink-700 md:flex-row md:items-center md:justify-between"
+    class="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-8 text-sm text-ink-900/70 md:flex-row md:items-center md:justify-between"
   >
-    <p>Tus promos · promos locales en tiempo real.</p>
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-3">
+        <img
+          src={logoSrc}
+          alt={logoAlt}
+          class="h-8 w-8 rounded-xl object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+        <p class="font-semibold text-ink-900">
+          Tus promos · promos locales en tiempo real.
+        </p>
+      </div>
+      <p class="text-xs text-ink-900/50">
+        © 2024 Tus promos. Todos los derechos reservados.
+      </p>
+    </div>
+    <div
+      class="flex items-center gap-4 text-xs font-semibold uppercase tracking-wide"
+    >
+      <a class="transition hover:text-ink-900" href="/contacto">Contacto</a>
+      <a class="transition hover:text-ink-900" href="/terminos"
+        >Términos y condiciones</a
+      >
+    </div>
   </div>
 </footer>

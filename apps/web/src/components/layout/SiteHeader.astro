@@ -1,15 +1,34 @@
 ---
-const { isAuthenticated = false } = Astro.props;
+const {
+  isAuthenticated = false,
+  logoSrc = "/logo.png",
+  logoAlt = "Tus promos",
+} = Astro.props;
 ---
 
-<header class="border-b border-ink-900/10 bg-sand-100/70 backdrop-blur">
-  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
-    <a href="/" class="flex items-center gap-3">
-      <span class="text-base font-display font-bold tracking-[0.2em] sm:text-xl"
-        >TUS PROMOS</span
-      >
+<header class="border-b border-ink-900/10 bg-white">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
+    <a href="/" class="flex items-center">
+      <img
+        src={logoSrc}
+        alt={logoAlt}
+        class="block h-24 w-24 px-1 rounded-3xl object-contain"
+        loading="eager"
+        decoding="async"
+      />
+      <div class="flex flex-col leading-none">
+        <span
+          class="text-base font-display font-bold tracking-[0.2em] sm:text-xl"
+          >Tus promos</span
+        >
+        <span class="text-[0.65rem] tracking-[0.12em] text-ink-900/60"
+          >Fácil y cerca de ti.</span
+        >
+      </div>
     </a>
-    <nav class="flex items-center gap-2 text-xs font-medium sm:gap-4 sm:text-sm">
+    <nav
+      class="flex items-center gap-2 text-xs font-medium sm:gap-4 sm:text-sm"
+    >
       <a
         href="/dashboard"
         class="transition hover:text-ink-700"
@@ -32,7 +51,7 @@ const { isAuthenticated = false } = Astro.props;
         data-nav-login
         hidden={isAuthenticated}
       >
-        Entrar
+        Iniciar sesión
       </a>
       <button
         class="rounded-full border border-ink-900/20 px-3 py-1.5 text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"

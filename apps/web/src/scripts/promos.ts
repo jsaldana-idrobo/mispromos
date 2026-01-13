@@ -36,6 +36,12 @@ const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
 const container = document.querySelector<HTMLDivElement>(
   "[data-promos-container]",
 );
+const featuredSection = document.querySelector<HTMLElement>(
+  "[data-promos-featured-section]",
+);
+const featuredContainer = document.querySelector<HTMLDivElement>(
+  "[data-promos-featured]",
+);
 const categorySelect = document.querySelector<HTMLSelectElement>(
   "[data-category-select]",
 );
@@ -97,13 +103,14 @@ const promoModalEmoji = document.querySelector<HTMLElement>(
   "[data-promos-modal-emoji]",
 );
 const promoModalFieldValue = document.querySelector<HTMLElement>(
-  "[data-promos-modal-field=\"value\"]",
+  '[data-promos-modal-field="value"]',
 );
 const promoModalFieldInstagram = document.querySelector<HTMLElement>(
-  "[data-promos-modal-field=\"instagram\"]",
+  '[data-promos-modal-field="instagram"]',
 );
 
 const PAGE_SIZE = 10;
+const FEATURED_COUNT = 6;
 
 type Category = {
   _id: string;
@@ -122,7 +129,8 @@ if (form && container) {
   let hasMore = true;
   let offset = 0;
   let totalLoaded = 0;
-  let totalActive = 0;
+  let totalRegular = 0;
+  let totalFeatured = 0;
   let baseQuery = new URLSearchParams();
   const promoTypeLabels: Record<string, string> = {
     discount: "Descuento",
@@ -209,6 +217,7 @@ if (form && container) {
   };
 
   const promosById = new Map<string, Promotion>();
+  const featuredIds = new Set<string>();
 
   const setModalFieldVisibility = (
     wrapper: HTMLElement | null,
@@ -241,7 +250,8 @@ if (form && container) {
         promo.description ?? "Promoción vigente.";
     }
     if (promoModalType) promoModalType.textContent = promoTypeLabel;
-    if (promoModalValue) promoModalValue.textContent = String(promo.value ?? "");
+    if (promoModalValue)
+      promoModalValue.textContent = String(promo.value ?? "");
     if (promoModalDays) promoModalDays.textContent = days;
     if (promoModalTags) {
       promoModalTags.innerHTML = categories.length
@@ -272,8 +282,8 @@ if (form && container) {
       promo.value ? String(promo.value) : null,
     );
 
-    if (promoModalMedia) {
-      promoModalMedia.className = `h-56 overflow-hidden rounded-3xl border border-ink-900/10 ${visual.tone}`;
+    if (promoModalImage) {
+      promoModalImage.classList.remove("is-contain");
     }
     if (promo.imageUrl) {
       if (promoModalImage) {
@@ -307,11 +317,29 @@ if (form && container) {
 
   const renderMessage = (message: string) => {
     container.innerHTML = `
-      <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">${message}</div>
+      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900/70">${message}</div>
     `;
+    if (featuredContainer) {
+      featuredIds.clear();
+      featuredContainer.innerHTML = "";
+    }
+    if (featuredSection) {
+      featuredSection.classList.add("hidden");
+    }
     if (counter) {
       counter.textContent = "";
     }
+    totalRegular = 0;
+    totalFeatured = 0;
+  };
+  const renderFeaturedLoading = () => {
+    if (!featuredContainer || !featuredSection) return;
+    featuredSection.classList.remove("hidden");
+    featuredContainer.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-xs text-ink-900/60">
+        Cargando promociones destacadas...
+      </div>
+    `;
   };
 
   if (filtersToggle && filtersBody) {
@@ -327,6 +355,87 @@ if (form && container) {
     });
   }
 
+  const buildPromoCard = (
+    promo: Promotion,
+    index: number,
+    isFeatured: boolean,
+  ) => {
+    const businessName = promo.business?.name ?? "Negocio local";
+    const instagramHandle = (promo.business?.instagram ?? "")
+      .replace("@", "")
+      .trim();
+    const categories = promo.business?.categories ?? [];
+    const category = categories[0];
+    const visual = getPromoVisual(category);
+    const days = formatDaysShort(promo.daysOfWeek);
+    const value = promo.value ? `<span>${promo.value}</span>` : "";
+    const categoryTags = categories
+      .slice(0, 3)
+      .map((item) => `<span class="promo-pill">#${item}</span>`)
+      .join("");
+    const delay = Math.min(index * 60, 360);
+    const media = promo.imageUrl
+      ? `<img class="promo-image" src="${promo.imageUrl}" alt="${promo.title}" loading="lazy" />`
+      : `<span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>`;
+    const cardClass = isFeatured
+      ? "promo-card promo-card--featured"
+      : "promo-card";
+    if (isFeatured) {
+      return `
+      <article class="${cardClass}" data-promo-id="${promo._id}" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
+        <div class="promo-media ${visual.tone}">
+          ${media}
+        </div>
+        <div class="mt-3">
+          <h3 class="text-sm font-semibold">${promo.title}</h3>
+        </div>
+      </article>
+    `;
+    }
+    const instagramLink = instagramHandle
+      ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
+      : "";
+    const featuredBadge = isFeatured
+      ? `<span class="promo-badge promo-badge-featured">Destacada</span>`
+      : "";
+    return `
+      <article class="${cardClass}" data-promo-id="${promo._id}" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
+        <div class="promo-media ${visual.tone}">
+          ${media}
+        </div>
+        <div class="mt-4 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="text-xs uppercase tracking-wide text-ink-900/50">${businessName}</p>
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="text-lg font-semibold">${promo.title}</h3>
+              ${featuredBadge}
+            </div>
+            <p class="text-sm text-ink-900/60">${promo.description ?? "Promoción vigente"}</p>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2 text-xs text-ink-900/60">
+          <span class="promo-chip">${days}</span>
+          ${value ? `<span class="promo-chip">${value}</span>` : ""}
+        </div>
+        <div class="mt-3 flex flex-col gap-3 text-xs text-ink-900/60 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-wrap gap-2">${categoryTags}</div>
+          <div class="w-full sm:w-auto">${instagramLink}</div>
+        </div>
+      </article>
+    `;
+  };
+
+  const renderFeaturedPromos = (promos: Promotion[]) => {
+    if (!featuredContainer || !featuredSection) return;
+    featuredIds.clear();
+    const featuredHtml = promos.slice(0, FEATURED_COUNT).map((promo, index) => {
+      featuredIds.add(promo._id);
+      return buildPromoCard(promo, index, true);
+    });
+    featuredContainer.innerHTML = featuredHtml.join("");
+    featuredSection.classList.toggle("hidden", featuredHtml.length === 0);
+  };
+
   const renderPromos = (promos: Promotion[], append = false) => {
     if (promos.length === 0 && !append) {
       renderMessage("No encontramos promos activas con esos filtros.");
@@ -340,56 +449,16 @@ if (form && container) {
       promosById.set(promo._id, promo);
     });
 
-    const html = promos
-      .map((promo, index) => {
-        const businessName = promo.business?.name ?? "Negocio local";
-        const instagramHandle = (promo.business?.instagram ?? "")
-          .replace("@", "")
-          .trim();
-        const categories = promo.business?.categories ?? [];
-        const category = categories[0];
-        const visual = getPromoVisual(category);
-        const days = formatDaysShort(promo.daysOfWeek);
-        const value = promo.value ? `<span>${promo.value}</span>` : "";
-        const categoryTags = categories
-          .slice(0, 3)
-          .map((item) => `<span class="promo-pill">#${item}</span>`)
-          .join("");
-        const instagramLink = instagramHandle
-          ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
-          : "";
-        const delay = Math.min(index * 60, 360);
-        const media = promo.imageUrl
-          ? `<img class="promo-image" src="${promo.imageUrl}" alt="${promo.title}" loading="lazy" />`
-          : `<span class="promo-emoji" aria-hidden="true">${visual.emoji}</span>`;
-        return `
-          <article class="promo-card" data-promo-id="${promo._id}" data-promo-title="${promo.title}" data-promo-business="${businessName}" style="animation-delay:${delay}ms">
-            <div class="promo-media ${visual.tone}">
-              ${media}
-            </div>
-            <div class="mt-4 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p class="text-xs uppercase tracking-wide text-ink-900/50">${businessName}</p>
-                <h3 class="text-lg font-semibold">${promo.title}</h3>
-                <p class="text-sm text-ink-900/60">${promo.description ?? "Promoción vigente"}</p>
-              </div>
-            </div>
-            <div class="mt-3 flex flex-wrap gap-2 text-xs text-ink-900/60">
-              <span class="promo-chip">${days}</span>
-              ${value ? `<span class="promo-chip">${value}</span>` : ""}
-            </div>
-            <div class="mt-3 flex flex-col gap-3 text-xs text-ink-900/60 sm:flex-row sm:items-center sm:justify-between">
-              <div class="flex flex-wrap gap-2">${categoryTags}</div>
-              <div class="w-full sm:w-auto">${instagramLink}</div>
-            </div>
-          </article>
-        `;
-      })
+    const regularPromos = promos.filter(
+      (promo) => !promo.featured && !featuredIds.has(promo._id),
+    );
+    const regularHtml = regularPromos
+      .map((promo, index) => buildPromoCard(promo, index, false))
       .join("");
     if (append) {
-      container.insertAdjacentHTML("beforeend", html);
+      container.insertAdjacentHTML("beforeend", regularHtml);
     } else {
-      container.innerHTML = html;
+      container.innerHTML = regularHtml;
     }
   };
 
@@ -427,6 +496,7 @@ if (form && container) {
 
   const updateCounter = () => {
     if (!counter) return;
+    const totalActive = totalRegular + totalFeatured;
     if (totalActive === 0) {
       counter.textContent = "0 promociones activas para hoy";
       return;
@@ -460,12 +530,13 @@ if (form && container) {
       const query = new URLSearchParams(baseQuery);
       query.set("offset", String(offset));
       query.set("limit", String(PAGE_SIZE));
+      query.set("featured", "false");
       const queryString = query.toString();
       const response = await apiFetch<PromotionsResponse>(
         `/promotions/active${queryString ? `?${queryString}` : ""}`,
       );
       const promos = response.items ?? [];
-      totalActive = response.total ?? 0;
+      totalRegular = response.total ?? 0;
       if (!append) {
         totalLoaded = 0;
         offset = 0;
@@ -496,6 +567,28 @@ if (form && container) {
     }
   };
 
+  const fetchFeaturedPromos = async () => {
+    if (!featuredContainer || !featuredSection) return;
+    try {
+      const query = new URLSearchParams(baseQuery);
+      query.set("featured", "true");
+      query.set("offset", "0");
+      query.set("limit", String(FEATURED_COUNT));
+      const response = await apiFetch<PromotionsResponse>(
+        `/promotions/active?${query.toString()}`,
+      );
+      totalFeatured = response.total ?? response.items?.length ?? 0;
+      renderFeaturedPromos(response.items ?? []);
+      updateCounter();
+    } catch {
+      featuredIds.clear();
+      featuredContainer.innerHTML = "";
+      featuredSection.classList.add("hidden");
+      totalFeatured = 0;
+      updateCounter();
+    }
+  };
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const nextBaseQuery = buildBaseQuery(new FormData(form));
@@ -508,7 +601,8 @@ if (form && container) {
     totalLoaded = 0;
     renderMessage("Cargando promociones...");
     updateLoadMore("");
-    fetchPromos(false);
+    renderFeaturedLoading();
+    void Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
   });
 
   const initialQuery = buildBaseQuery(new FormData(form));
@@ -516,7 +610,8 @@ if (form && container) {
     baseQuery = initialQuery;
   }
   updateLoadMore("");
-  fetchPromos(false);
+  renderFeaturedLoading();
+  void Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
 
   if (loadMore) {
     const observer = new IntersectionObserver(
@@ -542,7 +637,12 @@ if (form && container) {
     }
   });
 
-  container.addEventListener("click", (event) => {
+  promoModalImage?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    promoModalImage.classList.toggle("is-contain");
+  });
+
+  const handleCardClick = (event: Event) => {
     const target = event.target as HTMLElement;
     if (target.closest("a")) {
       return;
@@ -554,7 +654,10 @@ if (form && container) {
     if (promo) {
       openPromoModal(promo);
     }
-  });
+  };
+
+  container.addEventListener("click", handleCardClick);
+  featuredContainer?.addEventListener("click", handleCardClick);
 }
 
 if (categorySelect) {

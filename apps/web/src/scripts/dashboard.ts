@@ -2604,9 +2604,7 @@ const handlePromoForm = () => {
       showToast("Listo", "Foto subida.", "success");
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Error subiendo la foto.";
+        error instanceof Error ? error.message : "Error subiendo la foto.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
     } finally {
@@ -2650,8 +2648,7 @@ const handlePromoForm = () => {
       (startDateValue && !endDateValue) ||
       (!startDateValue && endDateValue)
     ) {
-      const message =
-        "Si defines fechas, debes completar inicio y fin.";
+      const message = "Si defines fechas, debes completar inicio y fin.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
       return;
@@ -2667,17 +2664,16 @@ const handlePromoForm = () => {
       showToast("Error", message, "error");
       return;
     }
-    if ((startHourValue && !endHourValue) || (!startHourValue && endHourValue)) {
+    if (
+      (startHourValue && !endHourValue) ||
+      (!startHourValue && endHourValue)
+    ) {
       const message = "Si defines horas, debes completar inicio y fin.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");
       return;
     }
-    if (
-      startHour &&
-      endHour &&
-      !isValidTimeRange(startHour, endHour)
-    ) {
+    if (startHour && endHour && !isValidTimeRange(startHour, endHour)) {
       const message = "La hora fin debe ser posterior a la hora inicio.";
       setMessage(promoMessage, message);
       showToast("Error", message, "error");

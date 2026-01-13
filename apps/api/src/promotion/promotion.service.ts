@@ -153,6 +153,7 @@ export class PromotionService {
     promoType?: string,
     category?: string,
     businessType?: string,
+    featured?: boolean,
     q?: string,
     offset?: number,
     limit?: number,
@@ -210,6 +211,18 @@ export class PromotionService {
     }
 
     const promoTypeFilter = promoType ? { promoType } : {};
+    const featuredFilter =
+      featured === true
+        ? { featured: true }
+        : featured === false
+          ? {
+              $or: [
+                { featured: false },
+                { featured: { $exists: false } },
+                { featured: null },
+              ],
+            }
+          : {};
     const queryFilter = q
       ? {
           $or: [
@@ -262,6 +275,7 @@ export class PromotionService {
       ...branchFilter,
       ...businessFilter,
       ...promoTypeFilter,
+      ...featuredFilter,
       ...queryFilter,
       active: true,
       ...dateFilter,
@@ -273,10 +287,10 @@ export class PromotionService {
       this.promotionModel.countDocuments(filter).exec(),
       this.promotionModel
         .find(filter)
-      .sort({ createdAt: -1 })
-      .skip(safeOffset)
-      .limit(safeLimit)
-      .lean()
+        .sort({ createdAt: -1 })
+        .skip(safeOffset)
+        .limit(safeLimit)
+        .lean()
         .exec(),
     ]);
 
