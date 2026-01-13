@@ -137,9 +137,8 @@ if (form && container) {
   let totalLoaded = 0;
   let totalRegular = 0;
   let totalFeatured = 0;
-  let pendingFeatured = false;
-  let pendingPromos = false;
   let baseQuery = new URLSearchParams();
+  let loadToken = 0;
   const promoTypeLabels: Record<string, string> = {
     discount: "Descuento",
     "2x1": "2x1",
@@ -356,14 +355,23 @@ if (form && container) {
     setContentLoading(false);
   };
 
-  const updateLoadingState = () => {
-    setContentLoading(pendingFeatured || pendingPromos);
-  };
-
   const startPrimaryLoad = () => {
     resetResults();
     setContentLoading(true);
     updateLoadMore("");
+  };
+
+  const runPrimaryLoad = () => {
+    loadToken += 1;
+    const token = loadToken;
+    startPrimaryLoad();
+    void Promise.allSettled([fetchFeaturedPromos(), fetchPromos(false)]).then(
+      () => {
+        if (token === loadToken) {
+          setContentLoading(false);
+        }
+      },
+    );
   };
 
   if (filtersToggle && filtersBody) {
@@ -544,10 +552,6 @@ if (form && container) {
       return;
     }
     loading = true;
-    if (!append) {
-      pendingPromos = true;
-      updateLoadingState();
-    }
     if (append) {
       updateLoadMore("Cargando más promociones...", true);
     } else {
@@ -592,17 +596,11 @@ if (form && container) {
       updateLoadMore("");
     } finally {
       loading = false;
-      if (!append) {
-        pendingPromos = false;
-        updateLoadingState();
-      }
     }
   };
 
   const fetchFeaturedPromos = async () => {
     if (!featuredContainer || !featuredSection) return;
-    pendingFeatured = true;
-    updateLoadingState();
     try {
       const query = new URLSearchParams(baseQuery);
       query.set("featured", "true");
@@ -620,9 +618,6 @@ if (form && container) {
       featuredSection.classList.add("hidden");
       totalFeatured = 0;
       updateCounter();
-    } finally {
-      pendingFeatured = false;
-      updateLoadingState();
     }
   };
 
@@ -636,16 +631,14 @@ if (form && container) {
     hasMore = true;
     offset = 0;
     totalLoaded = 0;
-    startPrimaryLoad();
-    void Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
+    runPrimaryLoad();
   });
 
   const initialQuery = buildBaseQuery(new FormData(form));
   if (initialQuery) {
     baseQuery = initialQuery;
   }
-  startPrimaryLoad();
-  void Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
+  runPrimaryLoad();
 
   if (loadMore) {
     const observer = new IntersectionObserver(
