@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Frontend Astro + Tailwind para mispromos",
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   },
   "scripts": {
     "dev": "astro dev",
