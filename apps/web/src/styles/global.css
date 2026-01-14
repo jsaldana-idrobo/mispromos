@@ -124,7 +124,7 @@ body {
 
 .promo-card--featured {
   border-radius: 22px;
-  padding: 0.75rem;
+  padding: 0.6rem;
 }
 
 .promo-card--featured .promo-media {
@@ -309,7 +309,7 @@ body {
 
 @media (max-width: 640px) {
   .promo-card {
-    padding: 1rem;
+    padding: 0.6rem;
   }
 
   .promo-media {

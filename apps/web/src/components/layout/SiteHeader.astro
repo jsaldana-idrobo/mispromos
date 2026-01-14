@@ -8,28 +8,28 @@ const {
 
 <header class="border-b border-ink-900/10 bg-white">
   <div
-    class="mx-auto flex w-full max-w-none flex-wrap items-center justify-between gap-3 px-4 sm:flex-nowrap sm:px-8 lg:px-12"
+    class="mx-auto flex w-full max-w-none items-center justify-between gap-2 px-3 sm:gap-3 sm:px-8 lg:px-12"
   >
-    <a href="/" class="flex items-center gap-3">
+    <a href="/" class="flex items-center gap-2 sm:gap-3">
       <img
         src={logoSrc}
         alt={logoAlt}
-        class="block h-24 w-24 px-1 rounded-3xl object-contain"
+        class="block h-14 w-14 rounded-2xl object-contain sm:h-20 sm:w-20"
         loading="eager"
         decoding="async"
       />
       <div class="flex flex-col leading-none">
         <span
-          class="text-base font-display font-bold tracking-[0.2em] sm:text-xl"
+          class="text-xs font-display font-bold tracking-[0.16em] sm:text-lg"
           >Tus promos</span
         >
-        <span class="text-[0.65rem] tracking-[0.12em] text-ink-900/60"
+        <span class="text-[0.55rem] tracking-[0.1em] text-ink-900/60 sm:text-xs"
           >Fácil y cerca de ti.</span
         >
       </div>
     </a>
     <nav
-      class="flex w-full items-center justify-center gap-2 text-xs font-medium sm:w-auto sm:justify-end sm:gap-4 sm:text-sm"
+      class="flex items-center justify-end gap-2 text-[0.65rem] font-medium sm:gap-4 sm:text-sm"
     >
       <a
         href="/dashboard"
@@ -41,7 +41,7 @@ const {
       </a>
       <a
         href="/register"
-        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-3 py-1.5 text-center text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
+        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-2.5 py-1 text-center text-[0.65rem] transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         data-nav-register
         hidden={isAuthenticated}
       >
@@ -49,14 +49,14 @@ const {
       </a>
       <a
         href="/login"
-        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-3 py-1.5 text-center text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
+        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-2.5 py-1 text-center text-[0.65rem] transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         data-nav-login
         hidden={isAuthenticated}
       >
         Iniciar sesión
       </a>
       <button
-        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-3 py-1.5 text-center text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
+        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-2.5 py-1 text-center text-[0.65rem] transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         type="button"
         data-nav-logout
         hidden={!isAuthenticated}
