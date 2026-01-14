@@ -325,9 +325,11 @@ if (form && container) {
   const setContentLoading = (isLoading: boolean) => {
     if (loadingBlock) {
       loadingBlock.classList.toggle("hidden", !isLoading);
+      loadingBlock.toggleAttribute("hidden", !isLoading);
     }
     if (contentBlock) {
       contentBlock.classList.toggle("hidden", isLoading);
+      contentBlock.toggleAttribute("hidden", isLoading);
     }
   };
 
