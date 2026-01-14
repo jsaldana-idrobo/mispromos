@@ -332,6 +332,7 @@ if (form && container) {
 
   const resetResults = () => {
     container.innerHTML = "";
+    promosById.clear();
     if (featuredContainer) {
       featuredIds.clear();
       featuredContainer.innerHTML = "";
@@ -476,9 +477,6 @@ if (form && container) {
       return;
     }
 
-    if (!append) {
-      promosById.clear();
-    }
     promos.forEach((promo) => {
       promosById.set(promo._id, promo);
     });

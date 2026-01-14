@@ -7,8 +7,10 @@ const {
 ---
 
 <header class="border-b border-ink-900/10 bg-white">
-  <div class="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6">
-    <a href="/" class="flex items-center">
+  <div
+    class="mx-auto flex w-full max-w-none flex-wrap items-center justify-between gap-3 px-4 sm:flex-nowrap sm:px-8 lg:px-12"
+  >
+    <a href="/" class="flex items-center gap-3">
       <img
         src={logoSrc}
         alt={logoAlt}
@@ -27,11 +29,11 @@ const {
       </div>
     </a>
     <nav
-      class="flex items-center gap-2 text-xs font-medium sm:gap-4 sm:text-sm"
+      class="flex w-full items-center justify-center gap-2 text-xs font-medium sm:w-auto sm:justify-end sm:gap-4 sm:text-sm"
     >
       <a
         href="/dashboard"
-        class="transition hover:text-ink-700"
+        class="inline-flex items-center justify-center text-center transition hover:text-ink-700"
         data-nav-dashboard
         hidden={!isAuthenticated}
       >
@@ -39,7 +41,7 @@ const {
       </a>
       <a
         href="/register"
-        class="rounded-full border border-ink-900/20 px-3 py-1.5 text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
+        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-3 py-1.5 text-center text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         data-nav-register
         hidden={isAuthenticated}
       >
@@ -47,14 +49,14 @@ const {
       </a>
       <a
         href="/login"
-        class="rounded-full border border-ink-900/20 px-3 py-1.5 text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
+        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-3 py-1.5 text-center text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         data-nav-login
         hidden={isAuthenticated}
       >
         Iniciar sesión
       </a>
       <button
-        class="rounded-full border border-ink-900/20 px-3 py-1.5 text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
+        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-3 py-1.5 text-center text-xs transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         type="button"
         data-nav-logout
         hidden={!isAuthenticated}

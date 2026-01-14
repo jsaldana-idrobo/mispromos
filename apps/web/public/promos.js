@@ -246,6 +246,7 @@
     };
     const resetResults = () => {
       container.innerHTML = "";
+      promosById.clear();
       if (featuredContainer) {
         featuredIds.clear();
         featuredContainer.innerHTML = "";
@@ -364,9 +365,6 @@
       if (promos.length === 0 && !append) {
         renderMessage("No encontramos promos activas con esos filtros.");
         return;
-      }
-      if (!append) {
-        promosById.clear();
       }
       promos.forEach((promo) => {
         promosById.set(promo._id, promo);
