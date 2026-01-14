@@ -1740,7 +1740,7 @@ const renderPromotions = (promos: Promotion[], total: number) => {
                 .replace("@", "")
                 .trim();
               const instagramLink = instagramHandle
-                ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
+                ? `<a class="promo-link" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
                 : "";
               return `
                 <tr class="rounded-2xl bg-white/90">

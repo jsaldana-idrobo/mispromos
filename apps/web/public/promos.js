@@ -287,10 +287,13 @@
     if (filtersToggle && filtersBody) {
       const updateFiltersToggle = (isOpen) => {
         filtersBody.classList.toggle("hidden", !isOpen);
+        filtersBody.toggleAttribute("hidden", !isOpen);
         filtersToggle.textContent = isOpen ? "Ocultar" : "Mostrar";
         filtersToggle.setAttribute("aria-expanded", String(isOpen));
       };
-      updateFiltersToggle(true);
+      filtersBody.classList.add("hidden");
+      filtersBody.setAttribute("hidden", "true");
+      updateFiltersToggle(false);
       filtersToggle.addEventListener("click", () => {
         const isOpen = !filtersBody.classList.contains("hidden");
         updateFiltersToggle(!isOpen);
