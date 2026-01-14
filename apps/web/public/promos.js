@@ -68,7 +68,6 @@
   var promoModalInstagram = document.querySelector(
     "[data-promos-modal-instagram]"
   );
-  var promoModalMedia = document.querySelector("[data-promos-modal-media]");
   var promoModalImage = document.querySelector("[data-promos-modal-image]");
   var promoModalEmoji = document.querySelector("[data-promos-modal-emoji]");
   var promoModalFieldValue = document.querySelector(

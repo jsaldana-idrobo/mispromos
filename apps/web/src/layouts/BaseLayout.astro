@@ -66,7 +66,7 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       </main>
       <SiteFooter logoSrc={logoSrc} logoAlt={logoAlt} />
     </div>
-    <script type="module">
+    <script type="module" is:inline>
       const apiBase =
         document.body?.dataset?.apiBase || "http://localhost:3000/api/v1";
       const dashboardLink = document.querySelector("[data-nav-dashboard]");
@@ -130,27 +130,33 @@ const hasAuthCookie = cookieHeader.includes("auth=");
         document.documentElement.dataset.authenticated === "true";
       const authHint = readAuthHint() || cookieAuth;
       setAuthState(authHint);
-      fetch(`${apiBase}/auth/me`, { credentials: "include", cache: "no-store" })
-        .then((response) =>
-          response.ok
-            ? response.json()
-            : Promise.resolve({ __status: response.status }),
-        )
-        .then((user) => {
-          if (user && !user.__status) {
-            setAuthState(true, user.role);
-            writeAuthHint(true);
-            return;
-          }
-          const status = user?.__status;
-          if (status === 401 || status === 403) {
-            setAuthState(false);
-            writeAuthHint(false);
-          }
+      const shouldCheckAuth = authHint || cookieAuth;
+      if (shouldCheckAuth) {
+        fetch(`${apiBase}/auth/me`, {
+          credentials: "include",
+          cache: "no-store",
         })
-        .catch(() => {
-          // keep last known state on network errors
-        });
+          .then((response) =>
+            response.ok
+              ? response.json()
+              : Promise.resolve({ __status: response.status }),
+          )
+          .then((user) => {
+            if (user && !user.__status) {
+              setAuthState(true, user.role);
+              writeAuthHint(true);
+              return;
+            }
+            const status = user?.__status;
+            if (status === 401 || status === 403) {
+              setAuthState(false);
+              writeAuthHint(false);
+            }
+          })
+          .catch(() => {
+            // keep last known state on network errors
+          });
+      }
       if (logoutButton) {
         logoutButton.addEventListener("click", async () => {
           try {

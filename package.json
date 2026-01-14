@@ -10,6 +10,10 @@
     "dev:web": "pnpm --filter @mispromos/web dev",
     "lint": "echo 'Define lint scripts per workspace'",
     "test": "echo 'Define tests per workspace'",
+    "prepare": "husky",
     "postinstall": "pnpm --filter @mispromos/shared build"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }

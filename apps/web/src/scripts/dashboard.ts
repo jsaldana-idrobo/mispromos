@@ -467,20 +467,6 @@ const normalizeSlug = (value: string) =>
     .replace(/-{2,}/g, "-")
     .replace(/^-|-\$/g, "");
 
-const renderSkeleton = (container: HTMLElement | null, count = 3) => {
-  if (!container) return;
-  container.innerHTML = Array.from({ length: count })
-    .map(
-      () => `
-        <div class="rounded-2xl border border-ink-900/10 bg-white/70 px-4 py-3 animate-pulse">
-          <div class="h-3 w-2/3 rounded bg-ink-900/10"></div>
-          <div class="mt-2 h-2 w-1/3 rounded bg-ink-900/10"></div>
-        </div>
-      `,
-    )
-    .join("");
-};
-
 const renderLoadingMessage = (
   container: HTMLElement | null,
   message: string,
@@ -585,16 +571,6 @@ const setInputValue = (
   if (input) {
     input.value = value;
   }
-};
-
-const setMultiSelectValues = (
-  select: HTMLSelectElement | null,
-  values: string[],
-) => {
-  if (!select) return;
-  Array.from(select.options).forEach((option) => {
-    option.selected = values.includes(option.value);
-  });
 };
 
 const formatDateInput = (value: string | null | undefined) => {
@@ -3344,7 +3320,8 @@ const wireBusinessFilters = () => {
     handleBusinessForm();
     handleBranchForm();
     handlePromoForm();
-    if (currentUser?.role === "ADMIN") {
+    const adminUser = currentUser as User | null;
+    if (adminUser?.role === "ADMIN") {
       handleCityForm();
       handleCategoryForm();
       wireAdminActions();

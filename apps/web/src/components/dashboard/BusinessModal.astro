@@ -1,5 +1,11 @@
 ---
-const { businessTypes = [], businessTypeLabels = {} } = Astro.props;
+type BusinessModalProps = {
+  businessTypes?: string[];
+  businessTypeLabels?: Record<string, string>;
+};
+
+const { businessTypes = [], businessTypeLabels = {} } =
+  Astro.props as BusinessModalProps;
 ---
 
 <div
@@ -45,7 +51,7 @@ const { businessTypes = [], businessTypeLabels = {} } = Astro.props;
         Tipo
         <select class="input-field" name="type" required>
           {
-            businessTypes.map((type) => (
+            businessTypes.map((type: string) => (
               <option value={type}>{businessTypeLabels[type]}</option>
             ))
           }

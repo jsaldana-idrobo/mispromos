@@ -1,5 +1,11 @@
 ---
-const { promoTypes = [], promoTypeLabels = {} } = Astro.props;
+type PromoPanelProps = {
+  promoTypes?: string[];
+  promoTypeLabels?: Record<string, string>;
+};
+
+const { promoTypes = [], promoTypeLabels = {} } =
+  Astro.props as PromoPanelProps;
 ---
 
 <section
@@ -60,7 +66,7 @@ const { promoTypes = [], promoTypeLabels = {} } = Astro.props;
       <select class="input-field" name="promoType" data-promo-type>
         <option value="all">Todos</option>
         {
-          promoTypes.map((type) => (
+          promoTypes.map((type: string) => (
             <option value={type}>{promoTypeLabels[type]}</option>
           ))
         }

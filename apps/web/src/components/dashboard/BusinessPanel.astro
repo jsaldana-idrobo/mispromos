@@ -1,5 +1,11 @@
 ---
-const { businessTypes = [], businessTypeLabels = {} } = Astro.props;
+type BusinessPanelProps = {
+  businessTypes?: string[];
+  businessTypeLabels?: Record<string, string>;
+};
+
+const { businessTypes = [], businessTypeLabels = {} } =
+  Astro.props as BusinessPanelProps;
 ---
 
 <section
@@ -64,7 +70,7 @@ const { businessTypes = [], businessTypeLabels = {} } = Astro.props;
       <select class="input-field" name="type" data-business-type-filter>
         <option value="all">Todos</option>
         {
-          businessTypes.map((type) => (
+          businessTypes.map((type: string) => (
             <option value={type}>{businessTypeLabels[type]}</option>
           ))
         }

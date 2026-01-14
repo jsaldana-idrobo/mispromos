@@ -99,9 +99,6 @@ const promoModalDays = document.querySelector<HTMLElement>(
 const promoModalInstagram = document.querySelector<HTMLAnchorElement>(
   "[data-promos-modal-instagram]",
 );
-const promoModalMedia = document.querySelector<HTMLElement>(
-  "[data-promos-modal-media]",
-);
 const promoModalImage = document.querySelector<HTMLImageElement>(
   "[data-promos-modal-image]",
 );
