@@ -1,36 +1,13 @@
 import { apiFetch } from "./api";
-
-type BusinessSummary = {
-  _id: string;
-  name: string;
-  slug: string;
-  categories?: string[];
-  instagram?: string;
-};
-
-type Promotion = {
-  _id: string;
-  businessId: string;
-  branchId?: string | null;
-  title: string;
-  description?: string;
-  promoType: string;
-  value?: string | number;
-  imageUrl?: string | null;
-  startDate: string | null;
-  endDate: string | null;
-  daysOfWeek: string[];
-  startHour: string | null;
-  endHour: string | null;
-  active?: boolean;
-  featured?: boolean;
-  business?: BusinessSummary | null;
-};
-
-type PromotionsResponse = {
-  items: Promotion[];
-  total: number;
-};
+import { formatDaysShort, getPromoVisual } from "./promos/formatters";
+import { initFiltersToggle } from "./promos/filters";
+import { createPromoModal } from "./promos/modal";
+import type {
+  Category,
+  City,
+  Promotion,
+  PromotionsResponse,
+} from "./promos/types";
 
 const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
 const container = document.querySelector<HTMLDivElement>(
@@ -68,7 +45,8 @@ const filtersBody = document.querySelector<HTMLElement>(
 const promoModalOverlay = document.querySelector<HTMLElement>(
   "[data-promos-modal-overlay]",
 );
-const promoModal = document.querySelector<HTMLElement>("[data-promos-modal]");
+const promoModalElement =
+  document.querySelector<HTMLElement>("[data-promos-modal]");
 const promoModalClose = document.querySelector<HTMLButtonElement>(
   "[data-promos-modal-close]",
 );
@@ -115,18 +93,6 @@ const promoModalFieldInstagram = document.querySelector<HTMLElement>(
 const PAGE_SIZE = 10;
 const FEATURED_COUNT = 6;
 
-type Category = {
-  _id: string;
-  name: string;
-  slug: string;
-};
-
-type City = {
-  _id: string;
-  name: string;
-  countryCode: string;
-};
-
 if (form && container) {
   let loading = false;
   let hasMore = true;
@@ -136,188 +102,27 @@ if (form && container) {
   let totalFeatured = 0;
   let baseQuery = new URLSearchParams();
   let loadToken = 0;
-  const promoTypeLabels: Record<string, string> = {
-    discount: "Descuento",
-    "2x1": "2x1",
-    combo: "Combo",
-    other: "Otra",
-  };
-
-  const toneMap: Record<string, { emoji: string; tone: string }> = {
-    pizza: { emoji: "🍕", tone: "promo-tone-sunset" },
-    hamburguesas: { emoji: "🍔", tone: "promo-tone-berry" },
-    sushi: { emoji: "🍣", tone: "promo-tone-sage" },
-    tacos: { emoji: "🌮", tone: "promo-tone-sunrise" },
-    parrilla: { emoji: "🥩", tone: "promo-tone-ember" },
-    pollo: { emoji: "🍗", tone: "promo-tone-honey" },
-    "comidas-rapidas": { emoji: "🍟", tone: "promo-tone-sunset" },
-    asiatica: { emoji: "🥢", tone: "promo-tone-sage" },
-    mexicana: { emoji: "🌶️", tone: "promo-tone-ember" },
-    cafeteria: { emoji: "☕️", tone: "promo-tone-honey" },
-    postres: { emoji: "🍰", tone: "promo-tone-berry" },
-    panaderia: { emoji: "🥐", tone: "promo-tone-honey" },
-    bebidas: { emoji: "🥤", tone: "promo-tone-sky" },
-    arepas: { emoji: "🫓", tone: "promo-tone-sunrise" },
-    mariscos: { emoji: "🦐", tone: "promo-tone-sky" },
-    helados: { emoji: "🍦", tone: "promo-tone-berry" },
-    vegana: { emoji: "🥗", tone: "promo-tone-lime" },
-    ensaladas: { emoji: "🥬", tone: "promo-tone-lime" },
-    desayunos: { emoji: "🥞", tone: "promo-tone-honey" },
-  };
-
-  const defaultTone = { emoji: "✨", tone: "promo-tone-sunrise" };
-
-  const getPromoVisual = (category?: string) => {
-    if (!category) return defaultTone;
-    return toneMap[category] ?? defaultTone;
-  };
-
-  const formatPromoType = (type: string) => promoTypeLabels[type] ?? type;
-  const dayLabels: Record<string, string> = {
-    monday: "Lunes",
-    tuesday: "Martes",
-    wednesday: "Miércoles",
-    thursday: "Jueves",
-    friday: "Viernes",
-    saturday: "Sábado",
-    sunday: "Domingo",
-  };
-  const orderedDays = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-  ];
-  const formatDaysShort = (days: string[]) =>
-    orderedDays
-      .filter((day) => days.includes(day))
-      .map((day) => dayLabels[day] ?? day)
-      .join(" · ");
-  const formatDaysFull = (days: string[]) => {
-    const daySet = new Set(days);
-    const hasWeekdays =
-      ["monday", "tuesday", "wednesday", "thursday", "friday"].every((day) =>
-        daySet.has(day),
-      ) && daySet.size === 5;
-    const hasWeekend =
-      ["friday", "saturday", "sunday"].every((day) => daySet.has(day)) &&
-      daySet.size === 3;
-    if (daySet.size === 7) {
-      return "Todos los días";
-    }
-    if (hasWeekdays) {
-      return "Entre semana";
-    }
-    if (hasWeekend) {
-      return "Fin de semana";
-    }
-    return orderedDays
-      .filter((day) => daySet.has(day))
-      .map((day) => dayLabels[day] ?? day)
-      .join(", ");
-  };
+  const promoModal = createPromoModal({
+    overlay: promoModalOverlay,
+    modal: promoModalElement,
+    close: promoModalClose,
+    title: promoModalTitle,
+    featured: promoModalFeatured,
+    business: promoModalBusiness,
+    description: promoModalDescription,
+    tags: promoModalTags,
+    promoType: promoModalType,
+    value: promoModalValue,
+    days: promoModalDays,
+    instagram: promoModalInstagram,
+    image: promoModalImage,
+    emoji: promoModalEmoji,
+    fieldValue: promoModalFieldValue,
+    fieldInstagram: promoModalFieldInstagram,
+  });
 
   const promosById = new Map<string, Promotion>();
   const featuredIds = new Set<string>();
-
-  const setModalFieldVisibility = (
-    wrapper: HTMLElement | null,
-    value: string | null,
-  ) => {
-    if (!wrapper) return;
-    if (!value) {
-      wrapper.classList.add("hidden");
-      return;
-    }
-    wrapper.classList.remove("hidden");
-  };
-
-  const openPromoModal = (promo: Promotion) => {
-    if (!promoModalOverlay || !promoModal) return;
-    const businessName = promo.business?.name ?? "Negocio local";
-    const categories = promo.business?.categories ?? [];
-    const category = categories[0];
-    const visual = getPromoVisual(category);
-    const promoTypeLabel = formatPromoType(promo.promoType);
-    const days = formatDaysFull(promo.daysOfWeek);
-
-    if (promoModalTitle) promoModalTitle.textContent = promo.title;
-    if (promoModalFeatured) {
-      promoModalFeatured.classList.toggle("hidden", !promo.featured);
-    }
-    if (promoModalBusiness) promoModalBusiness.textContent = businessName;
-    if (promoModalDescription) {
-      promoModalDescription.textContent =
-        promo.description ?? "Promoción vigente.";
-    }
-    if (promoModalType) promoModalType.textContent = promoTypeLabel;
-    if (promoModalValue)
-      promoModalValue.textContent = String(promo.value ?? "");
-    if (promoModalDays) promoModalDays.textContent = days;
-    if (promoModalTags) {
-      promoModalTags.innerHTML = categories.length
-        ? categories
-            .slice(0, 4)
-            .map((item) => `<span class="promo-pill">#${item}</span>`)
-            .join("")
-        : `<span class="promo-pill">#local</span>`;
-    }
-    if (promoModalInstagram) {
-      const instagramHandle = (promo.business?.instagram ?? "")
-        .replace("@", "")
-        .trim();
-      if (instagramHandle) {
-        promoModalInstagram.textContent = `@${instagramHandle}`;
-        promoModalInstagram.href = `https://instagram.com/${instagramHandle}`;
-      } else {
-        promoModalInstagram.textContent = "";
-        promoModalInstagram.removeAttribute("href");
-      }
-      setModalFieldVisibility(
-        promoModalFieldInstagram,
-        instagramHandle.length > 0 ? instagramHandle : null,
-      );
-    }
-    setModalFieldVisibility(
-      promoModalFieldValue,
-      promo.value ? String(promo.value) : null,
-    );
-
-    if (promoModalImage) {
-      promoModalImage.classList.remove("is-contain");
-    }
-    if (promo.imageUrl) {
-      if (promoModalImage) {
-        promoModalImage.src = promo.imageUrl;
-        promoModalImage.classList.remove("hidden");
-      }
-      if (promoModalEmoji) {
-        promoModalEmoji.textContent = "";
-        promoModalEmoji.classList.add("hidden");
-      }
-    } else {
-      if (promoModalImage) {
-        promoModalImage.removeAttribute("src");
-        promoModalImage.classList.add("hidden");
-      }
-      if (promoModalEmoji) {
-        promoModalEmoji.textContent = visual.emoji;
-        promoModalEmoji.classList.remove("hidden");
-      }
-    }
-
-    promoModalOverlay.hidden = false;
-    promoModalOverlay.classList.remove("hidden");
-  };
-
-  const closePromoModal = () => {
-    if (!promoModalOverlay) return;
-    promoModalOverlay.classList.add("hidden");
-    promoModalOverlay.hidden = true;
-  };
 
   const setContentLoading = (isLoading: boolean) => {
     if (loadingBlock) {
@@ -374,21 +179,8 @@ if (form && container) {
     );
   };
 
-  if (filtersToggle && filtersBody) {
-    const updateFiltersToggle = (isOpen: boolean) => {
-      filtersBody.classList.toggle("hidden", !isOpen);
-      filtersBody.toggleAttribute("hidden", !isOpen);
-      filtersToggle.textContent = isOpen ? "Ocultar" : "Mostrar";
-      filtersToggle.setAttribute("aria-expanded", String(isOpen));
-    };
-    filtersBody.classList.add("hidden");
-    filtersBody.setAttribute("hidden", "true");
-    updateFiltersToggle(false);
-    filtersToggle.addEventListener("click", () => {
-      const isOpen = !filtersBody.classList.contains("hidden");
-      updateFiltersToggle(!isOpen);
-    });
-  }
+  initFiltersToggle(filtersToggle, filtersBody);
+  promoModal.bind();
 
   const buildPromoCard = (
     promo: Promotion,
@@ -655,23 +447,6 @@ if (form && container) {
     observer.observe(loadMore);
   }
 
-  promoModalClose?.addEventListener("click", closePromoModal);
-  promoModalOverlay?.addEventListener("click", (event) => {
-    if (event.target === promoModalOverlay) {
-      closePromoModal();
-    }
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closePromoModal();
-    }
-  });
-
-  promoModalImage?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    promoModalImage.classList.toggle("is-contain");
-  });
-
   const handleCardClick = (event: Event) => {
     const target = event.target as HTMLElement;
     if (target.closest("a")) {
@@ -682,7 +457,7 @@ if (form && container) {
     const promoId = card.dataset.promoId ?? "";
     const promo = promosById.get(promoId);
     if (promo) {
-      openPromoModal(promo);
+      promoModal.open(promo);
     }
   };
 
