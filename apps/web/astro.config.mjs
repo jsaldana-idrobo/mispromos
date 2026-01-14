@@ -6,5 +6,5 @@ export default defineConfig({
   integrations: [tailwind({ applyBaseStyles: true })],
   srcDir: "src",
   output: "server",
-  adapter: vercel(),
+  adapter: vercel({ runtime: "nodejs20.x" }),
 });
