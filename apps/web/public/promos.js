@@ -40,6 +40,8 @@
   // apps/web/src/scripts/promos.ts
   var form = document.querySelector("[data-promos-form]");
   var container = document.querySelector("[data-promos-container]");
+  var loadingBlock = document.querySelector("[data-promos-loading]");
+  var contentBlock = document.querySelector("[data-promos-content]");
   var featuredSection = document.querySelector("[data-promos-featured-section]");
   var featuredContainer = document.querySelector("[data-promos-featured]");
   var categorySelect = document.querySelector("[data-category-select]");
@@ -85,6 +87,7 @@
     let totalRegular = 0;
     let totalFeatured = 0;
     let baseQuery = new URLSearchParams();
+    let loadToken = 0;
     const promoTypeLabels = {
       discount: "Descuento",
       "2x1": "2x1",
@@ -232,10 +235,18 @@
       promoModalOverlay.classList.add("hidden");
       promoModalOverlay.hidden = true;
     };
-    const renderMessage = (message) => {
-      container.innerHTML = `
-      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900/70">${message}</div>
-    `;
+    const setContentLoading = (isLoading) => {
+      if (loadingBlock) {
+        loadingBlock.classList.toggle("hidden", !isLoading);
+        loadingBlock.toggleAttribute("hidden", !isLoading);
+      }
+      if (contentBlock) {
+        contentBlock.classList.toggle("hidden", isLoading);
+        contentBlock.toggleAttribute("hidden", isLoading);
+      }
+    };
+    const resetResults = () => {
+      container.innerHTML = "";
       if (featuredContainer) {
         featuredIds.clear();
         featuredContainer.innerHTML = "";
@@ -249,14 +260,29 @@
       totalRegular = 0;
       totalFeatured = 0;
     };
-    const renderFeaturedLoading = () => {
-      if (!featuredContainer || !featuredSection) return;
-      featuredSection.classList.remove("hidden");
-      featuredContainer.innerHTML = `
-      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-xs text-ink-900/60">
-        Cargando promociones destacadas...
-      </div>
+    const renderMessage = (message) => {
+      resetResults();
+      container.innerHTML = `
+      <div class="rounded-2xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900/70">${message}</div>
     `;
+      setContentLoading(false);
+    };
+    const startPrimaryLoad = () => {
+      resetResults();
+      setContentLoading(true);
+      updateLoadMore("");
+    };
+    const runPrimaryLoad = () => {
+      loadToken += 1;
+      const token = loadToken;
+      startPrimaryLoad();
+      Promise.allSettled([fetchFeaturedPromos(), fetchPromos(false)]).then(
+        () => {
+          if (token === loadToken) {
+            setContentLoading(false);
+          }
+        }
+      );
     };
     if (filtersToggle && filtersBody) {
       const updateFiltersToggle = (isOpen) => {
@@ -325,6 +351,9 @@
     const renderFeaturedPromos = (promos) => {
       if (!featuredContainer || !featuredSection) return;
       featuredIds.clear();
+      promos.forEach((promo) => {
+        promosById.set(promo._id, promo);
+      });
       const featuredHtml = promos.slice(0, FEATURED_COUNT).map((promo, index) => {
         featuredIds.add(promo._id);
         return buildPromoCard(promo, index, true);
@@ -473,18 +502,13 @@
       hasMore = true;
       offset = 0;
       totalLoaded = 0;
-      renderMessage("Cargando promociones...");
-      updateLoadMore("");
-      renderFeaturedLoading();
-      Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
+      runPrimaryLoad();
     });
     const initialQuery = buildBaseQuery(new FormData(form));
     if (initialQuery) {
       baseQuery = initialQuery;
     }
-    updateLoadMore("");
-    renderFeaturedLoading();
-    Promise.all([fetchFeaturedPromos(), fetchPromos(false)]);
+    runPrimaryLoad();
     if (loadMore) {
       const observer = new IntersectionObserver(
         (entries) => {

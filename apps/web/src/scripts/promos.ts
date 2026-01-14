@@ -462,6 +462,9 @@ if (form && container) {
   const renderFeaturedPromos = (promos: Promotion[]) => {
     if (!featuredContainer || !featuredSection) return;
     featuredIds.clear();
+    promos.forEach((promo) => {
+      promosById.set(promo._id, promo);
+    });
     const featuredHtml = promos.slice(0, FEATURED_COUNT).map((promo, index) => {
       featuredIds.add(promo._id);
       return buildPromoCard(promo, index, true);
