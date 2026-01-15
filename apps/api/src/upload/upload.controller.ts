@@ -31,7 +31,7 @@ export class UploadController {
   @UseInterceptors(
     FileInterceptor("file", {
       storage: memoryStorage(),
-      limits: { fileSize: MAX_FILE_SIZE },
+      limits: { fileSize: MAX_FILE_SIZE, files: 1 },
       fileFilter: (_, file, callback) => {
         if (!file.mimetype.startsWith("image/")) {
           callback(
@@ -49,6 +49,9 @@ export class UploadController {
   ) {
     if (!file) {
       throw new BadRequestException("No se encontró imagen para subir.");
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      throw new BadRequestException("La imagen supera el tamaño permitido.");
     }
     if (!cloudName || !apiKey || !apiSecret) {
       throw new BadRequestException("Cloudinary no está configurado.");
