@@ -44,9 +44,13 @@ const defaultCategories = [
   { name: "Desayunos", slug: "desayunos" },
 ];
 
+const seedBusinessOwnerPassword = process.env.SEED_BUSINESS_OWNER_PASSWORD;
+if (!seedBusinessOwnerPassword) {
+  throw new Error("SEED_BUSINESS_OWNER_PASSWORD no está configurado");
+}
 const seedBusinessOwner = {
-  email: "negocio@demo.com",
-  password: "NegocioDemo2025!",
+  email: process.env.SEED_BUSINESS_OWNER_EMAIL ?? "negocio@demo.com",
+  password: seedBusinessOwnerPassword,
 };
 
 type SeedBusiness = {
