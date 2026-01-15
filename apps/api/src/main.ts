@@ -4,6 +4,7 @@ import express from "express";
 import path from "node:path";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
+import { createOriginChecker } from "./common/cors";
 import { MongoExceptionFilter } from "./common/filters/mongo-exception.filter";
 
 async function bootstrap() {
@@ -15,39 +16,13 @@ async function bootstrap() {
   app.use(cookieParser());
   app.useGlobalFilters(new MongoExceptionFilter());
   app.setGlobalPrefix("api/v1");
-  const rawOrigins = process.env.WEB_ORIGIN ?? "";
-  const allowedOrigins = rawOrigins
-    .split(",")
-    .map((origin) => origin.trim().replace(/\/+$/, ""))
-    .filter(Boolean);
-  const defaultOrigins = [
-    "https://mispromos-web.vercel.app",
-    "https://mispromos-web-git-main-juansaldanas-projects.vercel.app",
-  ];
-  const originSet = new Set([...allowedOrigins, ...defaultOrigins]);
+  const isOriginAllowed = createOriginChecker(process.env.WEB_ORIGIN ?? "");
   app.enableCors({
     origin: (
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-      const normalized = origin.replace(/\/+$/, "");
-      if (originSet.size === 0) {
-        callback(null, true);
-        return;
-      }
-      const allowed =
-        originSet.has(normalized) ||
-        (/^https:\/\/mispromos-web(-git-[a-z0-9-]+)?-juansaldanas-projects\.vercel\.app$/.test(
-          normalized,
-        ) &&
-          Array.from(originSet).some((entry) =>
-            entry.includes("mispromos-web"),
-          ));
-      callback(null, allowed);
+      callback(null, isOriginAllowed(origin));
     },
     credentials: true,
   });

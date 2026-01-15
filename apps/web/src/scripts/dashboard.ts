@@ -3413,8 +3413,7 @@ const initDashboard = async () => {
     handleBusinessForm();
     handleBranchForm();
     handlePromoForm();
-    const adminUser = currentUser as User | null;
-    if (adminUser?.role === "ADMIN") {
+    if (currentUser?.role === "ADMIN") {
       handleCityForm();
       handleCategoryForm();
       wireAdminActions();
