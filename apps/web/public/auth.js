@@ -129,9 +129,13 @@ if (form) {
       startButtonLoading(submitButton, "Ingresando");
     }
     const formData = new FormData(form);
+    const getField = (key) => {
+      const value = formData.get(key);
+      return typeof value === "string" ? value : "";
+    };
     const payload = {
-      email: String(formData.get("email") ?? ""),
-      password: String(formData.get("password") ?? "")
+      email: getField("email"),
+      password: getField("password")
     };
     try {
       await apiFetch(`/auth/${mode}`, {

@@ -172,10 +172,7 @@ export class PromotionService {
         };
   }
 
-  private async buildBusinessFilter(
-    category?: string,
-    businessType?: string,
-  ) {
+  private async buildBusinessFilter(category?: string, businessType?: string) {
     if (!category && !businessType) {
       return {};
     }

@@ -12,16 +12,17 @@ export class OptionalJwtAuthGuard implements CanActivate {
     if (!token) {
       return true;
     }
-    await this.attachUserIfValid(req, token);
-    return true; // NOSONAR - optional auth should never block requests
+    return this.attachUserIfValid(req, token);
   }
 
   private async attachUserIfValid(req: AuthRequest, token: string) {
     try {
       const payload = await this.authService.verifyAccessToken(token);
       req.user = { id: payload.sub, role: payload.role, email: payload.email };
+      return true;
     } catch {
-      // Ignore invalid/expired tokens for optional auth.
+      // Invalid tokens should not grant access to protected routes.
+      return false;
     }
   }
 }

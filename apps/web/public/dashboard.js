@@ -574,6 +574,10 @@ let setInputValue = (form, name, value) => {
     input.value = value;
   }
 };
+let getFormString = (data, key) => {
+  const value = data.get(key);
+  return typeof value === "string" ? value : "";
+};
 let formatDateInput = (value) => {
   if (!value) {
     return "";
@@ -2216,7 +2220,7 @@ let handleBusinessForm = () => {
         "[name='categories'] option:checked"
       )
     ).map((option) => option.value);
-    const slug = normalizeSlug(String(data.get("slug") ?? ""));
+    const slug = normalizeSlug(getFormString(data, "slug"));
     const slugConflict = businesses.some(
       (business) => business.slug.toLowerCase() === slug && (!businessForm.dataset.editId || business._id !== businessForm.dataset.editId)
     );
@@ -2229,12 +2233,12 @@ let handleBusinessForm = () => {
     await withLoading(businessForm, async () => {
       try {
         const payload = {
-          name: String(data.get("name") ?? ""),
+          name: getFormString(data, "name"),
           slug,
-          type: String(data.get("type") ?? ""),
+          type: getFormString(data, "type"),
           categories: categoryValues,
-          description: String(data.get("description") ?? "") || void 0,
-          instagram: String(data.get("instagram") ?? "") || void 0
+          description: getFormString(data, "description") || void 0,
+          instagram: getFormString(data, "instagram") || void 0
         };
         if (businessForm.dataset.mode === "edit" && businessForm.dataset.editId) {
           await apiFetch(
@@ -2290,11 +2294,11 @@ let handleBranchForm = () => {
     await withLoading(branchForm, async () => {
       try {
         const payload = {
-          businessId: String(data.get("businessId") ?? ""),
-          city: String(data.get("city") ?? ""),
-          address: String(data.get("address") ?? ""),
-          zone: String(data.get("zone") ?? "") || void 0,
-          phone: String(data.get("phone") ?? "") || void 0
+          businessId: getFormString(data, "businessId"),
+          city: getFormString(data, "city"),
+          address: getFormString(data, "address"),
+          zone: getFormString(data, "zone") || void 0,
+          phone: getFormString(data, "phone") || void 0
         };
         if (branchForm.dataset.mode === "edit" && branchForm.dataset.editId) {
           await apiFetch(`/branches/${branchForm.dataset.editId}`, {
@@ -2313,7 +2317,7 @@ let handleBranchForm = () => {
           branchEditing ? "Sede actualizada." : "Sede creada."
         );
         setBranchForm();
-        const businessId = String(data.get("businessId") ?? "");
+        const businessId = getFormString(data, "businessId");
         if (businessId) {
           currentBusinessId = businessId;
           await loadBranches(businessId);
@@ -2337,23 +2341,23 @@ let handleBranchForm = () => {
 let buildPromoFormValues = (form) => {
   const data = new FormData(form);
   const days = data.getAll("daysOfWeek").map(String);
-  const startDateValue = String(data.get("startDate") ?? "");
-  const endDateValue = String(data.get("endDate") ?? "");
+  const startDateValue = getFormString(data, "startDate");
+  const endDateValue = getFormString(data, "endDate");
   const startDateIso = startDateValue ? (/* @__PURE__ */ new Date(`${startDateValue}T00:00:00`)).toISOString() : null;
   const endDateIso = endDateValue ? (/* @__PURE__ */ new Date(`${endDateValue}T23:59:59`)).toISOString() : null;
-  const startHourValue = String(data.get("startHour") ?? "");
-  const endHourValue = String(data.get("endHour") ?? "");
+  const startHourValue = getFormString(data, "startHour");
+  const endHourValue = getFormString(data, "endHour");
   const startHour = startHourValue.length > 0 ? startHourValue : null;
   const endHour = endHourValue.length > 0 ? endHourValue : null;
-  const imageUrlValue = String(data.get("imageUrl") ?? "").trim();
+  const imageUrlValue = getFormString(data, "imageUrl").trim();
   const imageUrl = imageUrlValue.length > 0 ? imageUrlValue : null;
   return {
-    businessId: String(data.get("businessId") ?? ""),
-    branchId: String(data.get("branchId") ?? "") || null,
-    title: String(data.get("title") ?? ""),
-    description: String(data.get("description") ?? "") || void 0,
-    promoType: String(data.get("promoType") ?? ""),
-    value: String(data.get("value") ?? "") || void 0,
+    businessId: getFormString(data, "businessId"),
+    branchId: getFormString(data, "branchId") || null,
+    title: getFormString(data, "title"),
+    description: getFormString(data, "description") || void 0,
+    promoType: getFormString(data, "promoType"),
+    value: getFormString(data, "value") || void 0,
     days,
     startDateIso,
     endDateIso,
@@ -2493,8 +2497,8 @@ let handleCityForm = () => {
     await withLoading(cityForm, async () => {
       try {
         const payload = {
-          name: String(data.get("name") ?? ""),
-          countryCode: String(data.get("countryCode") ?? "").toUpperCase()
+          name: getFormString(data, "name"),
+          countryCode: getFormString(data, "countryCode").toUpperCase()
         };
         if (cityForm.dataset.mode === "edit" && cityForm.dataset.editId) {
           await apiFetch(`/cities/${cityForm.dataset.editId}`, {
@@ -2543,8 +2547,8 @@ let handleCategoryForm = () => {
     await withLoading(categoryForm, async () => {
       try {
         const payload = {
-          name: String(data.get("name") ?? ""),
-          slug: String(data.get("slug") ?? "").toLowerCase()
+          name: getFormString(data, "name"),
+          slug: getFormString(data, "slug").toLowerCase()
         };
         if (categoryForm.dataset.mode === "edit" && categoryForm.dataset.editId) {
           await apiFetch(

@@ -68,7 +68,13 @@ async function bootstrap() {
   console.log(`🚀 API mispromos escuchando en puerto ${port}`);
 }
 
-bootstrap().catch((error) => {
-  console.error("Fallo al iniciar la API", error);
-  process.exit(1);
-}); // NOSONAR
+const runBootstrap = async () => {
+  try {
+    await bootstrap();
+  } catch (error) {
+    console.error("Fallo al iniciar la API", error);
+    process.exit(1);
+  }
+};
+
+void runBootstrap();

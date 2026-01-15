@@ -488,11 +488,15 @@ if (form && container) {
     }
   };
   const buildBaseQuery = (formData) => {
-    const city = String(formData.get("city") ?? "").trim();
-    const atValue = String(formData.get("at") ?? "").trim();
-    const promoType = String(formData.get("promoType") ?? "").trim();
-    const category = String(formData.get("category") ?? "").trim();
-    const queryText = String(formData.get("q") ?? "").trim();
+    const getFormValue = (key) => {
+      const value = formData.get(key);
+      return typeof value === "string" ? value : "";
+    };
+    const city = getFormValue("city").trim();
+    const atValue = getFormValue("at").trim();
+    const promoType = getFormValue("promoType").trim();
+    const category = getFormValue("category").trim();
+    const queryText = getFormValue("q").trim();
     const atDate = atValue ? new Date(atValue) : void 0;
     if (atDate && Number.isNaN(atDate.valueOf())) {
       renderMessage("Formato de fecha inv\xE1lido.");

@@ -903,7 +903,13 @@ const run = async () => {
   }
 };
 
-run().catch(async (error) => {
-  console.error(error);
-  process.exit(1);
-}); // NOSONAR
+const runSeed = async () => {
+  try {
+    await run();
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
+
+void runSeed();

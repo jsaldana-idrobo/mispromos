@@ -288,11 +288,15 @@ if (form && container) {
   };
 
   const buildBaseQuery = (formData: FormData) => {
-    const city = String(formData.get("city") ?? "").trim();
-    const atValue = String(formData.get("at") ?? "").trim();
-    const promoType = String(formData.get("promoType") ?? "").trim();
-    const category = String(formData.get("category") ?? "").trim();
-    const queryText = String(formData.get("q") ?? "").trim();
+    const getFormValue = (key: string) => {
+      const value = formData.get(key);
+      return typeof value === "string" ? value : "";
+    };
+    const city = getFormValue("city").trim();
+    const atValue = getFormValue("at").trim();
+    const promoType = getFormValue("promoType").trim();
+    const category = getFormValue("category").trim();
+    const queryText = getFormValue("q").trim();
 
     const atDate = atValue ? new Date(atValue) : undefined;
     if (atDate && Number.isNaN(atDate.valueOf())) {
