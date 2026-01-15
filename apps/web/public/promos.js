@@ -1,10 +1,10 @@
 // apps/web/src/scripts/api.ts
-var readApiBase = () => {
+let readApiBase = () => {
   const base = document.body.dataset.apiBase;
   return base && base.length > 0 ? base : "http://localhost:3000/api/v1";
 };
-var API_BASE = readApiBase();
-var parseErrorMessage = (payload) => {
+let API_BASE = readApiBase();
+let parseErrorMessage = (payload) => {
   if (!payload?.message) {
     return "Ocurri\xF3 un error inesperado";
   }
@@ -13,7 +13,7 @@ var parseErrorMessage = (payload) => {
   }
   return payload.message;
 };
-var apiFetch = async (path, options) => {
+let apiFetch = async (path, options) => {
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
     headers: {
@@ -36,13 +36,13 @@ var apiFetch = async (path, options) => {
 };
 
 // apps/web/src/scripts/promos/formatters.ts
-var promoTypeLabels = {
+let promoTypeLabels = {
   discount: "Descuento",
   "2x1": "2x1",
   combo: "Combo",
   other: "Otra"
 };
-var toneMap = {
+let toneMap = {
   pizza: { emoji: "\u{1F355}", tone: "promo-tone-sunset" },
   hamburguesas: { emoji: "\u{1F354}", tone: "promo-tone-berry" },
   sushi: { emoji: "\u{1F363}", tone: "promo-tone-sage" },
@@ -63,8 +63,8 @@ var toneMap = {
   ensaladas: { emoji: "\u{1F96C}", tone: "promo-tone-lime" },
   desayunos: { emoji: "\u{1F95E}", tone: "promo-tone-honey" }
 };
-var defaultTone = { emoji: "\u2728", tone: "promo-tone-sunrise" };
-var dayLabels = {
+let defaultTone = { emoji: "\u2728", tone: "promo-tone-sunrise" };
+let dayLabels = {
   monday: "Lunes",
   tuesday: "Martes",
   wednesday: "Mi\xE9rcoles",
@@ -73,7 +73,7 @@ var dayLabels = {
   saturday: "S\xE1bado",
   sunday: "Domingo"
 };
-var orderedDays = [
+let orderedDays = [
   "monday",
   "tuesday",
   "wednesday",
@@ -82,13 +82,13 @@ var orderedDays = [
   "saturday",
   "sunday"
 ];
-var getPromoVisual = (category) => {
+let getPromoVisual = (category) => {
   if (!category) return defaultTone;
   return toneMap[category] ?? defaultTone;
 };
-var formatPromoType = (type) => promoTypeLabels[type] ?? type;
-var formatDaysShort = (days) => orderedDays.filter((day) => days.includes(day)).map((day) => dayLabels[day] ?? day).join(" \xB7 ");
-var formatDaysFull = (days) => {
+let formatPromoType = (type) => promoTypeLabels[type] ?? type;
+let formatDaysShort = (days) => orderedDays.filter((day) => days.includes(day)).map((day) => dayLabels[day] ?? day).join(" \xB7 ");
+let formatDaysFull = (days) => {
   const daySet = new Set(days);
   const hasWeekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"].every(
     (day) => daySet.has(day)
@@ -107,7 +107,7 @@ var formatDaysFull = (days) => {
 };
 
 // apps/web/src/scripts/promos/filters.ts
-var initFiltersToggle = (filtersToggle2, filtersBody2) => {
+let initFiltersToggle = (filtersToggle2, filtersBody2) => {
   if (!filtersToggle2 || !filtersBody2) return;
   const updateFiltersToggle = (isOpen) => {
     filtersBody2.classList.toggle("hidden", !isOpen);
@@ -125,7 +125,7 @@ var initFiltersToggle = (filtersToggle2, filtersBody2) => {
 };
 
 // apps/web/src/scripts/promos/modal.ts
-var setModalFieldVisibility = (wrapper, value) => {
+let setModalFieldVisibility = (wrapper, value) => {
   if (!wrapper) return;
   if (!value) {
     wrapper.classList.add("hidden");
@@ -133,13 +133,13 @@ var setModalFieldVisibility = (wrapper, value) => {
   }
   wrapper.classList.remove("hidden");
 };
-var getTagsHtml = (categories) => {
+let getTagsHtml = (categories) => {
   if (categories.length === 0) {
     return `<span class="promo-pill">#local</span>`;
   }
   return categories.slice(0, 4).map((item) => `<span class="promo-pill">#${item}</span>`).join("");
 };
-var updateInstagram = (elements, handle) => {
+let updateInstagram = (elements, handle) => {
   if (!elements.instagram) return;
   if (handle) {
     elements.instagram.textContent = `@${handle}`;
@@ -150,7 +150,7 @@ var updateInstagram = (elements, handle) => {
   }
   setModalFieldVisibility(elements.fieldInstagram, handle || null);
 };
-var updateMedia = (elements, promo, emoji) => {
+let updateMedia = (elements, promo, emoji) => {
   if (elements.image) {
     elements.image.classList.remove("is-contain");
   }
@@ -174,7 +174,7 @@ var updateMedia = (elements, promo, emoji) => {
     elements.emoji.classList.remove("hidden");
   }
 };
-var updateTextFields = (elements, promo, businessName, promoTypeLabel, days, tagsHtml) => {
+let updateTextFields = (elements, promo, businessName, promoTypeLabel, days, tagsHtml) => {
   if (elements.title) elements.title.textContent = promo.title;
   if (elements.featured) {
     elements.featured.classList.toggle("hidden", !promo.featured);
@@ -194,7 +194,7 @@ var updateTextFields = (elements, promo, businessName, promoTypeLabel, days, tag
     promo.value ? String(promo.value) : null
   );
 };
-var createPromoModal = (elements) => {
+let createPromoModal = (elements) => {
   const open = (promo) => {
     if (!elements.overlay || !elements.modal) return;
     const businessName = promo.business?.name ?? "Negocio local";
@@ -244,88 +244,88 @@ var createPromoModal = (elements) => {
 };
 
 // apps/web/src/scripts/promos.ts
-var form = document.querySelector("[data-promos-form]");
-var container = document.querySelector(
+let form = document.querySelector("[data-promos-form]");
+let container = document.querySelector(
   "[data-promos-container]"
 );
-var loadingBlock = document.querySelector(
+let loadingBlock = document.querySelector(
   "[data-promos-loading]"
 );
-var contentBlock = document.querySelector(
+let contentBlock = document.querySelector(
   "[data-promos-content]"
 );
-var featuredSection = document.querySelector(
+let featuredSection = document.querySelector(
   "[data-promos-featured-section]"
 );
-var featuredContainer = document.querySelector(
+let featuredContainer = document.querySelector(
   "[data-promos-featured]"
 );
-var categorySelect = document.querySelector(
+let categorySelect = document.querySelector(
   "[data-category-select]"
 );
-var citySelect = document.querySelector("[data-city-select]");
-var loadMore = document.querySelector(
+let citySelect = document.querySelector("[data-city-select]");
+let loadMore = document.querySelector(
   "[data-promos-load-more]"
 );
-var counter = document.querySelector(
+let counter = document.querySelector(
   "[data-promos-counter]"
 );
-var filtersToggle = document.querySelector(
+let filtersToggle = document.querySelector(
   "[data-promos-filters-toggle]"
 );
-var filtersBody = document.querySelector(
+let filtersBody = document.querySelector(
   "[data-promos-filters-body]"
 );
-var promoModalOverlay = document.querySelector(
+let promoModalOverlay = document.querySelector(
   "[data-promos-modal-overlay]"
 );
-var promoModalElement = document.querySelector(
+let promoModalElement = document.querySelector(
   "[data-promos-modal]"
 );
-var promoModalClose = document.querySelector(
+let promoModalClose = document.querySelector(
   "[data-promos-modal-close]"
 );
-var promoModalTitle = document.querySelector(
+let promoModalTitle = document.querySelector(
   "[data-promos-modal-title]"
 );
-var promoModalFeatured = document.querySelector(
+let promoModalFeatured = document.querySelector(
   "[data-promos-modal-featured]"
 );
-var promoModalBusiness = document.querySelector(
+let promoModalBusiness = document.querySelector(
   "[data-promos-modal-business]"
 );
-var promoModalDescription = document.querySelector(
+let promoModalDescription = document.querySelector(
   "[data-promos-modal-description]"
 );
-var promoModalTags = document.querySelector(
+let promoModalTags = document.querySelector(
   "[data-promos-modal-tags]"
 );
-var promoModalType = document.querySelector(
+let promoModalType = document.querySelector(
   "[data-promos-modal-type]"
 );
-var promoModalValue = document.querySelector(
+let promoModalValue = document.querySelector(
   "[data-promos-modal-value]"
 );
-var promoModalDays = document.querySelector(
+let promoModalDays = document.querySelector(
   "[data-promos-modal-days]"
 );
-var promoModalInstagram = document.querySelector(
+let promoModalInstagram = document.querySelector(
   "[data-promos-modal-instagram]"
 );
-var promoModalImage = document.querySelector(
+let promoModalImage = document.querySelector(
   "[data-promos-modal-image]"
 );
-var promoModalEmoji = document.querySelector(
+let promoModalEmoji = document.querySelector(
   "[data-promos-modal-emoji]"
 );
-var promoModalFieldValue = document.querySelector(
+let promoModalFieldValue = document.querySelector(
   '[data-promos-modal-field="value"]'
 );
-var promoModalFieldInstagram = document.querySelector(
+let promoModalFieldInstagram = document.querySelector(
   '[data-promos-modal-field="instagram"]'
 );
-var PAGE_SIZE = 10;
-var FEATURED_COUNT = 6;
+let PAGE_SIZE = 10;
+let FEATURED_COUNT = 6;
 if (form && container) {
   let loading = false;
   let hasMore = true;

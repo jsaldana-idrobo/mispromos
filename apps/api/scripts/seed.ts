@@ -734,36 +734,119 @@ const upsertBranch = async (
   return found;
 };
 
-const run = async () => {
-  const client = new MongoClient(uri);
-  await client.connect();
-  const db = client.db();
-
-  const cities = db.collection<CityDoc>("cities");
-  const categories = db.collection<CategoryDoc>("categories");
-  const users = db.collection<UserDoc>("users");
-  const businesses = db.collection<BusinessDoc>("businesses");
-  const branches = db.collection<BranchDoc>("branches");
-  const promotions = db.collection<PromotionDoc>("promotions");
-
+const seedCities = async (cities: Collection<CityDoc>) => {
   for (const city of defaultCities) {
     await upsertCity(cities, { ...city, createdAt: new Date() });
   }
+};
 
+const seedCategories = async (categories: Collection<CategoryDoc>) => {
   for (const category of defaultCategories) {
     await upsertCategory(categories, { ...category, createdAt: new Date() });
   }
+};
 
+const getSeedOwnerId = async (users: Collection<UserDoc>) => {
   const seedOwner = await upsertUser(users, {
     email: seedBusinessOwner.email,
     password: seedBusinessOwner.password,
     role: UserRole.BUSINESS_OWNER,
   });
-  const ownerId = seedOwner?._id ? String(seedOwner._id) : "seed-owner-palmira";
-  const today = new Date();
-  const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
-  const endDate = new Date(today.getFullYear(), today.getMonth() + 3, today.getDate());
+  return seedOwner?._id ? String(seedOwner._id) : "seed-owner-palmira";
+};
 
+const getSeedDateRange = () => {
+  const today = new Date();
+  const startDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - 1
+  );
+  const endDate = new Date(
+    today.getFullYear(),
+    today.getMonth() + 3,
+    today.getDate()
+  );
+  return { startDate, endDate };
+};
+
+const upsertBranchesForBusiness = async (
+  branches: Collection<BranchDoc>,
+  businessId: string,
+  branchList: SeedBusiness["branches"]
+) => {
+  const branchIds: ObjectId[] = [];
+  for (const branch of branchList) {
+    const savedBranch = await upsertBranch(
+      branches,
+      { businessId, address: branch.address },
+      {
+        businessId,
+        city: branch.city,
+        zone: branch.zone,
+        address: branch.address,
+        lat: branch.lat,
+        lng: branch.lng,
+        phone: branch.phone,
+        createdAt: new Date(),
+      }
+    );
+
+    if (!savedBranch._id) {
+      throw new Error("Sede guardada sin _id");
+    }
+
+    branchIds.push(savedBranch._id);
+  }
+  return branchIds;
+};
+
+const buildPromoInsert = (
+  promo: SeedBusiness["promotions"][number],
+  businessId: string,
+  branchId: ObjectId | undefined,
+  dates: { startDate: Date; endDate: Date }
+) => ({
+  businessId,
+  branchId: branchId ? branchId.toString() : null,
+  title: promo.title,
+  description: promo.description,
+  promoType: promo.promoType,
+  value: promo.value,
+  startDate: dates.startDate,
+  endDate: dates.endDate,
+  daysOfWeek: promo.daysOfWeek,
+  startHour: promo.startHour,
+  endHour: promo.endHour,
+  active: true,
+  createdAt: new Date(),
+});
+
+const upsertPromosForBusiness = async (
+  promotions: Collection<PromotionDoc>,
+  businessId: string,
+  branchIds: ObjectId[],
+  promoList: SeedBusiness["promotions"],
+  dates: { startDate: Date; endDate: Date }
+) => {
+  for (const promo of promoList) {
+    const branchId =
+      typeof promo.branchIndex === "number" ? branchIds[promo.branchIndex] : undefined;
+    await promotions.updateOne(
+      { businessId, title: promo.title },
+      { $setOnInsert: buildPromoInsert(promo, businessId, branchId, dates) },
+      { upsert: true }
+    );
+  }
+};
+
+const seedBusinessesData = async (
+  businesses: Collection<BusinessDoc>,
+  branches: Collection<BranchDoc>,
+  promotions: Collection<PromotionDoc>,
+  ownerId: string,
+  dates: { startDate: Date; endDate: Date }
+) => {
   for (const business of seedBusinesses) {
     const savedBusiness = await upsertBusiness(businesses, {
       name: business.name,
@@ -781,61 +864,46 @@ const run = async () => {
       throw new Error("Negocio guardado sin _id");
     }
 
-    const branchIds: ObjectId[] = [];
-    for (const branch of business.branches) {
-      const savedBranch = await upsertBranch(
-        branches,
-        { businessId: savedBusiness._id.toString(), address: branch.address },
-        {
-          businessId: savedBusiness._id.toString(),
-          city: branch.city,
-          zone: branch.zone,
-          address: branch.address,
-          lat: branch.lat,
-          lng: branch.lng,
-          phone: branch.phone,
-          createdAt: new Date(),
-        }
-      );
-
-      if (!savedBranch._id) {
-        throw new Error("Sede guardada sin _id");
-      }
-
-      branchIds.push(savedBranch._id);
-    }
-
-    for (const promo of business.promotions) {
-      const branchId =
-        typeof promo.branchIndex === "number" ? branchIds[promo.branchIndex] : undefined;
-      await promotions.updateOne(
-        { businessId: savedBusiness._id.toString(), title: promo.title },
-        {
-          $setOnInsert: {
-            businessId: savedBusiness._id.toString(),
-            branchId: branchId ? branchId.toString() : null,
-            title: promo.title,
-            description: promo.description,
-            promoType: promo.promoType,
-            value: promo.value,
-            startDate,
-            endDate,
-            daysOfWeek: promo.daysOfWeek,
-            startHour: promo.startHour,
-            endHour: promo.endHour,
-            active: true,
-            createdAt: new Date(),
-          },
-        },
-        { upsert: true }
-      );
-    }
+    const businessId = savedBusiness._id.toString();
+    const branchIds = await upsertBranchesForBusiness(
+      branches,
+      businessId,
+      business.branches
+    );
+    await upsertPromosForBusiness(
+      promotions,
+      businessId,
+      branchIds,
+      business.promotions,
+      dates
+    );
   }
+};
 
-  await client.close();
+const run = async () => {
+  const client = new MongoClient(uri);
+  await client.connect();
+  const db = client.db();
+
+  const cities = db.collection<CityDoc>("cities");
+  const categories = db.collection<CategoryDoc>("categories");
+  const users = db.collection<UserDoc>("users");
+  const businesses = db.collection<BusinessDoc>("businesses");
+  const branches = db.collection<BranchDoc>("branches");
+  const promotions = db.collection<PromotionDoc>("promotions");
+
+  try {
+    await seedCities(cities);
+    await seedCategories(categories);
+    const ownerId = await getSeedOwnerId(users);
+    const dates = getSeedDateRange();
+    await seedBusinessesData(businesses, branches, promotions, ownerId, dates);
+  } finally {
+    await client.close();
+  }
 };
 
 run().catch(async (error) => {
   console.error(error);
   process.exit(1);
-});
+}); // NOSONAR

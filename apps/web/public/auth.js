@@ -1,10 +1,10 @@
 // apps/web/src/scripts/api.ts
-var readApiBase = () => {
+let readApiBase = () => {
   const base = document.body.dataset.apiBase;
   return base && base.length > 0 ? base : "http://localhost:3000/api/v1";
 };
-var API_BASE2 = readApiBase();
-var parseErrorMessage = (payload) => {
+let API_BASE2 = readApiBase();
+let parseErrorMessage = (payload) => {
   if (!payload?.message) {
     return "Ocurri\xF3 un error inesperado";
   }
@@ -13,7 +13,7 @@ var parseErrorMessage = (payload) => {
   }
   return payload.message;
 };
-var apiFetch = async (path, options) => {
+let apiFetch = async (path, options) => {
   const response = await fetch(`${API_BASE2}${path}`, {
     credentials: "include",
     headers: {
@@ -36,7 +36,7 @@ var apiFetch = async (path, options) => {
 };
 
 // apps/web/src/scripts/ui.ts
-var getContainer = () => {
+let getContainer = () => {
   let container = document.querySelector(
     "[data-toast-container]"
   );
@@ -48,7 +48,7 @@ var getContainer = () => {
   }
   return container;
 };
-var showToast = (title, description, variant = "info") => {
+let showToast = (title, description, variant = "info") => {
   const container = getContainer();
   const toast = document.createElement("div");
   let variantClass = "";
@@ -69,7 +69,7 @@ var showToast = (title, description, variant = "info") => {
     toast.remove();
   }, 3600);
 };
-var startButtonLoading = (button, text) => {
+let startButtonLoading = (button, text) => {
   button.dataset.originalText = button.textContent ?? "";
   button.disabled = true;
   button.innerHTML = `
@@ -81,7 +81,7 @@ var startButtonLoading = (button, text) => {
     </span>
   `;
 };
-var stopButtonLoading = (button) => {
+let stopButtonLoading = (button) => {
   button.disabled = false;
   if (button.dataset.originalText) {
     button.textContent = button.dataset.originalText;
@@ -90,9 +90,9 @@ var stopButtonLoading = (button) => {
 };
 
 // apps/web/src/scripts/auth.ts
-var form = document.querySelector("[data-auth-form]");
-var messageEl = document.querySelector("[data-auth-message]");
-var redirectIfAuthenticated = async () => {
+let form = document.querySelector("[data-auth-form]");
+let messageEl = document.querySelector("[data-auth-message]");
+let redirectIfAuthenticated = async () => {
   if (!form) return false;
   try {
     const response = await fetch(`${API_BASE}/auth/me`, {

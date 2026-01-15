@@ -6,7 +6,8 @@ import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 import { MongoExceptionFilter } from "./common/filters/mongo-exception.filter";
 
-async function bootstrap() { // NOSONAR - top-level await is not available in CommonJS
+async function bootstrap() {
+  // NOSONAR - top-level await is not available in CommonJS
   const app = await NestFactory.create(AppModule, {
     logger: ["log", "warn", "error"],
   });

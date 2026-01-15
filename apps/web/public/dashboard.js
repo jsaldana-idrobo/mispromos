@@ -1,10 +1,10 @@
 // apps/web/src/scripts/api.ts
-var readApiBase = () => {
+let readApiBase = () => {
   const base = document.body.dataset.apiBase;
   return base && base.length > 0 ? base : "http://localhost:3000/api/v1";
 };
-var API_BASE = readApiBase();
-var parseErrorMessage = (payload) => {
+let API_BASE = readApiBase();
+let parseErrorMessage = (payload) => {
   if (!payload?.message) {
     return "Ocurri\xF3 un error inesperado";
   }
@@ -13,7 +13,7 @@ var parseErrorMessage = (payload) => {
   }
   return payload.message;
 };
-var apiFetch = async (path, options) => {
+let apiFetch = async (path, options) => {
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
     headers: {
@@ -36,7 +36,7 @@ var apiFetch = async (path, options) => {
 };
 
 // apps/web/src/scripts/ui.ts
-var getContainer = () => {
+let getContainer = () => {
   let container = document.querySelector(
     "[data-toast-container]"
   );
@@ -48,7 +48,7 @@ var getContainer = () => {
   }
   return container;
 };
-var showToast = (title, description, variant = "info") => {
+let showToast = (title, description, variant = "info") => {
   const container = getContainer();
   const toast = document.createElement("div");
   let variantClass = "";
@@ -69,7 +69,7 @@ var showToast = (title, description, variant = "info") => {
     toast.remove();
   }, 3600);
 };
-var startButtonLoading = (button, text) => {
+let startButtonLoading = (button, text) => {
   button.dataset.originalText = button.textContent ?? "";
   button.disabled = true;
   button.innerHTML = `
@@ -81,7 +81,7 @@ var startButtonLoading = (button, text) => {
     </span>
   `;
 };
-var stopButtonLoading = (button) => {
+let stopButtonLoading = (button) => {
   button.disabled = false;
   if (button.dataset.originalText) {
     button.textContent = button.dataset.originalText;
@@ -90,17 +90,17 @@ var stopButtonLoading = (button) => {
 };
 
 // apps/web/src/scripts/validators.ts
-var isValidDateRange = (startIso, endIso) => startIso <= endIso;
-var isValidTimeRange = (start, end) => start <= end;
+let isValidDateRange = (startIso, endIso) => startIso <= endIso;
+let isValidTimeRange = (start, end) => start <= end;
 
 // apps/web/src/data/catalog.ts
-var businessTypeLabels = {
+let businessTypeLabels = {
   restaurant: "Restaurante",
   shop: "Tienda",
   service: "Servicio",
   bar: "Bar"
 };
-var promoTypeLabels = {
+let promoTypeLabels = {
   discount: "Descuento",
   "2x1": "2x1",
   combo: "Combo",
@@ -108,380 +108,380 @@ var promoTypeLabels = {
 };
 
 // apps/web/src/scripts/dashboard.ts
-var isMobileDevice = () => /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-var compareLabels = (left, right) => left.localeCompare(right, "es", { sensitivity: "base" });
-var userCard = document.querySelector("[data-user-card]");
-var businessList = document.querySelector(
+let isMobileDevice = () => /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+let compareLabels = (left, right) => left.localeCompare(right, "es", { sensitivity: "base" });
+let userCard = document.querySelector("[data-user-card]");
+let businessList = document.querySelector(
   "[data-business-list]"
 );
-var branchList = document.querySelector("[data-branch-list]");
-var promoList = document.querySelector("[data-promo-list]");
-var businessSelects = Array.from(
+let branchList = document.querySelector("[data-branch-list]");
+let promoList = document.querySelector("[data-promo-list]");
+let businessSelects = Array.from(
   document.querySelectorAll("[data-business-select]")
 );
-var businessSelectRows = Array.from(
+let businessSelectRows = Array.from(
   document.querySelectorAll("[data-business-select-row]")
 );
-var branchSelect = document.querySelector(
+let branchSelect = document.querySelector(
   "[data-branch-select]"
 );
-var businessForm = document.querySelector(
+let businessForm = document.querySelector(
   "[data-business-form]"
 );
-var businessMessage = document.querySelector(
+let businessMessage = document.querySelector(
   "[data-business-message]"
 );
-var businessMode = document.querySelector(
+let businessMode = document.querySelector(
   "[data-business-mode]"
 );
-var branchForm = document.querySelector("[data-branch-form]");
-var branchMessage = document.querySelector(
+let branchForm = document.querySelector("[data-branch-form]");
+let branchMessage = document.querySelector(
   "[data-branch-message]"
 );
-var branchMode = document.querySelector("[data-branch-mode]");
-var promoForm = document.querySelector("[data-promo-form]");
-var promoImageFileInput = document.querySelector(
+let branchMode = document.querySelector("[data-branch-mode]");
+let promoForm = document.querySelector("[data-promo-form]");
+let promoImageFileInput = document.querySelector(
   "[data-promo-image-file]"
 );
-var promoImagePreview = document.querySelector(
+let promoImagePreview = document.querySelector(
   "[data-promo-image-preview]"
 );
-var promoImagePreviewWrapper = document.querySelector(
+let promoImagePreviewWrapper = document.querySelector(
   "[data-promo-image-preview-wrapper]"
 );
-var promoMessage = document.querySelector(
+let promoMessage = document.querySelector(
   "[data-promo-message]"
 );
-var promoMode = document.querySelector("[data-promo-mode]");
-var promoSearchInput = document.querySelector(
+let promoMode = document.querySelector("[data-promo-mode]");
+let promoSearchInput = document.querySelector(
   "[data-promo-search]"
 );
-var promoStatusSelect = document.querySelector(
+let promoStatusSelect = document.querySelector(
   "[data-promo-status]"
 );
-var promoTypeSelect = document.querySelector("[data-promo-type]");
-var promoBusinessFilter = document.querySelector(
+let promoTypeSelect = document.querySelector("[data-promo-type]");
+let promoBusinessFilter = document.querySelector(
   "[data-promo-business-filter]"
 );
-var promoPagination = document.querySelector(
+let promoPagination = document.querySelector(
   "[data-promo-pagination]"
 );
-var promoPagePrev = document.querySelector(
+let promoPagePrev = document.querySelector(
   "[data-promo-page-prev]"
 );
-var promoPageNext = document.querySelector(
+let promoPageNext = document.querySelector(
   "[data-promo-page-next]"
 );
-var promoPageInfo = document.querySelector(
+let promoPageInfo = document.querySelector(
   "[data-promo-page-info]"
 );
-var promoKpiTotal = document.querySelector(
+let promoKpiTotal = document.querySelector(
   "[data-promo-kpi-total]"
 );
-var promoKpiActive = document.querySelector(
+let promoKpiActive = document.querySelector(
   "[data-promo-kpi-active]"
 );
-var promoKpiInactive = document.querySelector(
+let promoKpiInactive = document.querySelector(
   "[data-promo-kpi-inactive]"
 );
-var branchSearchInput = document.querySelector(
+let branchSearchInput = document.querySelector(
   "[data-branch-search]"
 );
-var branchCityFilter = document.querySelector(
+let branchCityFilter = document.querySelector(
   "[data-branch-city-filter]"
 );
-var branchBusinessFilter = document.querySelector(
+let branchBusinessFilter = document.querySelector(
   "[data-branch-business-filter]"
 );
-var branchPagination = document.querySelector(
+let branchPagination = document.querySelector(
   "[data-branch-pagination]"
 );
-var branchPagePrev = document.querySelector(
+let branchPagePrev = document.querySelector(
   "[data-branch-page-prev]"
 );
-var branchPageNext = document.querySelector(
+let branchPageNext = document.querySelector(
   "[data-branch-page-next]"
 );
-var branchPageInfo = document.querySelector(
+let branchPageInfo = document.querySelector(
   "[data-branch-page-info]"
 );
-var branchKpiTotal = document.querySelector(
+let branchKpiTotal = document.querySelector(
   "[data-branch-kpi-total]"
 );
-var branchKpiCities = document.querySelector(
+let branchKpiCities = document.querySelector(
   "[data-branch-kpi-cities]"
 );
-var branchKpiPhones = document.querySelector(
+let branchKpiPhones = document.querySelector(
   "[data-branch-kpi-phones]"
 );
-var businessSearchInput = document.querySelector(
+let businessSearchInput = document.querySelector(
   "[data-business-search]"
 );
-var businessTypeFilter = document.querySelector(
+let businessTypeFilter = document.querySelector(
   "[data-business-type-filter]"
 );
-var businessCityFilter = document.querySelector(
+let businessCityFilter = document.querySelector(
   "[data-business-city-filter]"
 );
-var businessCategoryFilter = document.querySelector(
+let businessCategoryFilter = document.querySelector(
   "[data-business-category-filter]"
 );
-var businessVerifiedFilter = document.querySelector(
+let businessVerifiedFilter = document.querySelector(
   "[data-business-verified-filter]"
 );
-var businessInstagramFilter = document.querySelector(
+let businessInstagramFilter = document.querySelector(
   "[data-business-instagram-filter]"
 );
-var businessPagination = document.querySelector(
+let businessPagination = document.querySelector(
   "[data-business-pagination]"
 );
-var businessPagePrev = document.querySelector(
+let businessPagePrev = document.querySelector(
   "[data-business-page-prev]"
 );
-var businessPageNext = document.querySelector(
+let businessPageNext = document.querySelector(
   "[data-business-page-next]"
 );
-var businessPageInfo = document.querySelector(
+let businessPageInfo = document.querySelector(
   "[data-business-page-info]"
 );
-var businessKpiTotal = document.querySelector(
+let businessKpiTotal = document.querySelector(
   "[data-business-kpi-total]"
 );
-var businessKpiBranches = document.querySelector(
+let businessKpiBranches = document.querySelector(
   "[data-business-kpi-branches]"
 );
-var businessKpiPromos = document.querySelector(
+let businessKpiPromos = document.querySelector(
   "[data-business-kpi-promos]"
 );
-var adminPanel = document.querySelector("[data-admin-panel]");
-var adminOnlySections = Array.from(
+let adminPanel = document.querySelector("[data-admin-panel]");
+let adminOnlySections = Array.from(
   document.querySelectorAll("[data-admin-only]")
 );
-var ownerBusinessPanel = document.querySelector(
+let ownerBusinessPanel = document.querySelector(
   "[data-owner-business]"
 );
-var ownerBusinessName = document.querySelector(
+let ownerBusinessName = document.querySelector(
   "[data-owner-business-name]"
 );
-var ownerBusinessType = document.querySelector(
+let ownerBusinessType = document.querySelector(
   "[data-owner-business-type]"
 );
-var ownerBusinessSlug = document.querySelector(
+let ownerBusinessSlug = document.querySelector(
   "[data-owner-business-slug]"
 );
-var ownerBusinessCategories = document.querySelector(
+let ownerBusinessCategories = document.querySelector(
   "[data-owner-business-categories]"
 );
-var ownerBusinessInstagram = document.querySelector(
+let ownerBusinessInstagram = document.querySelector(
   "[data-owner-business-instagram]"
 );
-var ownerBusinessDescription = document.querySelector(
+let ownerBusinessDescription = document.querySelector(
   "[data-owner-business-description]"
 );
-var ownerBusinessEdit = document.querySelector(
+let ownerBusinessEdit = document.querySelector(
   "[data-owner-business-edit]"
 );
-var cityForm = document.querySelector("[data-city-form]");
-var cityMessage = document.querySelector("[data-city-message]");
-var cityList = document.querySelector("[data-city-list]");
-var cityMode = document.querySelector("[data-city-mode]");
-var cityPagination = document.querySelector(
+let cityForm = document.querySelector("[data-city-form]");
+let cityMessage = document.querySelector("[data-city-message]");
+let cityList = document.querySelector("[data-city-list]");
+let cityMode = document.querySelector("[data-city-mode]");
+let cityPagination = document.querySelector(
   "[data-city-pagination]"
 );
-var cityPagePrev = document.querySelector(
+let cityPagePrev = document.querySelector(
   "[data-city-page-prev]"
 );
-var cityPageNext = document.querySelector(
+let cityPageNext = document.querySelector(
   "[data-city-page-next]"
 );
-var cityPageInfo = document.querySelector(
+let cityPageInfo = document.querySelector(
   "[data-city-page-info]"
 );
-var cityKpiTotal = document.querySelector(
+let cityKpiTotal = document.querySelector(
   "[data-city-kpi-total]"
 );
-var cityKpiCountries = document.querySelector(
+let cityKpiCountries = document.querySelector(
   "[data-city-kpi-countries]"
 );
-var cityKpiLast = document.querySelector("[data-city-kpi-last]");
-var categoryForm = document.querySelector(
+let cityKpiLast = document.querySelector("[data-city-kpi-last]");
+let categoryForm = document.querySelector(
   "[data-category-form]"
 );
-var categoryMessage = document.querySelector(
+let categoryMessage = document.querySelector(
   "[data-category-message]"
 );
-var categoryList = document.querySelector(
+let categoryList = document.querySelector(
   "[data-category-list]"
 );
-var categoryMode = document.querySelector(
+let categoryMode = document.querySelector(
   "[data-category-mode]"
 );
-var categoryPagination = document.querySelector(
+let categoryPagination = document.querySelector(
   "[data-category-pagination]"
 );
-var categoryPagePrev = document.querySelector(
+let categoryPagePrev = document.querySelector(
   "[data-category-page-prev]"
 );
-var categoryPageNext = document.querySelector(
+let categoryPageNext = document.querySelector(
   "[data-category-page-next]"
 );
-var categoryPageInfo = document.querySelector(
+let categoryPageInfo = document.querySelector(
   "[data-category-page-info]"
 );
-var categoryKpiTotal = document.querySelector(
+let categoryKpiTotal = document.querySelector(
   "[data-category-kpi-total]"
 );
-var categoryKpiSlugs = document.querySelector(
+let categoryKpiSlugs = document.querySelector(
   "[data-category-kpi-slugs]"
 );
-var categoryKpiLast = document.querySelector(
+let categoryKpiLast = document.querySelector(
   "[data-category-kpi-last]"
 );
-var categorySuggestions = document.querySelector(
+let categorySuggestions = document.querySelector(
   "[data-business-category-select]"
 );
-var ownerSections = Array.from(
+let ownerSections = Array.from(
   document.querySelectorAll("[data-owner-only]")
 );
-var authGate = document.querySelector("[data-auth-gate]");
-var authGateText = document.querySelector(
+let authGate = document.querySelector("[data-auth-gate]");
+let authGateText = document.querySelector(
   "[data-auth-gate-text]"
 );
-var branchCitySelect = document.querySelector(
+let branchCitySelect = document.querySelector(
   "[data-branch-city-select]"
 );
-var dashboardHero = document.querySelector(
+let dashboardHero = document.querySelector(
   "[data-dashboard-hero]"
 );
-var dashboardMenu = document.querySelector(
+let dashboardMenu = document.querySelector(
   "[data-dashboard-menu]"
 );
-var dashboardOverlay = document.querySelector(
+let dashboardOverlay = document.querySelector(
   "[data-dashboard-overlay]"
 );
-var dashboardToggle = document.querySelector(
+let dashboardToggle = document.querySelector(
   "[data-dashboard-toggle]"
 );
-var dashboardClose = document.querySelector(
+let dashboardClose = document.querySelector(
   "[data-dashboard-close]"
 );
-var dashboardLoader = document.querySelector(
+let dashboardLoader = document.querySelector(
   "[data-dashboard-loader]"
 );
-var dashboardContent = document.querySelector(
+let dashboardContent = document.querySelector(
   "[data-dashboard-content]"
 );
-var dashboardTabs = Array.from(
+let dashboardTabs = Array.from(
   document.querySelectorAll("[data-dashboard-tab]")
 );
-var dashboardPanels = Array.from(
+let dashboardPanels = Array.from(
   document.querySelectorAll("[data-dashboard-panel]")
 );
-var dashboardCreateButtons = Array.from(
+let dashboardCreateButtons = Array.from(
   document.querySelectorAll("[data-dashboard-create]")
 );
-var businessTabLabels = Array.from(
+let businessTabLabels = Array.from(
   document.querySelectorAll("[data-dashboard-business-label]")
 );
-var businessTabTitle = document.querySelector(
+let businessTabTitle = document.querySelector(
   "[data-dashboard-business-title]"
 );
-var promoTabLabels = Array.from(
+let promoTabLabels = Array.from(
   document.querySelectorAll("[data-dashboard-promo-label]")
 );
-var promoTabTitle = document.querySelector(
+let promoTabTitle = document.querySelector(
   "[data-dashboard-promo-title]"
 );
-var promoTabSubtitle = document.querySelector(
+let promoTabSubtitle = document.querySelector(
   "[data-dashboard-promo-subtitle]"
 );
-var branchTabLabels = Array.from(
+let branchTabLabels = Array.from(
   document.querySelectorAll("[data-dashboard-branch-label]")
 );
-var branchTabTitle = document.querySelector(
+let branchTabTitle = document.querySelector(
   "[data-dashboard-branch-title]"
 );
-var branchTabSubtitle = document.querySelector(
+let branchTabSubtitle = document.querySelector(
   "[data-dashboard-branch-subtitle]"
 );
-var promoModalOverlay = document.querySelector(
+let promoModalOverlay = document.querySelector(
   "[data-promo-modal-overlay]"
 );
-var promoModal = document.querySelector("[data-promo-modal]");
-var promoModalClose = document.querySelector(
+let promoModal = document.querySelector("[data-promo-modal]");
+let promoModalClose = document.querySelector(
   "[data-promo-modal-close]"
 );
-var promoModalTitle = document.querySelector(
+let promoModalTitle = document.querySelector(
   "[data-promo-modal-title]"
 );
-var branchModalOverlay = document.querySelector(
+let branchModalOverlay = document.querySelector(
   "[data-branch-modal-overlay]"
 );
-var branchModal = document.querySelector("[data-branch-modal]");
-var branchModalClose = document.querySelector(
+let branchModal = document.querySelector("[data-branch-modal]");
+let branchModalClose = document.querySelector(
   "[data-branch-modal-close]"
 );
-var branchModalTitle = document.querySelector(
+let branchModalTitle = document.querySelector(
   "[data-branch-modal-title]"
 );
-var businessModalOverlay = document.querySelector(
+let businessModalOverlay = document.querySelector(
   "[data-business-modal-overlay]"
 );
-var businessModal = document.querySelector(
+let businessModal = document.querySelector(
   "[data-business-modal]"
 );
-var businessModalClose = document.querySelector(
+let businessModalClose = document.querySelector(
   "[data-business-modal-close]"
 );
-var businessModalTitle = document.querySelector(
+let businessModalTitle = document.querySelector(
   "[data-business-modal-title]"
 );
-var cityModalOverlay = document.querySelector(
+let cityModalOverlay = document.querySelector(
   "[data-city-modal-overlay]"
 );
-var cityModal = document.querySelector("[data-city-modal]");
-var cityModalClose = document.querySelector(
+let cityModal = document.querySelector("[data-city-modal]");
+let cityModalClose = document.querySelector(
   "[data-city-modal-close]"
 );
-var cityModalTitle = document.querySelector(
+let cityModalTitle = document.querySelector(
   "[data-city-modal-title]"
 );
-var categoryModalOverlay = document.querySelector(
+let categoryModalOverlay = document.querySelector(
   "[data-category-modal-overlay]"
 );
-var categoryModal = document.querySelector(
+let categoryModal = document.querySelector(
   "[data-category-modal]"
 );
-var categoryModalClose = document.querySelector(
+let categoryModalClose = document.querySelector(
   "[data-category-modal-close]"
 );
-var categoryModalTitle = document.querySelector(
+let categoryModalTitle = document.querySelector(
   "[data-category-modal-title]"
 );
-var businesses = [];
-var branches = [];
-var currentUser = null;
-var cities = [];
-var categories = [];
-var currentBusinessId = "";
-var promotions = [];
-var activeDashboardTab = "promos";
-var promoFilters = {
+let businesses = [];
+let branches = [];
+let currentUser = null;
+let cities = [];
+let categories = [];
+let currentBusinessId = "";
+let promotions = [];
+let activeDashboardTab = "promos";
+let promoFilters = {
   search: "",
   status: "all",
   type: "all",
   businessId: "all"
 };
-var branchFilters = {
+let branchFilters = {
   search: "",
   city: "all",
   businessId: "all"
 };
-var adminBusinessPage = 1;
-var ADMIN_BUSINESS_PAGE_SIZE = 10;
-var adminBranchPage = 1;
-var ADMIN_BRANCH_PAGE_SIZE = 10;
-var businessFilters = {
+let adminBusinessPage = 1;
+let ADMIN_BUSINESS_PAGE_SIZE = 10;
+let adminBranchPage = 1;
+let ADMIN_BRANCH_PAGE_SIZE = 10;
+let businessFilters = {
   search: "",
   type: "all",
   city: "all",
@@ -489,19 +489,19 @@ var businessFilters = {
   verified: "all",
   instagram: "all"
 };
-var adminPromoPage = 1;
-var ADMIN_PROMO_PAGE_SIZE = 10;
-var adminCityPage = 1;
-var ADMIN_CITY_PAGE_SIZE = 10;
-var adminCategoryPage = 1;
-var ADMIN_CATEGORY_PAGE_SIZE = 10;
-var setMessage = (el, text) => {
+let adminPromoPage = 1;
+let ADMIN_PROMO_PAGE_SIZE = 10;
+let adminCityPage = 1;
+let ADMIN_CITY_PAGE_SIZE = 10;
+let adminCategoryPage = 1;
+let ADMIN_CATEGORY_PAGE_SIZE = 10;
+let setMessage = (el, text) => {
   if (el) {
     el.textContent = text;
   }
 };
-var normalizeSlug = (value) => value.trim().toLowerCase().replaceAll(/[^a-z0-9-]+/g, "-").replaceAll(/-{2,}/g, "-").replaceAll(/(^-|-$)/g, "");
-var renderLoadingMessage = (container, message) => {
+let normalizeSlug = (value) => value.trim().toLowerCase().replaceAll(/[^a-z0-9-]+/g, "-").replaceAll(/-{2,}/g, "-").replaceAll(/(^-|-$)/g, "");
+let renderLoadingMessage = (container, message) => {
   if (!container) return;
   container.innerHTML = `
     <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70 flex items-center gap-3">
@@ -510,17 +510,17 @@ var renderLoadingMessage = (container, message) => {
     </div>
   `;
 };
-var setSelectLoading = (select, message) => {
+let setSelectLoading = (select, message) => {
   if (!select) return;
   select.disabled = true;
   select.innerHTML = `<option value="">${message}</option>`;
 };
-var setSelectReady = (select, optionsHtml, keepDisabled = false) => {
+let setSelectReady = (select, optionsHtml, keepDisabled = false) => {
   if (!select) return;
   select.innerHTML = optionsHtml;
   select.disabled = keepDisabled;
 };
-var withLoading = async (form, action) => {
+let withLoading = async (form, action) => {
   if (!form) {
     await action();
     return;
@@ -537,7 +537,7 @@ var withLoading = async (form, action) => {
     }
   }
 };
-var setMode = (form, label, cancel, mode) => {
+let setMode = (form, label, cancel, mode) => {
   if (!form) return;
   form.dataset.mode = mode;
   if (label) {
@@ -553,7 +553,7 @@ var setMode = (form, label, cancel, mode) => {
     cancel.hidden = mode !== "edit";
   }
 };
-var setFormReadOnly = (form, readOnly) => {
+let setFormReadOnly = (form, readOnly) => {
   if (!form) return;
   form.dataset.readonly = readOnly ? "true" : "false";
   const fields = form.querySelectorAll("input, select, textarea");
@@ -567,14 +567,14 @@ var setFormReadOnly = (form, readOnly) => {
     submitButton.hidden = readOnly;
   }
 };
-var setInputValue = (form, name, value) => {
+let setInputValue = (form, name, value) => {
   if (!form) return;
   const input = form.querySelector(`[name="${name}"]`);
   if (input) {
     input.value = value;
   }
 };
-var formatDateInput = (value) => {
+let formatDateInput = (value) => {
   if (!value) {
     return "";
   }
@@ -584,7 +584,7 @@ var formatDateInput = (value) => {
   }
   return date.toISOString().slice(0, 10);
 };
-var setPromoImagePreview = (url) => {
+let setPromoImagePreview = (url) => {
   if (!promoImagePreview || !promoImagePreviewWrapper) return;
   if (!url) {
     promoImagePreview.removeAttribute("src");
@@ -594,7 +594,7 @@ var setPromoImagePreview = (url) => {
   promoImagePreview.src = url;
   promoImagePreviewWrapper.classList.remove("hidden");
 };
-var uploadPromoImage = async (file) => {
+let uploadPromoImage = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
   const response = await fetch(`${API_BASE}/uploads/promo-image`, {
@@ -613,7 +613,7 @@ var uploadPromoImage = async (file) => {
   }
   return payload.url;
 };
-var setBusinessForm = (business, options = {}) => {
+let setBusinessForm = (business, options = {}) => {
   if (!businessForm) return;
   if (!business) {
     businessForm.reset();
@@ -653,7 +653,7 @@ var setBusinessForm = (business, options = {}) => {
   setInputValue(businessForm, "description", business.description ?? "");
   setInputValue(businessForm, "instagram", business.instagram ?? "");
 };
-var setBranchForm = (branch, options = {}) => {
+let setBranchForm = (branch, options = {}) => {
   if (!branchForm) return;
   if (!branch) {
     branchForm.reset();
@@ -685,7 +685,7 @@ var setBranchForm = (branch, options = {}) => {
   setInputValue(branchForm, "zone", branch.zone ?? "");
   setInputValue(branchForm, "phone", branch.phone ?? "");
 };
-var resetPromoForm = () => {
+let resetPromoForm = () => {
   if (!promoForm) return;
   promoForm.reset();
   promoForm.dataset.editId = "";
@@ -702,7 +702,7 @@ var resetPromoForm = () => {
     setInputValue(promoForm, "businessId", currentBusinessId);
   }
 };
-var setPromoFormTitle = (mode, title) => {
+let setPromoFormTitle = (mode, title) => {
   if (!promoModalTitle) return;
   if (title) {
     promoModalTitle.textContent = title;
@@ -710,7 +710,7 @@ var setPromoFormTitle = (mode, title) => {
   }
   promoModalTitle.textContent = mode === "view" ? "Detalle de la promoci\xF3n" : "Editar promoci\xF3n";
 };
-var loadPromoBranches = async (businessId) => {
+let loadPromoBranches = async (businessId) => {
   if (currentUser?.role === "ADMIN") {
     await loadBranchOptionsForBusiness(businessId);
   } else {
@@ -718,7 +718,7 @@ var loadPromoBranches = async (businessId) => {
     await loadBranches(businessId);
   }
 };
-var fillPromoForm = async (promo) => {
+let fillPromoForm = async (promo) => {
   if (!promoForm) return;
   if (promo.businessId) {
     await loadPromoBranches(promo.businessId);
@@ -748,7 +748,7 @@ var fillPromoForm = async (promo) => {
   }
   setPromoImagePreview(promo.imageUrl ?? null);
 };
-var setPromoForm = async (promo, options = {}) => {
+let setPromoForm = async (promo, options = {}) => {
   if (!promoForm) return;
   if (!promo) {
     resetPromoForm();
@@ -761,7 +761,7 @@ var setPromoForm = async (promo, options = {}) => {
   setPromoFormTitle(mode, options.title);
   await fillPromoForm(promo);
 };
-var setCityForm = (city, options = {}) => {
+let setCityForm = (city, options = {}) => {
   if (!cityForm) return;
   if (!city) {
     cityForm.reset();
@@ -787,7 +787,7 @@ var setCityForm = (city, options = {}) => {
   setInputValue(cityForm, "name", city.name);
   setInputValue(cityForm, "countryCode", city.countryCode);
 };
-var setCategoryForm = (category, options = {}) => {
+let setCategoryForm = (category, options = {}) => {
   if (!categoryForm) return;
   if (!category) {
     categoryForm.reset();
@@ -813,7 +813,7 @@ var setCategoryForm = (category, options = {}) => {
   setInputValue(categoryForm, "name", category.name);
   setInputValue(categoryForm, "slug", category.slug);
 };
-var setFormsEnabled = (enabled) => {
+let setFormsEnabled = (enabled) => {
   [businessForm, branchForm, promoForm].forEach((form) => {
     if (!form) return;
     Array.from(form.elements).forEach((element) => {
@@ -823,12 +823,12 @@ var setFormsEnabled = (enabled) => {
     });
   });
 };
-var setOwnerSectionsVisible = (visible) => {
+let setOwnerSectionsVisible = (visible) => {
   ownerSections.forEach((section) => {
     section.hidden = !visible;
   });
 };
-var setDashboardLoading = (isLoading) => {
+let setDashboardLoading = (isLoading) => {
   document.documentElement.dataset.dashboardLoading = isLoading ? "true" : "false";
   if (dashboardLoader) {
     dashboardLoader.classList.toggle("hidden", !isLoading);
@@ -848,7 +848,7 @@ var setDashboardLoading = (isLoading) => {
     }
   }
 };
-var setHeaderAuthState = (isAuthenticated) => {
+let setHeaderAuthState = (isAuthenticated) => {
   const loginLink = document.querySelector("[data-nav-login]");
   const registerLink = document.querySelector(
     "[data-nav-register]"
@@ -866,7 +866,7 @@ var setHeaderAuthState = (isAuthenticated) => {
     dashboardLink.hidden = !isAuthenticated;
   }
 };
-var setBusinessSelectVisibility = (isAdmin) => {
+let setBusinessSelectVisibility = (isAdmin) => {
   businessSelectRows.forEach((row) => {
     row.hidden = !isAdmin;
   });
@@ -877,7 +877,7 @@ var setBusinessSelectVisibility = (isAdmin) => {
     }
   });
 };
-var setBusinessLabels = (isAdmin) => {
+let setBusinessLabels = (isAdmin) => {
   const label = isAdmin ? "Mis negocios" : "Mi negocio";
   businessTabLabels.forEach((item) => {
     item.textContent = label;
@@ -886,7 +886,7 @@ var setBusinessLabels = (isAdmin) => {
     businessTabTitle.textContent = label;
   }
 };
-var setPromoLabels = (isAdmin) => {
+let setPromoLabels = (isAdmin) => {
   const label = isAdmin ? "Promociones" : "Mis promociones";
   promoTabLabels.forEach((item) => {
     item.textContent = label;
@@ -898,7 +898,7 @@ var setPromoLabels = (isAdmin) => {
     promoTabSubtitle.textContent = isAdmin ? "Gestiona promociones de todos los negocios." : "Gestiona las promos activas de tu negocio.";
   }
 };
-var setBranchLabels = (isAdmin) => {
+let setBranchLabels = (isAdmin) => {
   const label = isAdmin ? "Sedes" : "Mis sucursales";
   branchTabLabels.forEach((item) => {
     item.textContent = label;
@@ -910,7 +910,7 @@ var setBranchLabels = (isAdmin) => {
     branchTabSubtitle.textContent = isAdmin ? "Gestiona sedes de todos los negocios." : "Administra las sedes activas de tu negocio.";
   }
 };
-var setAdminOnlyVisibility = (isAdmin) => {
+let setAdminOnlyVisibility = (isAdmin) => {
   adminOnlySections.forEach((section) => {
     section.hidden = !isAdmin;
   });
@@ -918,12 +918,12 @@ var setAdminOnlyVisibility = (isAdmin) => {
     ownerBusinessPanel.hidden = isAdmin;
   }
 };
-var removeAdminOnlySections = () => {
+let removeAdminOnlySections = () => {
   adminOnlySections.forEach((section) => {
     section.remove();
   });
 };
-var renderOwnerBusinessDetails = () => {
+let renderOwnerBusinessDetails = () => {
   if (!ownerBusinessPanel) return;
   const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
   if (!business) {
@@ -950,7 +950,7 @@ var renderOwnerBusinessDetails = () => {
     ownerBusinessDescription.textContent = business.description ?? "-";
   }
 };
-var updatePromoPagination = (total, isAdmin) => {
+let updatePromoPagination = (total, isAdmin) => {
   if (!promoPagination || !promoPageInfo || !promoPagePrev || !promoPageNext)
     return;
   if (!isAdmin) {
@@ -966,7 +966,7 @@ var updatePromoPagination = (total, isAdmin) => {
   promoPageNext.disabled = adminPromoPage >= totalPages;
   promoPagination.hidden = totalPages <= 1;
 };
-var closeAllModals = () => {
+let closeAllModals = () => {
   const setHidden = (overlay, hidden) => {
     if (!overlay) return;
     overlay.hidden = hidden;
@@ -978,7 +978,7 @@ var closeAllModals = () => {
   setHidden(cityModalOverlay, true);
   setHidden(categoryModalOverlay, true);
 };
-var openModal = (type) => {
+let openModal = (type) => {
   closeAllModals();
   const modalMap = {
     promo: { overlay: promoModalOverlay, modal: promoModal },
@@ -994,7 +994,7 @@ var openModal = (type) => {
   const focusTarget = target.modal.querySelector("input, select, textarea");
   focusTarget?.focus();
 };
-var setActiveDashboardTab = (tab) => {
+let setActiveDashboardTab = (tab) => {
   activeDashboardTab = tab;
   dashboardPanels.forEach((panel) => {
     panel.hidden = panel.dataset.dashboardPanel !== tab;
@@ -1007,7 +1007,7 @@ var setActiveDashboardTab = (tab) => {
     button.setAttribute("aria-current", isActive ? "page" : "false");
   });
 };
-var setDashboardMenuVisible = (visible) => {
+let setDashboardMenuVisible = (visible) => {
   if (dashboardMenu) {
     dashboardMenu.hidden = !visible;
   }
@@ -1024,13 +1024,13 @@ var setDashboardMenuVisible = (visible) => {
     }
   }
 };
-var setDashboardMenuOpen = (open) => {
+let setDashboardMenuOpen = (open) => {
   if (!dashboardMenu || !dashboardOverlay) return;
   dashboardOverlay.hidden = !open;
   dashboardMenu.classList.toggle("translate-x-0", open);
   dashboardMenu.classList.toggle("translate-x-full", !open);
 };
-var focusCreateForm = (target) => {
+let focusCreateForm = (target) => {
   if (target === "promo") {
     setActiveDashboardTab("promos");
     setPromoForm();
@@ -1081,12 +1081,12 @@ var focusCreateForm = (target) => {
     openModal("category");
   }
 };
-var setAuthGateVisible = (visible) => {
+let setAuthGateVisible = (visible) => {
   if (authGate) {
     authGate.hidden = !visible;
   }
 };
-var setBranchFormEnabled = (enabled) => {
+let setBranchFormEnabled = (enabled) => {
   if (!branchForm) return;
   Array.from(branchForm.elements).forEach((element) => {
     if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
@@ -1094,7 +1094,7 @@ var setBranchFormEnabled = (enabled) => {
     }
   });
 };
-var setPromoFormEnabled = (enabled) => {
+let setPromoFormEnabled = (enabled) => {
   if (!promoForm) return;
   Array.from(promoForm.elements).forEach((element) => {
     if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
@@ -1102,7 +1102,7 @@ var setPromoFormEnabled = (enabled) => {
     }
   });
 };
-var renderUser = () => {
+let renderUser = () => {
   if (!userCard) return;
   if (!currentUser) {
     userCard.innerHTML = "Inicia sesi\xF3n para administrar tus negocios.";
@@ -1167,20 +1167,20 @@ var renderUser = () => {
     renderOwnerBusinessDetails();
   }
 };
-var getBusinessCities = (businessId) => {
+let getBusinessCities = (businessId) => {
   return Array.from(
     new Set(
       branches.filter((branch) => branch.businessId === businessId).map((branch) => branch.city)
     )
   ).sort(compareLabels);
 };
-var formatBusinessCities = (businessId) => {
+let formatBusinessCities = (businessId) => {
   const list = getBusinessCities(businessId);
   if (list.length === 0) return "Sin sedes";
   if (list.length <= 2) return list.join(", ");
   return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
 };
-var formatBusinessCategories = (business) => {
+let formatBusinessCategories = (business) => {
   const categoryMap = new Map(
     categories.map((category) => [category.slug, category.name])
   );
@@ -1191,7 +1191,7 @@ var formatBusinessCategories = (business) => {
   if (list.length <= 2) return list.join(", ");
   return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
 };
-var getFilteredBusinesses = () => {
+let getFilteredBusinesses = () => {
   const searchValue = businessFilters.search.trim().toLowerCase();
   return businesses.filter((business) => {
     const typeMatch = businessFilters.type === "all" || business.type === businessFilters.type;
@@ -1205,7 +1205,7 @@ var getFilteredBusinesses = () => {
     return typeMatch && categoryMatch && cityMatch && verifiedMatch && instagramMatch && textMatch;
   });
 };
-var updateBusinessCityFilterOptions = () => {
+let updateBusinessCityFilterOptions = () => {
   if (!businessCityFilter) return;
   const selected = businessCityFilter.value || "all";
   const cities2 = Array.from(
@@ -1217,7 +1217,7 @@ var updateBusinessCityFilterOptions = () => {
   `;
   businessCityFilter.value = cities2.includes(selected) ? selected : "all";
 };
-var updateBusinessCategoryFilterOptions = () => {
+let updateBusinessCategoryFilterOptions = () => {
   if (!businessCategoryFilter) return;
   const selected = businessCategoryFilter.value || "all";
   const options = categories.length > 0 ? categories.map((category) => ({
@@ -1232,7 +1232,7 @@ var updateBusinessCategoryFilterOptions = () => {
   `;
   businessCategoryFilter.value = options.some((item) => item.value === selected) ? selected : "all";
 };
-var renderBusinesses = (list, total) => {
+let renderBusinesses = (list, total) => {
   if (!businessList) return;
   if (total === 0) {
     businessList.innerHTML = `
@@ -1339,7 +1339,7 @@ var renderBusinesses = (list, total) => {
     </div>
   `;
 };
-var populateBusinessSelects = () => {
+let populateBusinessSelects = () => {
   const isAdmin = currentUser?.role === "ADMIN";
   businessSelects.forEach((select) => {
     const selected = select.value;
@@ -1364,7 +1364,7 @@ var populateBusinessSelects = () => {
     }
   });
 };
-var populateBranchSelect = (businessId, branchItems = branches) => {
+let populateBranchSelect = (businessId, branchItems = branches) => {
   if (!branchSelect) return;
   const filtered = branchItems.filter(
     (branch) => branch.businessId === businessId
@@ -1378,7 +1378,7 @@ var populateBranchSelect = (businessId, branchItems = branches) => {
   });
   branchSelect.disabled = filtered.length === 0;
 };
-var getFilteredBranches = () => {
+let getFilteredBranches = () => {
   const searchValue = branchFilters.search.trim().toLowerCase();
   return branches.filter((branch) => {
     const businessMatch = branchFilters.businessId === "all" || branch.businessId === branchFilters.businessId;
@@ -1387,7 +1387,7 @@ var getFilteredBranches = () => {
     return businessMatch && cityMatch && textMatch;
   });
 };
-var renderBranches = (list, total) => {
+let renderBranches = (list, total) => {
   if (!branchList) return;
   const isAdmin = currentUser?.role === "ADMIN";
   if (!currentBusinessId && !isAdmin) {
@@ -1483,7 +1483,7 @@ var renderBranches = (list, total) => {
     </div>
   `;
 };
-var updatePromoKpis = () => {
+let updatePromoKpis = () => {
   const total = promotions.length;
   const activeCount = promotions.filter((promo) => promo.active ?? true).length;
   const inactiveCount = total - activeCount;
@@ -1497,7 +1497,7 @@ var updatePromoKpis = () => {
     promoKpiInactive.textContent = String(inactiveCount);
   }
 };
-var updatePromoBusinessFilterOptions = () => {
+let updatePromoBusinessFilterOptions = () => {
   if (!promoBusinessFilter) return;
   const isAdmin = currentUser?.role === "ADMIN";
   promoBusinessFilter.hidden = !isAdmin;
@@ -1513,7 +1513,7 @@ var updatePromoBusinessFilterOptions = () => {
   `;
   promoBusinessFilter.value = currentValue;
 };
-var getFilteredPromotions = () => {
+let getFilteredPromotions = () => {
   const searchValue = promoFilters.search.trim().toLowerCase();
   return promotions.filter((promo) => {
     const businessMatch = promoFilters.businessId === "all" || promo.businessId === promoFilters.businessId;
@@ -1523,7 +1523,7 @@ var getFilteredPromotions = () => {
     return businessMatch && statusMatch && typeMatch && textMatch;
   });
 };
-var renderPromotions = (promos, total) => {
+let renderPromotions = (promos, total) => {
   if (!promoList) return;
   const isAdmin = currentUser?.role === "ADMIN";
   if (!currentBusinessId && !isAdmin) {
@@ -1635,7 +1635,7 @@ var renderPromotions = (promos, total) => {
     </div>
   `;
 };
-var updatePromotionsView = () => {
+let updatePromotionsView = () => {
   updatePromoKpis();
   updatePromoBusinessFilterOptions();
   const isAdmin = currentUser?.role === "ADMIN";
@@ -1651,7 +1651,7 @@ var updatePromotionsView = () => {
   }
   updateBusinessesView();
 };
-var updateBranchCityFilterOptions = () => {
+let updateBranchCityFilterOptions = () => {
   if (!branchCityFilter) return;
   const cities2 = Array.from(
     new Set(branches.map((branch) => branch.city))
@@ -1668,7 +1668,7 @@ var updateBranchCityFilterOptions = () => {
     branchFilters.city = "all";
   }
 };
-var updateBranchBusinessFilterOptions = () => {
+let updateBranchBusinessFilterOptions = () => {
   if (!branchBusinessFilter) return;
   const isAdmin = currentUser?.role === "ADMIN";
   branchBusinessFilter.hidden = !isAdmin;
@@ -1684,7 +1684,7 @@ var updateBranchBusinessFilterOptions = () => {
   `;
   branchBusinessFilter.value = currentValue;
 };
-var updateBranchPagination = (total, isAdmin) => {
+let updateBranchPagination = (total, isAdmin) => {
   if (!branchPagination || !branchPageInfo || !branchPagePrev || !branchPageNext)
     return;
   if (!isAdmin) {
@@ -1700,7 +1700,7 @@ var updateBranchPagination = (total, isAdmin) => {
   branchPageNext.disabled = adminBranchPage >= totalPages;
   branchPagination.hidden = totalPages <= 1;
 };
-var updateBranchesView = () => {
+let updateBranchesView = () => {
   updateBranchCityFilterOptions();
   updateBranchBusinessFilterOptions();
   const total = branches.length;
@@ -1730,7 +1730,7 @@ var updateBranchesView = () => {
   }
   updateBusinessesView();
 };
-var updateBusinessesView = () => {
+let updateBusinessesView = () => {
   updateBusinessCityFilterOptions();
   updateBusinessCategoryFilterOptions();
   const total = businesses.length;
@@ -1758,7 +1758,7 @@ var updateBusinessesView = () => {
     renderOwnerBusinessDetails();
   }
 };
-var updateBusinessPagination = (total, isAdmin) => {
+let updateBusinessPagination = (total, isAdmin) => {
   if (!businessPagination || !businessPageInfo || !businessPagePrev || !businessPageNext)
     return;
   if (!isAdmin) {
@@ -1774,7 +1774,7 @@ var updateBusinessPagination = (total, isAdmin) => {
   businessPageNext.disabled = adminBusinessPage >= totalPages;
   businessPagination.hidden = totalPages <= 1;
 };
-var loadUser = async () => {
+let loadUser = async () => {
   if (userCard) {
     userCard.innerHTML = "Cargando usuario...";
   }
@@ -1788,7 +1788,7 @@ var loadUser = async () => {
   }
   renderUser();
 };
-var resetBusinessFilters = () => {
+let resetBusinessFilters = () => {
   businessFilters = {
     search: "",
     type: "all",
@@ -1816,12 +1816,12 @@ var resetBusinessFilters = () => {
     businessInstagramFilter.value = "all";
   }
 };
-var ensureCurrentBusiness = () => {
+let ensureCurrentBusiness = () => {
   if (!currentBusinessId && businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
   }
 };
-var updateBusinessFormAvailability = () => {
+let updateBusinessFormAvailability = () => {
   const hasBusinesses = businesses.length > 0;
   setBranchFormEnabled(hasBusinesses);
   setPromoFormEnabled(hasBusinesses);
@@ -1829,7 +1829,7 @@ var updateBusinessFormAvailability = () => {
     setSelectLoading(branchSelect, "Sin sedes");
   }
 };
-var loadBusinessDependencies = async (isAdmin) => {
+let loadBusinessDependencies = async (isAdmin) => {
   if (businesses.length === 0) {
     return;
   }
@@ -1844,7 +1844,7 @@ var loadBusinessDependencies = async (isAdmin) => {
   updatePromotionsView();
   updateBusinessesView();
 };
-var loadBusinesses = async () => {
+let loadBusinesses = async () => {
   if (!currentUser) return;
   renderLoadingMessage(businessList, "Cargando negocios...");
   businessSelects.forEach(
@@ -1865,7 +1865,7 @@ var loadBusinesses = async () => {
   updateBusinessFormAvailability();
   await loadBusinessDependencies(isAdmin);
 };
-var loadBranches = async (businessId) => {
+let loadBranches = async (businessId) => {
   renderLoadingMessage(branchList, "Cargando sedes...");
   setSelectLoading(branchSelect, "Cargando sedes...");
   const response = await apiFetch(
@@ -1884,7 +1884,7 @@ var loadBranches = async (businessId) => {
   }
   updateBranchesView();
 };
-var loadPromotions = async (businessId) => {
+let loadPromotions = async (businessId) => {
   renderLoadingMessage(promoList, "Cargando promociones...");
   const response = await apiFetch(
     businessId ? `/promotions?businessId=${businessId}` : "/promotions"
@@ -1892,7 +1892,7 @@ var loadPromotions = async (businessId) => {
   promotions = response;
   return response;
 };
-var loadBranchOptionsForBusiness = async (businessId) => {
+let loadBranchOptionsForBusiness = async (businessId) => {
   if (!branchSelect) return;
   setSelectLoading(branchSelect, "Cargando sedes...");
   const response = await apiFetch(
@@ -1900,7 +1900,7 @@ var loadBranchOptionsForBusiness = async (businessId) => {
   );
   populateBranchSelect(businessId, response);
 };
-var updateCityPagination = (total) => {
+let updateCityPagination = (total) => {
   if (!cityPagination || !cityPageInfo || !cityPagePrev || !cityPageNext)
     return;
   const totalPages = Math.max(1, Math.ceil(total / ADMIN_CITY_PAGE_SIZE));
@@ -1912,7 +1912,7 @@ var updateCityPagination = (total) => {
   cityPageNext.disabled = adminCityPage >= totalPages;
   cityPagination.hidden = totalPages <= 1;
 };
-var renderCities = () => {
+let renderCities = () => {
   if (!cityList) return;
   if (cities.length === 0) {
     cityList.innerHTML = '<p class="text-ink-900/60">Sin ciudades registradas.</p>';
@@ -1996,7 +1996,7 @@ var renderCities = () => {
   `;
   updateCityPagination(cities.length);
 };
-var renderCategories = () => {
+let renderCategories = () => {
   if (!categoryList) return;
   if (categories.length === 0) {
     categoryList.innerHTML = '<p class="text-ink-900/60">Sin categor\xEDas registradas.</p>';
@@ -2080,7 +2080,7 @@ var renderCategories = () => {
   `;
   updateCategoryPagination(categories.length);
 };
-var updateCategoryPagination = (total) => {
+let updateCategoryPagination = (total) => {
   if (!categoryPagination || !categoryPageInfo || !categoryPagePrev || !categoryPageNext)
     return;
   const totalPages = Math.max(1, Math.ceil(total / ADMIN_CATEGORY_PAGE_SIZE));
@@ -2092,7 +2092,7 @@ var updateCategoryPagination = (total) => {
   categoryPageNext.disabled = adminCategoryPage >= totalPages;
   categoryPagination.hidden = totalPages <= 1;
 };
-var loadCities = async () => {
+let loadCities = async () => {
   renderLoadingMessage(cityList, "Cargando ciudades...");
   setSelectLoading(branchCitySelect, "Cargando ciudades...");
   cities = await apiFetch("/cities");
@@ -2110,7 +2110,7 @@ var loadCities = async () => {
     );
   }
 };
-var loadCategories = async () => {
+let loadCategories = async () => {
   renderLoadingMessage(categoryList, "Cargando categor\xEDas...");
   setSelectLoading(categorySuggestions, "Cargando categor\xEDas...");
   categories = await apiFetch("/categories");
@@ -2126,7 +2126,7 @@ var loadCategories = async () => {
     );
   }
 };
-var wireAdminActions = () => {
+let wireAdminActions = () => {
   if (cityList) {
     cityList.addEventListener("click", async (event) => {
       const target = event.target;
@@ -2198,7 +2198,7 @@ var wireAdminActions = () => {
     });
   }
 };
-var handleBusinessForm = () => {
+let handleBusinessForm = () => {
   if (!businessForm) return;
   businessForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -2274,7 +2274,7 @@ var handleBusinessForm = () => {
     });
   });
 };
-var handleBranchForm = () => {
+let handleBranchForm = () => {
   if (!branchForm) return;
   branchForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -2334,7 +2334,7 @@ var handleBranchForm = () => {
     });
   });
 };
-var buildPromoFormValues = (form) => {
+let buildPromoFormValues = (form) => {
   const data = new FormData(form);
   const days = data.getAll("daysOfWeek").map(String);
   const startDateValue = String(data.get("startDate") ?? "");
@@ -2363,7 +2363,7 @@ var buildPromoFormValues = (form) => {
     active: Boolean(data.get("active"))
   };
 };
-var validatePromoForm = (values) => {
+let validatePromoForm = (values) => {
   if (values.days.length === 0) {
     return "Selecciona al menos un d\xEDa de la semana.";
   }
@@ -2381,7 +2381,7 @@ var validatePromoForm = (values) => {
   }
   return null;
 };
-var handlePromoForm = () => {
+let handlePromoForm = () => {
   if (!promoForm) return;
   const promoImageUrlInput = promoForm.querySelector(
     'input[name="imageUrl"]'
@@ -2477,7 +2477,7 @@ var handlePromoForm = () => {
     });
   });
 };
-var handleCityForm = () => {
+let handleCityForm = () => {
   if (!cityForm) return;
   cityForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -2527,7 +2527,7 @@ var handleCityForm = () => {
     });
   });
 };
-var handleCategoryForm = () => {
+let handleCategoryForm = () => {
   if (!categoryForm) return;
   categoryForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -2580,7 +2580,7 @@ var handleCategoryForm = () => {
     });
   });
 };
-var wireSelectors = () => {
+let wireSelectors = () => {
   businessSelects.forEach((select) => {
     select.addEventListener("change", async () => {
       if (select.value) {
@@ -2599,7 +2599,7 @@ var wireSelectors = () => {
     });
   });
 };
-var wireBusinessActions = () => {
+let wireBusinessActions = () => {
   if (!businessList) return;
   businessList.addEventListener("click", async (event) => {
     const target = event.target;
@@ -2675,7 +2675,7 @@ var wireBusinessActions = () => {
     }
   });
 };
-var wireOwnerBusinessEdit = () => {
+let wireOwnerBusinessEdit = () => {
   if (!ownerBusinessEdit) return;
   ownerBusinessEdit.addEventListener("click", async () => {
     const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
@@ -2689,7 +2689,7 @@ var wireOwnerBusinessEdit = () => {
     openModal("business");
   });
 };
-var wireBranchActions = () => {
+let wireBranchActions = () => {
   if (!branchList) return;
   branchList.addEventListener("click", async (event) => {
     const target = event.target;
@@ -2751,7 +2751,7 @@ var wireBranchActions = () => {
     }
   });
 };
-var handleInstagramDeepLink = (event, target) => {
+let handleInstagramDeepLink = (event, target) => {
   const instagramLink = target.closest(
     "[data-instagram-link]"
   );
@@ -2767,7 +2767,7 @@ var handleInstagramDeepLink = (event, target) => {
   }
   return true;
 };
-var findPromoById = async (id) => {
+let findPromoById = async (id) => {
   let promo = promotions.find((item) => item._id === id);
   if (!promo && currentBusinessId) {
     const promos = await loadPromotions(currentBusinessId);
@@ -2775,7 +2775,7 @@ var findPromoById = async (id) => {
   }
   return promo;
 };
-var handlePromoView = async (id) => {
+let handlePromoView = async (id) => {
   const promo = await findPromoById(id);
   if (!promo) return;
   await setPromoForm(promo, {
@@ -2786,7 +2786,7 @@ var handlePromoView = async (id) => {
   setActiveDashboardTab("promos");
   openModal("promo");
 };
-var handlePromoEdit = async (id) => {
+let handlePromoEdit = async (id) => {
   const promo = await findPromoById(id);
   if (!promo) return;
   await setPromoForm(promo, {
@@ -2797,7 +2797,7 @@ var handlePromoEdit = async (id) => {
   setActiveDashboardTab("promos");
   openModal("promo");
 };
-var handlePromoDelete = async (id) => {
+let handlePromoDelete = async (id) => {
   const confirmed = globalThis.confirm("\xBFEliminar esta promoci\xF3n?");
   if (!confirmed) return;
   promotions = promotions.filter((promo) => promo._id !== id);
@@ -2809,7 +2809,7 @@ var handlePromoDelete = async (id) => {
     updatePromotionsView();
   }
 };
-var wirePromoActions = () => {
+let wirePromoActions = () => {
   if (!promoList) return;
   promoList.addEventListener("click", async (event) => {
     const target = event.target;
@@ -2831,7 +2831,7 @@ var wirePromoActions = () => {
     await handlePromoDelete(deleteId);
   });
 };
-var wireEmptyStateActions = () => {
+let wireEmptyStateActions = () => {
   document.body.addEventListener("click", (event) => {
     const target = event.target;
     const action = target.dataset.emptyAction;
@@ -2839,9 +2839,9 @@ var wireEmptyStateActions = () => {
     focusCreateForm(action);
   });
 };
-var wireCancelButtons = () => {
+let wireCancelButtons = () => {
 };
-var wireDashboardTabs = () => {
+let wireDashboardTabs = () => {
   if (dashboardTabs.length === 0) return;
   dashboardTabs.forEach((button) => {
     button.addEventListener("click", () => {
@@ -2852,7 +2852,7 @@ var wireDashboardTabs = () => {
   });
   setActiveDashboardTab(activeDashboardTab);
 };
-var wireDashboardMenu = () => {
+let wireDashboardMenu = () => {
   if (!dashboardMenu || !dashboardOverlay || !dashboardToggle) return;
   const closeMenu = () => setDashboardMenuOpen(false);
   dashboardToggle.addEventListener("click", () => setDashboardMenuOpen(true));
@@ -2864,7 +2864,7 @@ var wireDashboardMenu = () => {
     }
   });
 };
-var wireDashboardCreateButtons = () => {
+let wireDashboardCreateButtons = () => {
   if (dashboardCreateButtons.length === 0) return;
   dashboardCreateButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -2874,7 +2874,7 @@ var wireDashboardCreateButtons = () => {
     });
   });
 };
-var wireDashboardDelegates = () => {
+let wireDashboardDelegates = () => {
   document.addEventListener("click", (event) => {
     const target = event.target;
     const tabButton = target.closest("[data-dashboard-tab]");
@@ -2891,7 +2891,7 @@ var wireDashboardDelegates = () => {
     }
   });
 };
-var wireDashboardModal = () => {
+let wireDashboardModal = () => {
   const wireModal = (overlay, closeButton) => {
     if (!overlay) return;
     const closeModal = () => closeAllModals();
@@ -2913,7 +2913,7 @@ var wireDashboardModal = () => {
     }
   });
 };
-var wirePromoFilters = () => {
+let wirePromoFilters = () => {
   if (!promoSearchInput || !promoStatusSelect || !promoTypeSelect) return;
   const updateFilters = () => {
     promoFilters = {
@@ -2930,7 +2930,7 @@ var wirePromoFilters = () => {
   promoTypeSelect.addEventListener("change", updateFilters);
   promoBusinessFilter?.addEventListener("change", updateFilters);
 };
-var wirePromoPagination = () => {
+let wirePromoPagination = () => {
   if (!promoPagePrev || !promoPageNext) return;
   promoPagePrev.addEventListener("click", () => {
     adminPromoPage = Math.max(1, adminPromoPage - 1);
@@ -2941,7 +2941,7 @@ var wirePromoPagination = () => {
     updatePromotionsView();
   });
 };
-var wireBranchPagination = () => {
+let wireBranchPagination = () => {
   if (!branchPagePrev || !branchPageNext) return;
   branchPagePrev.addEventListener("click", () => {
     adminBranchPage = Math.max(1, adminBranchPage - 1);
@@ -2952,7 +2952,7 @@ var wireBranchPagination = () => {
     updateBranchesView();
   });
 };
-var wireBusinessPagination = () => {
+let wireBusinessPagination = () => {
   if (!businessPagePrev || !businessPageNext) return;
   businessPagePrev.addEventListener("click", () => {
     adminBusinessPage = Math.max(1, adminBusinessPage - 1);
@@ -2963,7 +2963,7 @@ var wireBusinessPagination = () => {
     updateBusinessesView();
   });
 };
-var wireCityPagination = () => {
+let wireCityPagination = () => {
   if (!cityPagePrev || !cityPageNext) return;
   cityPagePrev.addEventListener("click", () => {
     adminCityPage = Math.max(1, adminCityPage - 1);
@@ -2974,7 +2974,7 @@ var wireCityPagination = () => {
     renderCities();
   });
 };
-var wireCategoryPagination = () => {
+let wireCategoryPagination = () => {
   if (!categoryPagePrev || !categoryPageNext) return;
   categoryPagePrev.addEventListener("click", () => {
     adminCategoryPage = Math.max(1, adminCategoryPage - 1);
@@ -2985,7 +2985,7 @@ var wireCategoryPagination = () => {
     renderCategories();
   });
 };
-var wireBranchFilters = () => {
+let wireBranchFilters = () => {
   if (!branchSearchInput || !branchCityFilter) return;
   const updateFilters = () => {
     branchFilters = {
@@ -3000,7 +3000,7 @@ var wireBranchFilters = () => {
   branchCityFilter.addEventListener("change", updateFilters);
   branchBusinessFilter?.addEventListener("change", updateFilters);
 };
-var wireBusinessFilters = () => {
+let wireBusinessFilters = () => {
   if (!businessSearchInput || !businessTypeFilter) return;
   const updateFilters = () => {
     businessFilters = {
@@ -3021,7 +3021,7 @@ var wireBusinessFilters = () => {
   businessVerifiedFilter?.addEventListener("change", updateFilters);
   businessInstagramFilter?.addEventListener("change", updateFilters);
 };
-var initDashboard = async () => {
+let initDashboard = async () => {
   setDashboardLoading(true);
   try {
     setBusinessForm();
