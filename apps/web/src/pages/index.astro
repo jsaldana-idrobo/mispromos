@@ -14,5 +14,7 @@ const at = searchParams.get("at") ?? "";
     <PromosResults />
   </section>
 
-  <script type="module" src="/promos.js" is:inline></script>
+  <script>
+    import "../scripts/promos.ts";
+  </script>
 </BaseLayout>

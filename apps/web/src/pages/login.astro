@@ -10,5 +10,7 @@ import LoginAside from "../components/auth/LoginAside.astro";
     <AuthForm mode="login" submitLabel="Entrar" />
   </section>
 
-  <script type="module" src="/auth.js" is:inline></script>
+  <script>
+    import "../scripts/auth.ts";
+  </script>
 </BaseLayout>
