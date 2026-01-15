@@ -11,11 +11,10 @@ import {
   UseGuards,
   Req,
 } from "@nestjs/common";
-import { UserRole } from "@mispromos/shared";
+import { BusinessType, PromotionType, UserRole } from "@mispromos/shared";
 import { PromotionService } from "./promotion.service";
 import { CreatePromotionDto } from "./dto/create-promotion.dto";
 import { UpdatePromotionDto } from "./dto/update-promotion.dto";
-import { PromotionType, BusinessType } from "@mispromos/shared";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/roles.decorator";
@@ -58,12 +57,12 @@ export class PromotionController {
       ? (query.businessType as BusinessType)
       : undefined;
     const featuredParam = query.featured?.trim().toLowerCase();
-    const featured =
-      featuredParam === "true"
-        ? true
-        : featuredParam === "false"
-          ? false
-          : undefined;
+    let featured: boolean | undefined;
+    if (featuredParam === "true") {
+      featured = true;
+    } else if (featuredParam === "false") {
+      featured = false;
+    }
     const q = query.q?.trim() || undefined;
     const offset = Number.isFinite(Number(query.offset))
       ? Number(query.offset)
@@ -71,7 +70,7 @@ export class PromotionController {
     const limit = Number.isFinite(Number(query.limit))
       ? Number(query.limit)
       : undefined;
-    return this.promotionService.findActiveByCity(
+    return this.promotionService.findActiveByCity({
       city,
       at,
       promoType,
@@ -81,7 +80,7 @@ export class PromotionController {
       q,
       offset,
       limit,
-    );
+    });
   }
 
   @Get(":id")

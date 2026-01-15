@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      baseline-browser-mapping:
+        specifier: ^2.9.14
+        version: 2.9.14
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -1821,6 +1824,10 @@ packages:
 
   baseline-browser-mapping@2.9.11:
     resolution: {integrity: sha512-Sg0xJUNDU1sJNGdfGWhVHX0kkZ+HWcvmVymJbj6NSgZZmW/8S9Y2HQ5euytnIgakgxN6papOAWiwDo1ctFDcoQ==}
+    hasBin: true
+
+  baseline-browser-mapping@2.9.14:
+    resolution: {integrity: sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==}
     hasBin: true
 
   bcryptjs@2.4.3:
@@ -6675,6 +6682,8 @@ snapshots:
   base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.9.11: {}
+
+  baseline-browser-mapping@2.9.14: {}
 
   bcryptjs@2.4.3: {}
 

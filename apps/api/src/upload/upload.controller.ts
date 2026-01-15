@@ -66,9 +66,11 @@ export class UploadController {
         },
         (error, result) => {
           if (error || !result?.secure_url) {
-            reject(
-              error ?? new Error("No se pudo obtener la URL de la imagen."),
-            );
+            const cause =
+              error instanceof Error
+                ? error
+                : new Error("No se pudo obtener la URL de la imagen.");
+            reject(cause);
             return;
           }
           resolve(result.secure_url);

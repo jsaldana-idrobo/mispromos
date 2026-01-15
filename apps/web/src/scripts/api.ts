@@ -29,7 +29,7 @@ export const apiFetch = async <T>(
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...(options?.headers ?? {}),
+      ...options?.headers,
     },
     ...options,
   });

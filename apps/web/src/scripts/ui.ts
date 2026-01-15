@@ -21,12 +21,12 @@ export const showToast = (
 ) => {
   const container = getContainer();
   const toast = document.createElement("div");
-  const variantClass =
-    variant === "success"
-      ? "toast-success"
-      : variant === "error"
-        ? "toast-error"
-        : "";
+  let variantClass = "";
+  if (variant === "success") {
+    variantClass = "toast-success";
+  } else if (variant === "error") {
+    variantClass = "toast-error";
+  }
   toast.className = `toast ${variantClass}`;
   toast.innerHTML = `
     <div>
@@ -41,27 +41,26 @@ export const showToast = (
   }, 3600);
 };
 
-export const setButtonLoading = (
+export const startButtonLoading = (
   button: HTMLButtonElement,
-  loading: boolean,
   text?: string,
 ) => {
-  if (loading) {
-    button.dataset.originalText = button.textContent ?? "";
-    button.disabled = true;
-    button.innerHTML = `
-      <span class="loader">
-        <span class="loader-dot"></span>
-        <span class="loader-dot"></span>
-        <span class="loader-dot"></span>
-        ${text ?? "Procesando"}
-      </span>
-    `;
-  } else {
-    button.disabled = false;
-    if (button.dataset.originalText) {
-      button.textContent = button.dataset.originalText;
-      button.dataset.originalText = "";
-    }
+  button.dataset.originalText = button.textContent ?? "";
+  button.disabled = true;
+  button.innerHTML = `
+    <span class="loader">
+      <span class="loader-dot"></span>
+      <span class="loader-dot"></span>
+      <span class="loader-dot"></span>
+      ${text ?? "Procesando"}
+    </span>
+  `;
+};
+
+export const stopButtonLoading = (button: HTMLButtonElement) => {
+  button.disabled = false;
+  if (button.dataset.originalText) {
+    button.textContent = button.dataset.originalText;
+    button.dataset.originalText = "";
   }
 };

@@ -144,97 +144,90 @@ export class PromotionService {
   }
 
   private escapeRegex(input: string) {
-    return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return input.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\\$&`);
   }
 
-  async findActiveByCity(
-    city?: string,
-    at?: string,
-    promoType?: string,
-    category?: string,
-    businessType?: string,
-    featured?: boolean,
-    q?: string,
-    offset?: number,
-    limit?: number,
-  ) {
-    const now = at ? new Date(at) : new Date();
-    if (Number.isNaN(now.valueOf())) {
-      throw new BadRequestException("Formato de fecha inválido");
+  private async buildBranchFilter(city?: string) {
+    if (!city) {
+      return {};
     }
+    const branchIds = await this.branchModel
+      .find({ city })
+      .select("_id")
+      .lean()
+      .exec();
 
-    const { day, time } = this.getTimePartsInZone(now, "America/Bogota");
+    const branchIdStrings = branchIds.map((branch) => String(branch._id));
 
-    let branchFilter: Record<string, unknown> = {};
-    if (city) {
-      const branchIds = await this.branchModel
-        .find({ city })
-        .select("_id")
-        .lean()
-        .exec();
-
-      const branchIdStrings = branchIds.map((branch) => String(branch._id));
-
-      branchFilter =
-        branchIdStrings.length > 0
-          ? {
-              $or: [
-                { branchId: null },
-                { branchId: { $exists: false } },
-                { branchId: { $in: branchIdStrings } },
-              ],
-            }
-          : {
-              $or: [{ branchId: null }, { branchId: { $exists: false } }],
-            };
-    }
-
-    let businessFilter: Record<string, unknown> = {};
-    if (category || businessType) {
-      const businessQuery: Record<string, unknown> = {};
-      if (category) {
-        businessQuery.categories = category;
-      }
-      if (businessType) {
-        businessQuery.type = businessType;
-      }
-      const businesses = await this.businessModel
-        .find(businessQuery)
-        .select("_id")
-        .lean()
-        .exec();
-      const businessIds = businesses.map((business) => String(business._id));
-      businessFilter =
-        businessIds.length > 0
-          ? { businessId: { $in: businessIds } }
-          : { businessId: "__none__" };
-    }
-
-    const promoTypeFilter = promoType ? { promoType } : {};
-    const featuredFilter =
-      featured === true
-        ? { featured: true }
-        : featured === false
-          ? {
-              $or: [
-                { featured: false },
-                { featured: { $exists: false } },
-                { featured: null },
-              ],
-            }
-          : {};
-    const queryFilter = q
+    return branchIdStrings.length > 0
       ? {
           $or: [
-            { title: { $regex: this.escapeRegex(q), $options: "i" } },
-            { description: { $regex: this.escapeRegex(q), $options: "i" } },
+            { branchId: null },
+            { branchId: { $exists: false } },
+            { branchId: { $in: branchIdStrings } },
           ],
         }
-      : {};
+      : {
+          $or: [{ branchId: null }, { branchId: { $exists: false } }],
+        };
+  }
 
-    const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
-    const safeOffset = Math.max(offset ?? 0, 0);
-    const dateFilter = {
+  private async buildBusinessFilter(
+    category?: string,
+    businessType?: string,
+  ) {
+    if (!category && !businessType) {
+      return {};
+    }
+    const businessQuery: Record<string, unknown> = {};
+    if (category) {
+      businessQuery.categories = category;
+    }
+    if (businessType) {
+      businessQuery.type = businessType;
+    }
+    const businesses = await this.businessModel
+      .find(businessQuery)
+      .select("_id")
+      .lean()
+      .exec();
+    const businessIds = businesses.map((business) => String(business._id));
+    return businessIds.length > 0
+      ? { businessId: { $in: businessIds } }
+      : { businessId: "__none__" };
+  }
+
+  private buildFeaturedFilter(featured?: boolean) {
+    if (featured === true) {
+      return { featured: true };
+    }
+    if (featured === false) {
+      return {
+        $or: [
+          { featured: false },
+          { featured: { $exists: false } },
+          { featured: null },
+        ],
+      };
+    }
+    return {};
+  }
+
+  private buildQueryFilter(q?: string) {
+    if (!q) {
+      return {};
+    }
+    const escaped = this.escapeRegex(q);
+    return {
+      $or: [
+        { title: { $regex: escaped, $options: "i" } },
+        { description: { $regex: escaped, $options: "i" } },
+      ],
+    };
+  }
+
+  private buildDateFilter(now: Date) {
+    return {
       $and: [
         {
           $or: [
@@ -252,7 +245,10 @@ export class PromotionService {
         },
       ],
     };
-    const timeFilter = {
+  }
+
+  private buildTimeFilter(time: string) {
+    return {
       $and: [
         {
           $or: [
@@ -270,6 +266,50 @@ export class PromotionService {
         },
       ],
     };
+  }
+
+  async findActiveByCity(params: {
+    city?: string;
+    at?: string;
+    promoType?: string;
+    category?: string;
+    businessType?: string;
+    featured?: boolean;
+    q?: string;
+    offset?: number;
+    limit?: number;
+  }) {
+    const {
+      city,
+      at,
+      promoType,
+      category,
+      businessType,
+      featured,
+      q,
+      offset,
+      limit,
+    } = params;
+    const now = at ? new Date(at) : new Date();
+    if (Number.isNaN(now.valueOf())) {
+      throw new BadRequestException("Formato de fecha inválido");
+    }
+
+    const { day, time } = this.getTimePartsInZone(now, "America/Bogota");
+
+    const branchFilter = await this.buildBranchFilter(city);
+    const businessFilter = await this.buildBusinessFilter(
+      category,
+      businessType,
+    );
+    const promoTypeFilter = promoType ? { promoType } : {};
+    const featuredFilter = this.buildFeaturedFilter(featured);
+    const queryFilter = this.buildQueryFilter(q);
+
+    const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
+    const safeOffset = Math.max(offset ?? 0, 0);
+    const dateFilter = this.buildDateFilter(now);
+    const timeFilter = this.buildTimeFilter(time);
 
     const filter = {
       ...branchFilter,

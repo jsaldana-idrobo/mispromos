@@ -94,7 +94,7 @@ export class AuthController {
         UserRole.BUSINESS_OWNER,
       );
       if (updated) {
-        user = updated as typeof user;
+        user = updated;
       }
     }
     const token = await this.authService.createAccessToken({

@@ -45,8 +45,9 @@ const filtersBody = document.querySelector<HTMLElement>(
 const promoModalOverlay = document.querySelector<HTMLElement>(
   "[data-promos-modal-overlay]",
 );
-const promoModalElement =
-  document.querySelector<HTMLElement>("[data-promos-modal]");
+const promoModalElement = document.querySelector<HTMLElement>(
+  "[data-promos-modal]",
+);
 const promoModalClose = document.querySelector<HTMLButtonElement>(
   "[data-promos-modal-close]",
 );
@@ -166,17 +167,14 @@ if (form && container) {
     updateLoadMore("");
   };
 
-  const runPrimaryLoad = () => {
+  const runPrimaryLoad = async () => {
     loadToken += 1;
     const token = loadToken;
     startPrimaryLoad();
-    void Promise.allSettled([fetchFeaturedPromos(), fetchPromos(false)]).then(
-      () => {
-        if (token === loadToken) {
-          setContentLoading(false);
-        }
-      },
-    );
+    await Promise.allSettled([fetchFeaturedPromos(), fetchPromos(false)]);
+    if (token === loadToken) {
+      setContentLoading(false);
+    }
   };
 
   initFiltersToggle(filtersToggle, filtersBody);
@@ -189,7 +187,7 @@ if (form && container) {
   ) => {
     const businessName = promo.business?.name ?? "Negocio local";
     const instagramHandle = (promo.business?.instagram ?? "")
-      .replace("@", "")
+      .replaceAll("@", "")
       .trim();
     const categories = promo.business?.categories ?? [];
     const category = categories[0];
@@ -359,8 +357,9 @@ if (form && container) {
       query.set("limit", String(PAGE_SIZE));
       query.set("featured", "false");
       const queryString = query.toString();
+      const querySuffix = queryString ? `?${queryString}` : "";
       const response = await apiFetch<PromotionsResponse>(
-        `/promotions/active${queryString ? `?${queryString}` : ""}`,
+        `/promotions/active${querySuffix}`,
       );
       const promos = response.items ?? [];
       totalRegular = response.total ?? 0;
@@ -426,14 +425,14 @@ if (form && container) {
     hasMore = true;
     offset = 0;
     totalLoaded = 0;
-    runPrimaryLoad();
+    void runPrimaryLoad();
   });
 
   const initialQuery = buildBaseQuery(new FormData(form));
   if (initialQuery) {
     baseQuery = initialQuery;
   }
-  runPrimaryLoad();
+  void runPrimaryLoad();
 
   if (loadMore) {
     const observer = new IntersectionObserver(
@@ -466,37 +465,34 @@ if (form && container) {
 }
 
 if (categorySelect) {
-  apiFetch<Category[]>("/categories")
-    .then((categories) => {
-      categorySelect.innerHTML = [
-        `<option value=\"\">Todas</option>`,
-        ...categories.map(
-          (category) =>
-            `<option value=\"${category.slug}\">${category.name}</option>`,
-        ),
-      ].join("");
-    })
-    .catch(() => {
-      categorySelect.innerHTML = `<option value=\"\">Todas</option>`;
-    });
+  try {
+    const categories = await apiFetch<Category[]>("/categories");
+    categorySelect.innerHTML = [
+      `<option value="">Todas</option>`,
+      ...categories.map(
+        (category) =>
+          `<option value="${category.slug}">${category.name}</option>`,
+      ),
+    ].join("");
+  } catch {
+    categorySelect.innerHTML = `<option value="">Todas</option>`;
+  }
 }
 
 if (citySelect) {
   const initialCity = citySelect.dataset.initialCity ?? "";
-  apiFetch<City[]>("/cities")
-    .then((cities) => {
-      const options = cities.map(
-        (city) => `<option value=\"${city.name}\">${city.name}</option>`,
-      );
-      citySelect.innerHTML = [
-        `<option value=\"\">Todas</option>`,
-        ...options,
-      ].join("");
-      if (initialCity) {
-        citySelect.value = initialCity;
-      }
-    })
-    .catch(() => {
-      citySelect.innerHTML = `<option value=\"\">Todas</option>`;
-    });
+  try {
+    const cities = await apiFetch<City[]>("/cities");
+    const options = cities.map(
+      (city) => `<option value="${city.name}">${city.name}</option>`,
+    );
+    citySelect.innerHTML = [`<option value="">Todas</option>`, ...options].join(
+      "",
+    );
+    if (initialCity) {
+      citySelect.value = initialCity;
+    }
+  } catch {
+    citySelect.innerHTML = `<option value="">Todas</option>`;
+  }
 }

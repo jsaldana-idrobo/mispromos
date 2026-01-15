@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import { showToast, setButtonLoading } from "./ui";
+import { showToast, startButtonLoading, stopButtonLoading } from "./ui";
 
 type AuthResponse = {
   id: string;
@@ -24,7 +24,7 @@ const redirectIfAuthenticated = async () => {
       if (messageEl) {
         messageEl.textContent = "Ya tienes una sesión activa. Redirigiendo...";
       }
-      window.location.href = "/dashboard";
+      globalThis.location.href = "/dashboard";
       return true;
     }
     return false;
@@ -47,7 +47,7 @@ if (form) {
       "button[type='submit']",
     );
     if (submitButton) {
-      setButtonLoading(submitButton, true, "Ingresando");
+      startButtonLoading(submitButton, "Ingresando");
     }
 
     const formData = new FormData(form);
@@ -67,7 +67,7 @@ if (form) {
         // ignore storage errors
       }
       showToast("Listo", "Bienvenido a Tus promos.", "success");
-      window.location.href = "/dashboard";
+      globalThis.location.href = "/dashboard";
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error al autenticar";
@@ -77,7 +77,7 @@ if (form) {
       showToast("Error", message, "error");
     } finally {
       if (submitButton) {
-        setButtonLoading(submitButton, false);
+        stopButtonLoading(submitButton);
       }
     }
   });

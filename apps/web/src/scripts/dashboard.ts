@@ -1,5 +1,5 @@
 import { apiFetch, API_BASE } from "./api";
-import { setButtonLoading, showToast } from "./ui";
+import { showToast, startButtonLoading, stopButtonLoading } from "./ui";
 import { isValidDateRange, isValidTimeRange } from "./validators";
 import { businessTypeLabels, promoTypeLabels } from "../data/catalog";
 
@@ -60,6 +60,9 @@ type Category = {
 
 const isMobileDevice = () =>
   /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+
+const compareLabels = (left: string, right: string) =>
+  left.localeCompare(right, "es", { sensitivity: "base" });
 
 const userCard = document.querySelector<HTMLElement>("[data-user-card]");
 const businessList = document.querySelector<HTMLElement>(
@@ -463,9 +466,9 @@ const normalizeSlug = (value: string) =>
   value
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/-{2,}/g, "-")
-    .replace(/^-|-\$/g, "");
+    .replaceAll(/[^a-z0-9-]+/g, "-")
+    .replaceAll(/-{2,}/g, "-")
+    .replaceAll(/(^-|-$)/g, "");
 
 const renderLoadingMessage = (
   container: HTMLElement | null,
@@ -509,13 +512,13 @@ const withLoading = async (
   }
   const button = form.querySelector<HTMLButtonElement>("button[type='submit']");
   if (button) {
-    setButtonLoading(button, true);
+    startButtonLoading(button);
   }
   try {
     await action();
   } finally {
     if (button) {
-      setButtonLoading(button, false);
+      stopButtonLoading(button);
     }
   }
 };
@@ -698,50 +701,49 @@ const setBranchForm = (
   setInputValue(branchForm, "phone", branch.phone ?? "");
 };
 
-const setPromoForm = async (
-  promo?: Promotion,
-  options: { mode?: FormMode; readOnly?: boolean; title?: string } = {},
-) => {
+const resetPromoForm = () => {
   if (!promoForm) return;
-  if (!promo) {
-    promoForm.reset();
-    promoForm.dataset.editId = "";
-    setFormReadOnly(promoForm, false);
-    setMode(promoForm, promoMode, null, "create");
-    setPromoImagePreview(null);
-    if (promoImageFileInput) {
-      promoImageFileInput.value = "";
-    }
-    if (promoModalTitle) {
-      promoModalTitle.textContent = "Crear promoción";
-    }
-    if (currentUser?.role !== "ADMIN" && currentBusinessId) {
-      setInputValue(promoForm, "businessId", currentBusinessId);
-    }
+  promoForm.reset();
+  promoForm.dataset.editId = "";
+  setFormReadOnly(promoForm, false);
+  setMode(promoForm, promoMode, null, "create");
+  setPromoImagePreview(null);
+  if (promoImageFileInput) {
+    promoImageFileInput.value = "";
+  }
+  if (promoModalTitle) {
+    promoModalTitle.textContent = "Crear promoción";
+  }
+  if (currentUser?.role !== "ADMIN" && currentBusinessId) {
+    setInputValue(promoForm, "businessId", currentBusinessId);
+  }
+};
+
+const setPromoFormTitle = (mode: FormMode, title?: string) => {
+  if (!promoModalTitle) return;
+  if (title) {
+    promoModalTitle.textContent = title;
     return;
   }
+  promoModalTitle.textContent =
+    mode === "view" ? "Detalle de la promoción" : "Editar promoción";
+};
 
-  const mode = options.mode ?? "edit";
-  promoForm.dataset.editId = promo._id;
-  setFormReadOnly(promoForm, options.readOnly ?? false);
-  setMode(promoForm, promoMode, null, mode);
-  if (promoModalTitle) {
-    if (options.title) {
-      promoModalTitle.textContent = options.title;
-    } else {
-      promoModalTitle.textContent =
-        mode === "view" ? "Detalle de la promoción" : "Editar promoción";
-    }
+const loadPromoBranches = async (businessId: string) => {
+  if (currentUser?.role === "ADMIN") {
+    await loadBranchOptionsForBusiness(businessId);
+  } else {
+    currentBusinessId = businessId;
+    await loadBranches(businessId);
+  }
+};
+
+const fillPromoForm = async (promo: Promotion) => {
+  if (!promoForm) return;
+  if (promo.businessId) {
+    await loadPromoBranches(promo.businessId);
   }
   setInputValue(promoForm, "businessId", promo.businessId);
-  if (promo.businessId) {
-    if (currentUser?.role === "ADMIN") {
-      await loadBranchOptionsForBusiness(promo.businessId);
-    } else {
-      currentBusinessId = promo.businessId;
-      await loadBranches(promo.businessId);
-    }
-  }
   setInputValue(promoForm, "branchId", promo.branchId ?? "");
   setInputValue(promoForm, "title", promo.title);
   setInputValue(promoForm, "description", promo.description ?? "");
@@ -765,6 +767,24 @@ const setPromoForm = async (
     activeInput.checked = promo.active ?? true;
   }
   setPromoImagePreview(promo.imageUrl ?? null);
+};
+
+const setPromoForm = async (
+  promo?: Promotion,
+  options: { mode?: FormMode; readOnly?: boolean; title?: string } = {},
+) => {
+  if (!promoForm) return;
+  if (!promo) {
+    resetPromoForm();
+    return;
+  }
+
+  const mode = options.mode ?? "edit";
+  promoForm.dataset.editId = promo._id;
+  setFormReadOnly(promoForm, options.readOnly ?? false);
+  setMode(promoForm, promoMode, null, mode);
+  setPromoFormTitle(mode, options.title);
+  await fillPromoForm(promo);
 };
 
 const setCityForm = (
@@ -1023,9 +1043,9 @@ const closeAllModals = () => {
   setHidden(categoryModalOverlay, true);
 };
 
-const openModal = (
-  type: "promo" | "branch" | "business" | "city" | "category",
-) => {
+type ModalType = "promo" | "branch" | "business" | "city" | "category";
+
+const openModal = (type: ModalType) => {
   closeAllModals();
   const modalMap = {
     promo: { overlay: promoModalOverlay, modal: promoModal },
@@ -1245,7 +1265,7 @@ const getBusinessCities = (businessId: string) => {
         .filter((branch) => branch.businessId === businessId)
         .map((branch) => branch.city),
     ),
-  ).sort();
+  ).sort(compareLabels);
 };
 
 const formatBusinessCities = (businessId: string) => {
@@ -1310,7 +1330,7 @@ const updateBusinessCityFilterOptions = () => {
   const selected = businessCityFilter.value || "all";
   const cities = Array.from(
     new Set(branches.map((branch) => branch.city)),
-  ).sort();
+  ).sort(compareLabels);
   businessCityFilter.innerHTML = `
     <option value="all">Todas</option>
     ${cities.map((city) => `<option value="${city}">${city}</option>`).join("")}
@@ -1737,7 +1757,7 @@ const renderPromotions = (promos: Promotion[], total: number) => {
                 : businessMap.get(currentBusinessId);
               const businessName = promoBusiness?.name ?? "Negocio";
               const instagramHandle = (promoBusiness?.instagram ?? "")
-                .replace("@", "")
+                .replaceAll("@", "")
                 .trim();
               const instagramLink = instagramHandle
                 ? `<a class="promo-link" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
@@ -1827,7 +1847,7 @@ const updateBranchCityFilterOptions = () => {
   if (!branchCityFilter) return;
   const cities = Array.from(
     new Set(branches.map((branch) => branch.city)),
-  ).sort();
+  ).sort(compareLabels);
   const currentValue = branchCityFilter.value;
   branchCityFilter.innerHTML = `
     <option value="all">Todas</option>
@@ -1981,18 +2001,7 @@ const loadUser = async () => {
   renderUser();
 };
 
-const loadBusinesses = async () => {
-  if (!currentUser) return;
-  renderLoadingMessage(businessList, "Cargando negocios...");
-  businessSelects.forEach((select) =>
-    setSelectLoading(select, "Cargando negocios..."),
-  );
-  const isAdmin = currentUser.role === "ADMIN";
-  adminBusinessPage = 1;
-  const response = await apiFetch<Business[]>(
-    isAdmin ? "/businesses" : "/businesses/mine",
-  );
-  businesses = response;
+const resetBusinessFilters = () => {
   businessFilters = {
     search: "",
     type: "all",
@@ -2019,33 +2028,59 @@ const loadBusinesses = async () => {
   if (businessInstagramFilter) {
     businessInstagramFilter.value = "all";
   }
+};
+
+const ensureCurrentBusiness = () => {
   if (!currentBusinessId && businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
   }
-  updateBusinessesView();
-  populateBusinessSelects();
-  setBusinessSelectVisibility(isAdmin);
-  setAdminOnlyVisibility(isAdmin);
+};
+
+const updateBusinessFormAvailability = () => {
   const hasBusinesses = businesses.length > 0;
   setBranchFormEnabled(hasBusinesses);
   setPromoFormEnabled(hasBusinesses);
   if (!hasBusinesses) {
     setSelectLoading(branchSelect, "Sin sedes");
   }
-  if (businesses.length > 0) {
-    if (!currentBusinessId) {
-      currentBusinessId = businesses[0]._id;
-    }
-    if (isAdmin) {
-      await loadBranches("");
-      await loadPromotions();
-    } else {
-      await loadBranches(currentBusinessId);
-      await loadPromotions(currentBusinessId);
-    }
-    updatePromotionsView();
-    updateBusinessesView();
+};
+
+const loadBusinessDependencies = async (isAdmin: boolean) => {
+  if (businesses.length === 0) {
+    return;
   }
+  ensureCurrentBusiness();
+  if (isAdmin) {
+    await loadBranches("");
+    await loadPromotions();
+  } else if (currentBusinessId) {
+    await loadBranches(currentBusinessId);
+    await loadPromotions(currentBusinessId);
+  }
+  updatePromotionsView();
+  updateBusinessesView();
+};
+
+const loadBusinesses = async () => {
+  if (!currentUser) return;
+  renderLoadingMessage(businessList, "Cargando negocios...");
+  businessSelects.forEach((select) =>
+    setSelectLoading(select, "Cargando negocios..."),
+  );
+  const isAdmin = currentUser.role === "ADMIN";
+  adminBusinessPage = 1;
+  const response = await apiFetch<Business[]>(
+    isAdmin ? "/businesses" : "/businesses/mine",
+  );
+  businesses = response;
+  resetBusinessFilters();
+  ensureCurrentBusiness();
+  updateBusinessesView();
+  populateBusinessSelects();
+  setBusinessSelectVisibility(isAdmin);
+  setAdminOnlyVisibility(isAdmin);
+  updateBusinessFormAvailability();
+  await loadBusinessDependencies(isAdmin);
 };
 
 const loadBranches = async (businessId: string) => {
@@ -2307,9 +2342,9 @@ const loadCities = async () => {
     setSelectReady(
       branchCitySelect,
       [
-        `<option value=\"\">Selecciona una ciudad</option>`,
+        `<option value="">Selecciona una ciudad</option>`,
         ...cities.map(
-          (city) => `<option value=\"${city.name}\">${city.name}</option>`,
+          (city) => `<option value="${city.name}">${city.name}</option>`,
         ),
       ].join(""),
     );
@@ -2446,12 +2481,12 @@ const handleBusinessForm = () => {
     await withLoading(businessForm, async () => {
       try {
         const payload = {
-          name: data.get("name"),
+          name: String(data.get("name") ?? ""),
           slug,
-          type: data.get("type"),
+          type: String(data.get("type") ?? ""),
           categories: categoryValues,
-          description: data.get("description"),
-          instagram: data.get("instagram"),
+          description: String(data.get("description") ?? "") || undefined,
+          instagram: String(data.get("instagram") ?? "") || undefined,
         };
         if (
           businessForm.dataset.mode === "edit" &&
@@ -2513,11 +2548,11 @@ const handleBranchForm = () => {
     await withLoading(branchForm, async () => {
       try {
         const payload = {
-          businessId: data.get("businessId"),
-          city: data.get("city"),
-          address: data.get("address"),
-          zone: data.get("zone") || undefined,
-          phone: data.get("phone") || undefined,
+          businessId: String(data.get("businessId") ?? ""),
+          city: String(data.get("city") ?? ""),
+          address: String(data.get("address") ?? ""),
+          zone: String(data.get("zone") ?? "") || undefined,
+          phone: String(data.get("phone") ?? "") || undefined,
         };
         if (branchForm.dataset.mode === "edit" && branchForm.dataset.editId) {
           await apiFetch<Branch>(`/branches/${branchForm.dataset.editId}`, {
@@ -2559,6 +2594,90 @@ const handleBranchForm = () => {
   });
 };
 
+type PromoFormValues = {
+  businessId: string;
+  branchId: string | null;
+  title: string;
+  description?: string;
+  promoType: string;
+  value?: string;
+  days: string[];
+  startDateIso: string | null;
+  endDateIso: string | null;
+  startHour: string | null;
+  endHour: string | null;
+  imageUrl: string | null;
+  active: boolean;
+};
+
+const buildPromoFormValues = (form: HTMLFormElement): PromoFormValues => {
+  const data = new FormData(form);
+  const days = data.getAll("daysOfWeek").map(String);
+  const startDateValue = String(data.get("startDate") ?? "");
+  const endDateValue = String(data.get("endDate") ?? "");
+  const startDateIso = startDateValue
+    ? new Date(`${startDateValue}T00:00:00`).toISOString()
+    : null;
+  const endDateIso = endDateValue
+    ? new Date(`${endDateValue}T23:59:59`).toISOString()
+    : null;
+  const startHourValue = String(data.get("startHour") ?? "");
+  const endHourValue = String(data.get("endHour") ?? "");
+  const startHour = startHourValue.length > 0 ? startHourValue : null;
+  const endHour = endHourValue.length > 0 ? endHourValue : null;
+  const imageUrlValue = String(data.get("imageUrl") ?? "").trim();
+  const imageUrl = imageUrlValue.length > 0 ? imageUrlValue : null;
+
+  return {
+    businessId: String(data.get("businessId") ?? ""),
+    branchId: String(data.get("branchId") ?? "") || null,
+    title: String(data.get("title") ?? ""),
+    description: String(data.get("description") ?? "") || undefined,
+    promoType: String(data.get("promoType") ?? ""),
+    value: String(data.get("value") ?? "") || undefined,
+    days,
+    startDateIso,
+    endDateIso,
+    startHour,
+    endHour,
+    imageUrl,
+    active: Boolean(data.get("active")),
+  };
+};
+
+const validatePromoForm = (values: PromoFormValues) => {
+  if (values.days.length === 0) {
+    return "Selecciona al menos un día de la semana.";
+  }
+  if (
+    (values.startDateIso && !values.endDateIso) ||
+    (!values.startDateIso && values.endDateIso)
+  ) {
+    return "Si defines fechas, debes completar inicio y fin.";
+  }
+  if (
+    values.startDateIso &&
+    values.endDateIso &&
+    !isValidDateRange(values.startDateIso, values.endDateIso)
+  ) {
+    return "La fecha de fin debe ser posterior a la fecha de inicio.";
+  }
+  if (
+    (values.startHour && !values.endHour) ||
+    (!values.startHour && values.endHour)
+  ) {
+    return "Si defines horas, debes completar inicio y fin.";
+  }
+  if (
+    values.startHour &&
+    values.endHour &&
+    !isValidTimeRange(values.startHour, values.endHour)
+  ) {
+    return "La hora fin debe ser posterior a la hora inicio.";
+  }
+  return null;
+};
+
 const handlePromoForm = () => {
   if (!promoForm) return;
   const promoImageUrlInput = promoForm.querySelector<HTMLInputElement>(
@@ -2597,81 +2716,30 @@ const handlePromoForm = () => {
       promoMessage,
       promoEditing ? "Actualizando promoción..." : "Guardando promoción...",
     );
-
-    const data = new FormData(promoForm);
-    const days = data.getAll("daysOfWeek").map((day) => String(day));
-    const startDateValue = String(data.get("startDate") ?? "");
-    const endDateValue = String(data.get("endDate") ?? "");
-    const startDateIso = startDateValue
-      ? new Date(`${startDateValue}T00:00:00`).toISOString()
-      : null;
-    const endDateIso = endDateValue
-      ? new Date(`${endDateValue}T23:59:59`).toISOString()
-      : null;
-    const startHourValue = String(data.get("startHour") ?? "");
-    const endHourValue = String(data.get("endHour") ?? "");
-    const startHour = startHourValue.length > 0 ? startHourValue : null;
-    const endHour = endHourValue.length > 0 ? endHourValue : null;
-    const imageUrlValue = String(data.get("imageUrl") ?? "").trim();
-    const imageUrl = imageUrlValue.length > 0 ? imageUrlValue : null;
-    if (days.length === 0) {
-      const message = "Selecciona al menos un día de la semana.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (
-      (startDateValue && !endDateValue) ||
-      (!startDateValue && endDateValue)
-    ) {
-      const message = "Si defines fechas, debes completar inicio y fin.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (
-      startDateIso &&
-      endDateIso &&
-      !isValidDateRange(startDateIso, endDateIso)
-    ) {
-      const message =
-        "La fecha de fin debe ser posterior a la fecha de inicio.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (
-      (startHourValue && !endHourValue) ||
-      (!startHourValue && endHourValue)
-    ) {
-      const message = "Si defines horas, debes completar inicio y fin.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (startHour && endHour && !isValidTimeRange(startHour, endHour)) {
-      const message = "La hora fin debe ser posterior a la hora inicio.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
+    const values = buildPromoFormValues(promoForm);
+    const validationMessage = validatePromoForm(values);
+    if (validationMessage) {
+      setMessage(promoMessage, validationMessage);
+      showToast("Error", validationMessage, "error");
       return;
     }
 
     await withLoading(promoForm, async () => {
       try {
         const payload = {
-          businessId: data.get("businessId"),
-          branchId: data.get("branchId") || null,
-          title: data.get("title"),
-          description: data.get("description") || undefined,
-          imageUrl,
-          promoType: data.get("promoType"),
-          value: data.get("value") || undefined,
-          startDate: startDateIso,
-          endDate: endDateIso,
-          daysOfWeek: days,
-          startHour,
-          endHour,
-          active: Boolean(data.get("active")),
+          businessId: values.businessId,
+          branchId: values.branchId,
+          title: values.title,
+          description: values.description,
+          imageUrl: values.imageUrl,
+          promoType: values.promoType,
+          value: values.value,
+          startDate: values.startDateIso,
+          endDate: values.endDateIso,
+          daysOfWeek: values.days,
+          startHour: values.startHour,
+          endHour: values.endHour,
+          active: values.active,
         };
         if (promoForm.dataset.mode === "edit" && promoForm.dataset.editId) {
           await apiFetch<Promotion>(`/promotions/${promoForm.dataset.editId}`, {
@@ -2726,7 +2794,7 @@ const handleCityForm = () => {
     await withLoading(cityForm, async () => {
       try {
         const payload = {
-          name: data.get("name"),
+          name: String(data.get("name") ?? ""),
           countryCode: String(data.get("countryCode") ?? "").toUpperCase(),
         };
         if (cityForm.dataset.mode === "edit" && cityForm.dataset.editId) {
@@ -2778,7 +2846,7 @@ const handleCategoryForm = () => {
     await withLoading(categoryForm, async () => {
       try {
         const payload = {
-          name: data.get("name"),
+          name: String(data.get("name") ?? ""),
           slug: String(data.get("slug") ?? "").toLowerCase(),
         };
         if (
@@ -2892,7 +2960,7 @@ const wireBusinessActions = () => {
     }
 
     if (deleteId) {
-      const confirmed = window.confirm(
+      const confirmed = globalThis.confirm(
         "¿Eliminar este negocio? También perderás sus sedes y promos.",
       );
       if (!confirmed) return;
@@ -2988,7 +3056,7 @@ const wireBranchActions = () => {
       }
     }
     if (!deleteId) return;
-    const confirmed = window.confirm("¿Eliminar esta sede?");
+    const confirmed = globalThis.confirm("¿Eliminar esta sede?");
     if (!confirmed) return;
     branches = branches.filter((branch) => branch._id !== deleteId);
     updateBranchesView();
@@ -3000,72 +3068,89 @@ const wireBranchActions = () => {
   });
 };
 
+const handleInstagramDeepLink = (event: Event, target: HTMLElement) => {
+  const instagramLink = target.closest<HTMLAnchorElement>(
+    "[data-instagram-link]",
+  );
+  if (!instagramLink) return false;
+  const handle = instagramLink.dataset.instagramHandle ?? "";
+  if (handle && isMobileDevice()) {
+    event.preventDefault();
+    const deepLink = `instagram://user?username=${handle}`;
+    globalThis.location.href = deepLink;
+    globalThis.setTimeout(() => {
+      globalThis.open(`https://instagram.com/${handle}`, "_blank", "noopener");
+    }, 500);
+  }
+  return true;
+};
+
+const findPromoById = async (id: string) => {
+  let promo = promotions.find((item) => item._id === id);
+  if (!promo && currentBusinessId) {
+    const promos = await loadPromotions(currentBusinessId);
+    promo = promos.find((item) => item._id === id);
+  }
+  return promo;
+};
+
+const handlePromoView = async (id: string) => {
+  const promo = await findPromoById(id);
+  if (!promo) return;
+  await setPromoForm(promo, {
+    mode: "view",
+    readOnly: true,
+    title: "Detalle de la promoción",
+  });
+  setActiveDashboardTab("promos");
+  openModal("promo");
+};
+
+const handlePromoEdit = async (id: string) => {
+  const promo = await findPromoById(id);
+  if (!promo) return;
+  await setPromoForm(promo, {
+    mode: "edit",
+    readOnly: false,
+    title: "Editar promoción",
+  });
+  setActiveDashboardTab("promos");
+  openModal("promo");
+};
+
+const handlePromoDelete = async (id: string) => {
+  const confirmed = globalThis.confirm("¿Eliminar esta promoción?");
+  if (!confirmed) return;
+  promotions = promotions.filter((promo) => promo._id !== id);
+  updatePromotionsView();
+  await apiFetch(`/promotions/${id}`, { method: "DELETE" });
+  showToast("Listo", "Promoción eliminada.", "success");
+  if (currentBusinessId) {
+    await loadPromotions(currentBusinessId);
+    updatePromotionsView();
+  }
+};
+
 const wirePromoActions = () => {
   if (!promoList) return;
   promoList.addEventListener("click", async (event) => {
     const target = event.target as HTMLElement;
-    const instagramLink = target.closest<HTMLAnchorElement>(
-      "[data-instagram-link]",
-    );
-    if (instagramLink) {
-      const handle = instagramLink.dataset.instagramHandle ?? "";
-      if (handle && isMobileDevice()) {
-        event.preventDefault();
-        const deepLink = `instagram://user?username=${handle}`;
-        window.location.href = deepLink;
-        window.setTimeout(() => {
-          window.open(`https://instagram.com/${handle}`, "_blank", "noopener");
-        }, 500);
-      }
+    if (handleInstagramDeepLink(event, target)) {
       return;
     }
     const viewId = target.dataset.promoView;
     const editId = target.dataset.promoEdit;
     const deleteId = target.dataset.promoDelete;
     if (viewId) {
-      let promo = promotions.find((item) => item._id === viewId);
-      if (!promo && currentBusinessId) {
-        const promos = await loadPromotions(currentBusinessId);
-        promo = promos.find((item) => item._id === viewId);
-      }
-      if (promo) {
-        await setPromoForm(promo, {
-          mode: "view",
-          readOnly: true,
-          title: "Detalle de la promoción",
-        });
-        setActiveDashboardTab("promos");
-        openModal("promo");
-      }
+      await handlePromoView(viewId);
       return;
     }
     if (editId) {
-      let promo = promotions.find((item) => item._id === editId);
-      if (!promo && currentBusinessId) {
-        const promos = await loadPromotions(currentBusinessId);
-        promo = promos.find((item) => item._id === editId);
-      }
-      if (promo) {
-        await setPromoForm(promo, {
-          mode: "edit",
-          readOnly: false,
-          title: "Editar promoción",
-        });
-        setActiveDashboardTab("promos");
-        openModal("promo");
-      }
+      await handlePromoEdit(editId);
+      return;
     }
     if (!deleteId) return;
-    const confirmed = window.confirm("¿Eliminar esta promoción?");
-    if (!confirmed) return;
-    promotions = promotions.filter((promo) => promo._id !== deleteId);
-    updatePromotionsView();
-    await apiFetch(`/promotions/${deleteId}`, { method: "DELETE" });
-    showToast("Listo", "Promoción eliminada.", "success");
-    if (currentBusinessId) {
-      await loadPromotions(currentBusinessId);
-      updatePromotionsView();
-    }
+    await handlePromoDelete(deleteId);
   });
 };
 
@@ -3278,7 +3363,7 @@ const wireBusinessFilters = () => {
   businessInstagramFilter?.addEventListener("change", updateFilters);
 };
 
-(async () => {
+const initDashboard = async () => {
   setDashboardLoading(true);
   try {
     setBusinessForm();
@@ -3329,4 +3414,6 @@ const wireBusinessFilters = () => {
   } finally {
     setDashboardLoading(false);
   }
-})();
+};
+
+await initDashboard();

@@ -18,7 +18,7 @@ var apiFetch = async (path, options) => {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers ?? {}
+      ...options?.headers
     },
     ...options
   });
@@ -37,7 +37,9 @@ var apiFetch = async (path, options) => {
 
 // apps/web/src/scripts/ui.ts
 var getContainer = () => {
-  let container = document.querySelector("[data-toast-container]");
+  let container = document.querySelector(
+    "[data-toast-container]"
+  );
   if (!container) {
     container = document.createElement("div");
     container.dataset.toastContainer = "true";
@@ -49,7 +51,12 @@ var getContainer = () => {
 var showToast = (title, description, variant = "info") => {
   const container = getContainer();
   const toast = document.createElement("div");
-  const variantClass = variant === "success" ? "toast-success" : variant === "error" ? "toast-error" : "";
+  let variantClass = "";
+  if (variant === "success") {
+    variantClass = "toast-success";
+  } else if (variant === "error") {
+    variantClass = "toast-error";
+  }
   toast.className = `toast ${variantClass}`;
   toast.innerHTML = `
     <div>
@@ -62,24 +69,23 @@ var showToast = (title, description, variant = "info") => {
     toast.remove();
   }, 3600);
 };
-var setButtonLoading = (button, loading, text) => {
-  if (loading) {
-    button.dataset.originalText = button.textContent ?? "";
-    button.disabled = true;
-    button.innerHTML = `
-      <span class="loader">
-        <span class="loader-dot"></span>
-        <span class="loader-dot"></span>
-        <span class="loader-dot"></span>
-        ${text ?? "Procesando"}
-      </span>
-    `;
-  } else {
-    button.disabled = false;
-    if (button.dataset.originalText) {
-      button.textContent = button.dataset.originalText;
-      button.dataset.originalText = "";
-    }
+var startButtonLoading = (button, text) => {
+  button.dataset.originalText = button.textContent ?? "";
+  button.disabled = true;
+  button.innerHTML = `
+    <span class="loader">
+      <span class="loader-dot"></span>
+      <span class="loader-dot"></span>
+      <span class="loader-dot"></span>
+      ${text ?? "Procesando"}
+    </span>
+  `;
+};
+var stopButtonLoading = (button) => {
+  button.disabled = false;
+  if (button.dataset.originalText) {
+    button.textContent = button.dataset.originalText;
+    button.dataset.originalText = "";
   }
 };
 
@@ -103,8 +109,11 @@ var promoTypeLabels = {
 
 // apps/web/src/scripts/dashboard.ts
 var isMobileDevice = () => /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+var compareLabels = (left, right) => left.localeCompare(right, "es", { sensitivity: "base" });
 var userCard = document.querySelector("[data-user-card]");
-var businessList = document.querySelector("[data-business-list]");
+var businessList = document.querySelector(
+  "[data-business-list]"
+);
 var branchList = document.querySelector("[data-branch-list]");
 var promoList = document.querySelector("[data-promo-list]");
 var businessSelects = Array.from(
@@ -113,47 +122,107 @@ var businessSelects = Array.from(
 var businessSelectRows = Array.from(
   document.querySelectorAll("[data-business-select-row]")
 );
-var branchSelect = document.querySelector("[data-branch-select]");
-var businessForm = document.querySelector("[data-business-form]");
-var businessMessage = document.querySelector("[data-business-message]");
-var businessMode = document.querySelector("[data-business-mode]");
+var branchSelect = document.querySelector(
+  "[data-branch-select]"
+);
+var businessForm = document.querySelector(
+  "[data-business-form]"
+);
+var businessMessage = document.querySelector(
+  "[data-business-message]"
+);
+var businessMode = document.querySelector(
+  "[data-business-mode]"
+);
 var branchForm = document.querySelector("[data-branch-form]");
-var branchMessage = document.querySelector("[data-branch-message]");
+var branchMessage = document.querySelector(
+  "[data-branch-message]"
+);
 var branchMode = document.querySelector("[data-branch-mode]");
 var promoForm = document.querySelector("[data-promo-form]");
-var promoImageFileInput = document.querySelector("[data-promo-image-file]");
-var promoImagePreview = document.querySelector("[data-promo-image-preview]");
+var promoImageFileInput = document.querySelector(
+  "[data-promo-image-file]"
+);
+var promoImagePreview = document.querySelector(
+  "[data-promo-image-preview]"
+);
 var promoImagePreviewWrapper = document.querySelector(
   "[data-promo-image-preview-wrapper]"
 );
-var promoMessage = document.querySelector("[data-promo-message]");
+var promoMessage = document.querySelector(
+  "[data-promo-message]"
+);
 var promoMode = document.querySelector("[data-promo-mode]");
-var promoSearchInput = document.querySelector("[data-promo-search]");
-var promoStatusSelect = document.querySelector("[data-promo-status]");
+var promoSearchInput = document.querySelector(
+  "[data-promo-search]"
+);
+var promoStatusSelect = document.querySelector(
+  "[data-promo-status]"
+);
 var promoTypeSelect = document.querySelector("[data-promo-type]");
-var promoBusinessFilter = document.querySelector("[data-promo-business-filter]");
-var promoPagination = document.querySelector("[data-promo-pagination]");
-var promoPagePrev = document.querySelector("[data-promo-page-prev]");
-var promoPageNext = document.querySelector("[data-promo-page-next]");
-var promoPageInfo = document.querySelector("[data-promo-page-info]");
-var promoKpiTotal = document.querySelector("[data-promo-kpi-total]");
-var promoKpiActive = document.querySelector("[data-promo-kpi-active]");
-var promoKpiInactive = document.querySelector("[data-promo-kpi-inactive]");
-var branchSearchInput = document.querySelector("[data-branch-search]");
-var branchCityFilter = document.querySelector("[data-branch-city-filter]");
+var promoBusinessFilter = document.querySelector(
+  "[data-promo-business-filter]"
+);
+var promoPagination = document.querySelector(
+  "[data-promo-pagination]"
+);
+var promoPagePrev = document.querySelector(
+  "[data-promo-page-prev]"
+);
+var promoPageNext = document.querySelector(
+  "[data-promo-page-next]"
+);
+var promoPageInfo = document.querySelector(
+  "[data-promo-page-info]"
+);
+var promoKpiTotal = document.querySelector(
+  "[data-promo-kpi-total]"
+);
+var promoKpiActive = document.querySelector(
+  "[data-promo-kpi-active]"
+);
+var promoKpiInactive = document.querySelector(
+  "[data-promo-kpi-inactive]"
+);
+var branchSearchInput = document.querySelector(
+  "[data-branch-search]"
+);
+var branchCityFilter = document.querySelector(
+  "[data-branch-city-filter]"
+);
 var branchBusinessFilter = document.querySelector(
   "[data-branch-business-filter]"
 );
-var branchPagination = document.querySelector("[data-branch-pagination]");
-var branchPagePrev = document.querySelector("[data-branch-page-prev]");
-var branchPageNext = document.querySelector("[data-branch-page-next]");
-var branchPageInfo = document.querySelector("[data-branch-page-info]");
-var branchKpiTotal = document.querySelector("[data-branch-kpi-total]");
-var branchKpiCities = document.querySelector("[data-branch-kpi-cities]");
-var branchKpiPhones = document.querySelector("[data-branch-kpi-phones]");
-var businessSearchInput = document.querySelector("[data-business-search]");
-var businessTypeFilter = document.querySelector("[data-business-type-filter]");
-var businessCityFilter = document.querySelector("[data-business-city-filter]");
+var branchPagination = document.querySelector(
+  "[data-branch-pagination]"
+);
+var branchPagePrev = document.querySelector(
+  "[data-branch-page-prev]"
+);
+var branchPageNext = document.querySelector(
+  "[data-branch-page-next]"
+);
+var branchPageInfo = document.querySelector(
+  "[data-branch-page-info]"
+);
+var branchKpiTotal = document.querySelector(
+  "[data-branch-kpi-total]"
+);
+var branchKpiCities = document.querySelector(
+  "[data-branch-kpi-cities]"
+);
+var branchKpiPhones = document.querySelector(
+  "[data-branch-kpi-phones]"
+);
+var businessSearchInput = document.querySelector(
+  "[data-business-search]"
+);
+var businessTypeFilter = document.querySelector(
+  "[data-business-type-filter]"
+);
+var businessCityFilter = document.querySelector(
+  "[data-business-city-filter]"
+);
 var businessCategoryFilter = document.querySelector(
   "[data-business-category-filter]"
 );
@@ -163,61 +232,145 @@ var businessVerifiedFilter = document.querySelector(
 var businessInstagramFilter = document.querySelector(
   "[data-business-instagram-filter]"
 );
-var businessPagination = document.querySelector("[data-business-pagination]");
-var businessPagePrev = document.querySelector("[data-business-page-prev]");
-var businessPageNext = document.querySelector("[data-business-page-next]");
-var businessPageInfo = document.querySelector("[data-business-page-info]");
-var businessKpiTotal = document.querySelector("[data-business-kpi-total]");
-var businessKpiBranches = document.querySelector("[data-business-kpi-branches]");
-var businessKpiPromos = document.querySelector("[data-business-kpi-promos]");
+var businessPagination = document.querySelector(
+  "[data-business-pagination]"
+);
+var businessPagePrev = document.querySelector(
+  "[data-business-page-prev]"
+);
+var businessPageNext = document.querySelector(
+  "[data-business-page-next]"
+);
+var businessPageInfo = document.querySelector(
+  "[data-business-page-info]"
+);
+var businessKpiTotal = document.querySelector(
+  "[data-business-kpi-total]"
+);
+var businessKpiBranches = document.querySelector(
+  "[data-business-kpi-branches]"
+);
+var businessKpiPromos = document.querySelector(
+  "[data-business-kpi-promos]"
+);
 var adminPanel = document.querySelector("[data-admin-panel]");
-var adminOnlySections = Array.from(document.querySelectorAll("[data-admin-only]"));
-var ownerBusinessPanel = document.querySelector("[data-owner-business]");
-var ownerBusinessName = document.querySelector("[data-owner-business-name]");
-var ownerBusinessType = document.querySelector("[data-owner-business-type]");
-var ownerBusinessSlug = document.querySelector("[data-owner-business-slug]");
-var ownerBusinessCategories = document.querySelector("[data-owner-business-categories]");
-var ownerBusinessInstagram = document.querySelector("[data-owner-business-instagram]");
+var adminOnlySections = Array.from(
+  document.querySelectorAll("[data-admin-only]")
+);
+var ownerBusinessPanel = document.querySelector(
+  "[data-owner-business]"
+);
+var ownerBusinessName = document.querySelector(
+  "[data-owner-business-name]"
+);
+var ownerBusinessType = document.querySelector(
+  "[data-owner-business-type]"
+);
+var ownerBusinessSlug = document.querySelector(
+  "[data-owner-business-slug]"
+);
+var ownerBusinessCategories = document.querySelector(
+  "[data-owner-business-categories]"
+);
+var ownerBusinessInstagram = document.querySelector(
+  "[data-owner-business-instagram]"
+);
 var ownerBusinessDescription = document.querySelector(
   "[data-owner-business-description]"
 );
-var ownerBusinessEdit = document.querySelector("[data-owner-business-edit]");
+var ownerBusinessEdit = document.querySelector(
+  "[data-owner-business-edit]"
+);
 var cityForm = document.querySelector("[data-city-form]");
 var cityMessage = document.querySelector("[data-city-message]");
 var cityList = document.querySelector("[data-city-list]");
 var cityMode = document.querySelector("[data-city-mode]");
-var cityPagination = document.querySelector("[data-city-pagination]");
-var cityPagePrev = document.querySelector("[data-city-page-prev]");
-var cityPageNext = document.querySelector("[data-city-page-next]");
-var cityPageInfo = document.querySelector("[data-city-page-info]");
-var cityKpiTotal = document.querySelector("[data-city-kpi-total]");
-var cityKpiCountries = document.querySelector("[data-city-kpi-countries]");
+var cityPagination = document.querySelector(
+  "[data-city-pagination]"
+);
+var cityPagePrev = document.querySelector(
+  "[data-city-page-prev]"
+);
+var cityPageNext = document.querySelector(
+  "[data-city-page-next]"
+);
+var cityPageInfo = document.querySelector(
+  "[data-city-page-info]"
+);
+var cityKpiTotal = document.querySelector(
+  "[data-city-kpi-total]"
+);
+var cityKpiCountries = document.querySelector(
+  "[data-city-kpi-countries]"
+);
 var cityKpiLast = document.querySelector("[data-city-kpi-last]");
-var categoryForm = document.querySelector("[data-category-form]");
-var categoryMessage = document.querySelector("[data-category-message]");
-var categoryList = document.querySelector("[data-category-list]");
-var categoryMode = document.querySelector("[data-category-mode]");
-var categoryPagination = document.querySelector("[data-category-pagination]");
-var categoryPagePrev = document.querySelector("[data-category-page-prev]");
-var categoryPageNext = document.querySelector("[data-category-page-next]");
-var categoryPageInfo = document.querySelector("[data-category-page-info]");
-var categoryKpiTotal = document.querySelector("[data-category-kpi-total]");
-var categoryKpiSlugs = document.querySelector("[data-category-kpi-slugs]");
-var categoryKpiLast = document.querySelector("[data-category-kpi-last]");
+var categoryForm = document.querySelector(
+  "[data-category-form]"
+);
+var categoryMessage = document.querySelector(
+  "[data-category-message]"
+);
+var categoryList = document.querySelector(
+  "[data-category-list]"
+);
+var categoryMode = document.querySelector(
+  "[data-category-mode]"
+);
+var categoryPagination = document.querySelector(
+  "[data-category-pagination]"
+);
+var categoryPagePrev = document.querySelector(
+  "[data-category-page-prev]"
+);
+var categoryPageNext = document.querySelector(
+  "[data-category-page-next]"
+);
+var categoryPageInfo = document.querySelector(
+  "[data-category-page-info]"
+);
+var categoryKpiTotal = document.querySelector(
+  "[data-category-kpi-total]"
+);
+var categoryKpiSlugs = document.querySelector(
+  "[data-category-kpi-slugs]"
+);
+var categoryKpiLast = document.querySelector(
+  "[data-category-kpi-last]"
+);
 var categorySuggestions = document.querySelector(
   "[data-business-category-select]"
 );
-var ownerSections = Array.from(document.querySelectorAll("[data-owner-only]"));
+var ownerSections = Array.from(
+  document.querySelectorAll("[data-owner-only]")
+);
 var authGate = document.querySelector("[data-auth-gate]");
-var authGateText = document.querySelector("[data-auth-gate-text]");
-var branchCitySelect = document.querySelector("[data-branch-city-select]");
-var dashboardHero = document.querySelector("[data-dashboard-hero]");
-var dashboardMenu = document.querySelector("[data-dashboard-menu]");
-var dashboardOverlay = document.querySelector("[data-dashboard-overlay]");
-var dashboardToggle = document.querySelector("[data-dashboard-toggle]");
-var dashboardClose = document.querySelector("[data-dashboard-close]");
-var dashboardLoader = document.querySelector("[data-dashboard-loader]");
-var dashboardContent = document.querySelector("[data-dashboard-content]");
+var authGateText = document.querySelector(
+  "[data-auth-gate-text]"
+);
+var branchCitySelect = document.querySelector(
+  "[data-branch-city-select]"
+);
+var dashboardHero = document.querySelector(
+  "[data-dashboard-hero]"
+);
+var dashboardMenu = document.querySelector(
+  "[data-dashboard-menu]"
+);
+var dashboardOverlay = document.querySelector(
+  "[data-dashboard-overlay]"
+);
+var dashboardToggle = document.querySelector(
+  "[data-dashboard-toggle]"
+);
+var dashboardClose = document.querySelector(
+  "[data-dashboard-close]"
+);
+var dashboardLoader = document.querySelector(
+  "[data-dashboard-loader]"
+);
+var dashboardContent = document.querySelector(
+  "[data-dashboard-content]"
+);
 var dashboardTabs = Array.from(
   document.querySelectorAll("[data-dashboard-tab]")
 );
@@ -230,37 +383,81 @@ var dashboardCreateButtons = Array.from(
 var businessTabLabels = Array.from(
   document.querySelectorAll("[data-dashboard-business-label]")
 );
-var businessTabTitle = document.querySelector("[data-dashboard-business-title]");
+var businessTabTitle = document.querySelector(
+  "[data-dashboard-business-title]"
+);
 var promoTabLabels = Array.from(
   document.querySelectorAll("[data-dashboard-promo-label]")
 );
-var promoTabTitle = document.querySelector("[data-dashboard-promo-title]");
-var promoTabSubtitle = document.querySelector("[data-dashboard-promo-subtitle]");
+var promoTabTitle = document.querySelector(
+  "[data-dashboard-promo-title]"
+);
+var promoTabSubtitle = document.querySelector(
+  "[data-dashboard-promo-subtitle]"
+);
 var branchTabLabels = Array.from(
   document.querySelectorAll("[data-dashboard-branch-label]")
 );
-var branchTabTitle = document.querySelector("[data-dashboard-branch-title]");
-var branchTabSubtitle = document.querySelector("[data-dashboard-branch-subtitle]");
-var promoModalOverlay = document.querySelector("[data-promo-modal-overlay]");
+var branchTabTitle = document.querySelector(
+  "[data-dashboard-branch-title]"
+);
+var branchTabSubtitle = document.querySelector(
+  "[data-dashboard-branch-subtitle]"
+);
+var promoModalOverlay = document.querySelector(
+  "[data-promo-modal-overlay]"
+);
 var promoModal = document.querySelector("[data-promo-modal]");
-var promoModalClose = document.querySelector("[data-promo-modal-close]");
-var promoModalTitle = document.querySelector("[data-promo-modal-title]");
-var branchModalOverlay = document.querySelector("[data-branch-modal-overlay]");
+var promoModalClose = document.querySelector(
+  "[data-promo-modal-close]"
+);
+var promoModalTitle = document.querySelector(
+  "[data-promo-modal-title]"
+);
+var branchModalOverlay = document.querySelector(
+  "[data-branch-modal-overlay]"
+);
 var branchModal = document.querySelector("[data-branch-modal]");
-var branchModalClose = document.querySelector("[data-branch-modal-close]");
-var branchModalTitle = document.querySelector("[data-branch-modal-title]");
-var businessModalOverlay = document.querySelector("[data-business-modal-overlay]");
-var businessModal = document.querySelector("[data-business-modal]");
-var businessModalClose = document.querySelector("[data-business-modal-close]");
-var businessModalTitle = document.querySelector("[data-business-modal-title]");
-var cityModalOverlay = document.querySelector("[data-city-modal-overlay]");
+var branchModalClose = document.querySelector(
+  "[data-branch-modal-close]"
+);
+var branchModalTitle = document.querySelector(
+  "[data-branch-modal-title]"
+);
+var businessModalOverlay = document.querySelector(
+  "[data-business-modal-overlay]"
+);
+var businessModal = document.querySelector(
+  "[data-business-modal]"
+);
+var businessModalClose = document.querySelector(
+  "[data-business-modal-close]"
+);
+var businessModalTitle = document.querySelector(
+  "[data-business-modal-title]"
+);
+var cityModalOverlay = document.querySelector(
+  "[data-city-modal-overlay]"
+);
 var cityModal = document.querySelector("[data-city-modal]");
-var cityModalClose = document.querySelector("[data-city-modal-close]");
-var cityModalTitle = document.querySelector("[data-city-modal-title]");
-var categoryModalOverlay = document.querySelector("[data-category-modal-overlay]");
-var categoryModal = document.querySelector("[data-category-modal]");
-var categoryModalClose = document.querySelector("[data-category-modal-close]");
-var categoryModalTitle = document.querySelector("[data-category-modal-title]");
+var cityModalClose = document.querySelector(
+  "[data-city-modal-close]"
+);
+var cityModalTitle = document.querySelector(
+  "[data-city-modal-title]"
+);
+var categoryModalOverlay = document.querySelector(
+  "[data-category-modal-overlay]"
+);
+var categoryModal = document.querySelector(
+  "[data-category-modal]"
+);
+var categoryModalClose = document.querySelector(
+  "[data-category-modal-close]"
+);
+var categoryModalTitle = document.querySelector(
+  "[data-category-modal-title]"
+);
 var businesses = [];
 var branches = [];
 var currentUser = null;
@@ -303,7 +500,7 @@ var setMessage = (el, text) => {
     el.textContent = text;
   }
 };
-var normalizeSlug = (value) => value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-{2,}/g, "-").replace(/^-|-\$/g, "");
+var normalizeSlug = (value) => value.trim().toLowerCase().replaceAll(/[^a-z0-9-]+/g, "-").replaceAll(/-{2,}/g, "-").replaceAll(/(^-|-$)/g, "");
 var renderLoadingMessage = (container, message) => {
   if (!container) return;
   container.innerHTML = `
@@ -330,13 +527,13 @@ var withLoading = async (form, action) => {
   }
   const button = form.querySelector("button[type='submit']");
   if (button) {
-    setButtonLoading(button, true);
+    startButtonLoading(button);
   }
   try {
     await action();
   } finally {
     if (button) {
-      setButtonLoading(button, false);
+      stopButtonLoading(button);
     }
   }
 };
@@ -359,22 +556,20 @@ var setMode = (form, label, cancel, mode) => {
 var setFormReadOnly = (form, readOnly) => {
   if (!form) return;
   form.dataset.readonly = readOnly ? "true" : "false";
-  const fields = form.querySelectorAll(
-    "input, select, textarea"
-  );
+  const fields = form.querySelectorAll("input, select, textarea");
   fields.forEach((field) => {
     field.disabled = readOnly;
   });
-  const submitButton = form.querySelector("button[type='submit']");
+  const submitButton = form.querySelector(
+    "button[type='submit']"
+  );
   if (submitButton) {
     submitButton.hidden = readOnly;
   }
 };
 var setInputValue = (form, name, value) => {
   if (!form) return;
-  const input = form.querySelector(
-    `[name="${name}"]`
-  );
+  const input = form.querySelector(`[name="${name}"]`);
   if (input) {
     input.value = value;
   }
@@ -408,8 +603,8 @@ var uploadPromoImage = async (file) => {
     credentials: "include"
   });
   if (!response.ok) {
-    const payload = await response.json().catch(() => void 0);
-    const message = payload?.message ?? "No pudimos subir la foto de la promoción.";
+    const payload2 = await response.json().catch(() => void 0);
+    const message = payload2?.message ?? "No pudimos subir la foto de la promoci\xF3n.";
     throw new Error(Array.isArray(message) ? message.join(", ") : message);
   }
   const payload = await response.json();
@@ -490,45 +685,45 @@ var setBranchForm = (branch, options = {}) => {
   setInputValue(branchForm, "zone", branch.zone ?? "");
   setInputValue(branchForm, "phone", branch.phone ?? "");
 };
-var setPromoForm = async (promo, options = {}) => {
+var resetPromoForm = () => {
   if (!promoForm) return;
-  if (!promo) {
-    promoForm.reset();
-    promoForm.dataset.editId = "";
-    setFormReadOnly(promoForm, false);
-    setMode(promoForm, promoMode, null, "create");
-    setPromoImagePreview(null);
-    if (promoImageFileInput) {
-      promoImageFileInput.value = "";
-    }
-    if (promoModalTitle) {
-      promoModalTitle.textContent = "Crear promoci\xF3n";
-    }
-    if (currentUser?.role !== "ADMIN" && currentBusinessId) {
-      setInputValue(promoForm, "businessId", currentBusinessId);
-    }
+  promoForm.reset();
+  promoForm.dataset.editId = "";
+  setFormReadOnly(promoForm, false);
+  setMode(promoForm, promoMode, null, "create");
+  setPromoImagePreview(null);
+  if (promoImageFileInput) {
+    promoImageFileInput.value = "";
+  }
+  if (promoModalTitle) {
+    promoModalTitle.textContent = "Crear promoci\xF3n";
+  }
+  if (currentUser?.role !== "ADMIN" && currentBusinessId) {
+    setInputValue(promoForm, "businessId", currentBusinessId);
+  }
+};
+var setPromoFormTitle = (mode, title) => {
+  if (!promoModalTitle) return;
+  if (title) {
+    promoModalTitle.textContent = title;
     return;
   }
-  const mode = options.mode ?? "edit";
-  promoForm.dataset.editId = promo._id;
-  setFormReadOnly(promoForm, options.readOnly ?? false);
-  setMode(promoForm, promoMode, null, mode);
-  if (promoModalTitle) {
-    if (options.title) {
-      promoModalTitle.textContent = options.title;
-    } else {
-      promoModalTitle.textContent = mode === "view" ? "Detalle de la promoci\xF3n" : "Editar promoci\xF3n";
-    }
+  promoModalTitle.textContent = mode === "view" ? "Detalle de la promoci\xF3n" : "Editar promoci\xF3n";
+};
+var loadPromoBranches = async (businessId) => {
+  if (currentUser?.role === "ADMIN") {
+    await loadBranchOptionsForBusiness(businessId);
+  } else {
+    currentBusinessId = businessId;
+    await loadBranches(businessId);
+  }
+};
+var fillPromoForm = async (promo) => {
+  if (!promoForm) return;
+  if (promo.businessId) {
+    await loadPromoBranches(promo.businessId);
   }
   setInputValue(promoForm, "businessId", promo.businessId);
-  if (promo.businessId) {
-    if (currentUser?.role === "ADMIN") {
-      await loadBranchOptionsForBusiness(promo.businessId);
-    } else {
-      currentBusinessId = promo.businessId;
-      await loadBranches(promo.businessId);
-    }
-  }
   setInputValue(promoForm, "branchId", promo.branchId ?? "");
   setInputValue(promoForm, "title", promo.title);
   setInputValue(promoForm, "description", promo.description ?? "");
@@ -539,15 +734,32 @@ var setPromoForm = async (promo, options = {}) => {
   setInputValue(promoForm, "endDate", formatDateInput(promo.endDate));
   setInputValue(promoForm, "startHour", promo.startHour ?? "");
   setInputValue(promoForm, "endHour", promo.endHour ?? "");
-  const dayInputs = promoForm.querySelectorAll('input[name="daysOfWeek"]');
+  const dayInputs = promoForm.querySelectorAll(
+    'input[name="daysOfWeek"]'
+  );
   dayInputs.forEach((input) => {
     input.checked = promo.daysOfWeek.includes(input.value);
   });
-  const activeInput = promoForm.querySelector('input[name="active"]');
+  const activeInput = promoForm.querySelector(
+    'input[name="active"]'
+  );
   if (activeInput) {
     activeInput.checked = promo.active ?? true;
   }
   setPromoImagePreview(promo.imageUrl ?? null);
+};
+var setPromoForm = async (promo, options = {}) => {
+  if (!promoForm) return;
+  if (!promo) {
+    resetPromoForm();
+    return;
+  }
+  const mode = options.mode ?? "edit";
+  promoForm.dataset.editId = promo._id;
+  setFormReadOnly(promoForm, options.readOnly ?? false);
+  setMode(promoForm, promoMode, null, mode);
+  setPromoFormTitle(mode, options.title);
+  await fillPromoForm(promo);
 };
 var setCityForm = (city, options = {}) => {
   if (!cityForm) return;
@@ -638,8 +850,12 @@ var setDashboardLoading = (isLoading) => {
 };
 var setHeaderAuthState = (isAuthenticated) => {
   const loginLink = document.querySelector("[data-nav-login]");
-  const registerLink = document.querySelector("[data-nav-register]");
-  const dashboardLink = document.querySelector("[data-nav-dashboard]");
+  const registerLink = document.querySelector(
+    "[data-nav-register]"
+  );
+  const dashboardLink = document.querySelector(
+    "[data-nav-dashboard]"
+  );
   if (loginLink) {
     loginLink.hidden = isAuthenticated;
   }
@@ -735,7 +951,8 @@ var renderOwnerBusinessDetails = () => {
   }
 };
 var updatePromoPagination = (total, isAdmin) => {
-  if (!promoPagination || !promoPageInfo || !promoPagePrev || !promoPageNext) return;
+  if (!promoPagination || !promoPageInfo || !promoPagePrev || !promoPageNext)
+    return;
   if (!isAdmin) {
     promoPagination.hidden = true;
     return;
@@ -826,7 +1043,11 @@ var focusCreateForm = (target) => {
   }
   if (target === "business") {
     if (currentUser?.role !== "ADMIN") {
-      showToast("Acceso restringido", "Solo el admin puede crear nuevos negocios.", "info");
+      showToast(
+        "Acceso restringido",
+        "Solo el admin puede crear nuevos negocios.",
+        "info"
+      );
       return;
     }
     setActiveDashboardTab("business");
@@ -835,7 +1056,11 @@ var focusCreateForm = (target) => {
   }
   if (target === "city") {
     if (currentUser?.role !== "ADMIN") {
-      showToast("Acceso restringido", "Solo el admin puede crear ciudades.", "info");
+      showToast(
+        "Acceso restringido",
+        "Solo el admin puede crear ciudades.",
+        "info"
+      );
       return;
     }
     setActiveDashboardTab("cities");
@@ -844,7 +1069,11 @@ var focusCreateForm = (target) => {
   }
   if (target === "category") {
     if (currentUser?.role !== "ADMIN") {
-      showToast("Acceso restringido", "Solo el admin puede crear categor\xEDas.", "info");
+      showToast(
+        "Acceso restringido",
+        "Solo el admin puede crear categor\xEDas.",
+        "info"
+      );
       return;
     }
     setActiveDashboardTab("categories");
@@ -929,7 +1158,10 @@ var renderUser = () => {
     adminPanel.hidden = !isAdmin;
   }
   if (!ownerAccess) {
-    setMessage(businessMessage, "Necesitas rol BUSINESS_OWNER para crear negocios.");
+    setMessage(
+      businessMessage,
+      "Necesitas rol BUSINESS_OWNER para crear negocios."
+    );
   }
   if (!isAdmin) {
     renderOwnerBusinessDetails();
@@ -940,7 +1172,7 @@ var getBusinessCities = (businessId) => {
     new Set(
       branches.filter((branch) => branch.businessId === businessId).map((branch) => branch.city)
     )
-  ).sort();
+  ).sort(compareLabels);
 };
 var formatBusinessCities = (businessId) => {
   const list = getBusinessCities(businessId);
@@ -949,8 +1181,12 @@ var formatBusinessCities = (businessId) => {
   return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
 };
 var formatBusinessCategories = (business) => {
-  const categoryMap = new Map(categories.map((category) => [category.slug, category.name]));
-  const list = (business.categories ?? []).map((slug) => categoryMap.get(slug) ?? slug);
+  const categoryMap = new Map(
+    categories.map((category) => [category.slug, category.name])
+  );
+  const list = (business.categories ?? []).map(
+    (slug) => categoryMap.get(slug) ?? slug
+  );
   if (list.length === 0) return "Sin categor\xEDa";
   if (list.length <= 2) return list.join(", ");
   return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
@@ -972,7 +1208,9 @@ var getFilteredBusinesses = () => {
 var updateBusinessCityFilterOptions = () => {
   if (!businessCityFilter) return;
   const selected = businessCityFilter.value || "all";
-  const cities2 = Array.from(new Set(branches.map((branch) => branch.city))).sort();
+  const cities2 = Array.from(
+    new Set(branches.map((branch) => branch.city))
+  ).sort(compareLabels);
   businessCityFilter.innerHTML = `
     <option value="all">Todas</option>
     ${cities2.map((city) => `<option value="${city}">${city}</option>`).join("")}
@@ -982,7 +1220,10 @@ var updateBusinessCityFilterOptions = () => {
 var updateBusinessCategoryFilterOptions = () => {
   if (!businessCategoryFilter) return;
   const selected = businessCategoryFilter.value || "all";
-  const options = categories.length > 0 ? categories.map((category) => ({ value: category.slug, label: category.name })) : Array.from(
+  const options = categories.length > 0 ? categories.map((category) => ({
+    value: category.slug,
+    label: category.name
+  })) : Array.from(
     new Set(businesses.flatMap((business) => business.categories ?? []))
   ).map((slug) => ({ value: slug, label: slug }));
   businessCategoryFilter.innerHTML = `
@@ -1115,7 +1356,9 @@ var populateBusinessSelects = () => {
       return;
     }
     select.disabled = false;
-    select.innerHTML = businesses.map((business) => `<option value="${business._id}">${business.name}</option>`).join("");
+    select.innerHTML = businesses.map(
+      (business) => `<option value="${business._id}">${business.name}</option>`
+    ).join("");
     if (selected) {
       select.value = selected;
     }
@@ -1123,7 +1366,9 @@ var populateBusinessSelects = () => {
 };
 var populateBranchSelect = (businessId, branchItems = branches) => {
   if (!branchSelect) return;
-  const filtered = branchItems.filter((branch) => branch.businessId === businessId);
+  const filtered = branchItems.filter(
+    (branch) => branch.businessId === businessId
+  );
   branchSelect.innerHTML = `<option value="">Global</option>`;
   filtered.forEach((branch) => {
     const option = document.createElement("option");
@@ -1262,7 +1507,9 @@ var updatePromoBusinessFilterOptions = () => {
   const currentValue = promoBusinessFilter.value || "all";
   promoBusinessFilter.innerHTML = `
     <option value="all">Todos</option>
-    ${businesses.map((business) => `<option value="${business._id}">${business.name}</option>`).join("")}
+    ${businesses.map(
+    (business) => `<option value="${business._id}">${business.name}</option>`
+  ).join("")}
   `;
   promoBusinessFilter.value = currentValue;
 };
@@ -1331,8 +1578,8 @@ var renderPromotions = (promos, total) => {
     const dateLabel = promo.startDate && promo.endDate ? `${promo.startDate.slice(0, 10)} \u2192 ${promo.endDate.slice(0, 10)}` : "Sin fechas";
     const promoBusiness = isAdmin ? businessMap.get(promo.businessId) : businessMap.get(currentBusinessId);
     const businessName = promoBusiness?.name ?? "Negocio";
-    const instagramHandle = (promoBusiness?.instagram ?? "").replace("@", "").trim();
-    const instagramLink = instagramHandle ? `<a class="underline" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>` : "";
+    const instagramHandle = (promoBusiness?.instagram ?? "").replaceAll("@", "").trim();
+    const instagramLink = instagramHandle ? `<a class="promo-link" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>` : "";
     return `
                 <tr class="rounded-2xl bg-white/90">
                   <td class="rounded-l-2xl border border-ink-900/10 bg-white/90 px-4 py-3 align-top">
@@ -1406,7 +1653,9 @@ var updatePromotionsView = () => {
 };
 var updateBranchCityFilterOptions = () => {
   if (!branchCityFilter) return;
-  const cities2 = Array.from(new Set(branches.map((branch) => branch.city))).sort();
+  const cities2 = Array.from(
+    new Set(branches.map((branch) => branch.city))
+  ).sort(compareLabels);
   const currentValue = branchCityFilter.value;
   branchCityFilter.innerHTML = `
     <option value="all">Todas</option>
@@ -1429,12 +1678,15 @@ var updateBranchBusinessFilterOptions = () => {
   const currentValue = branchBusinessFilter.value || "all";
   branchBusinessFilter.innerHTML = `
     <option value="all">Todos</option>
-    ${businesses.map((business) => `<option value="${business._id}">${business.name}</option>`).join("")}
+    ${businesses.map(
+    (business) => `<option value="${business._id}">${business.name}</option>`
+  ).join("")}
   `;
   branchBusinessFilter.value = currentValue;
 };
 var updateBranchPagination = (total, isAdmin) => {
-  if (!branchPagination || !branchPageInfo || !branchPagePrev || !branchPageNext) return;
+  if (!branchPagination || !branchPageInfo || !branchPagePrev || !branchPageNext)
+    return;
   if (!isAdmin) {
     branchPagination.hidden = true;
     return;
@@ -1456,7 +1708,9 @@ var updateBranchesView = () => {
     branchKpiTotal.textContent = String(total);
   }
   if (branchKpiCities) {
-    branchKpiCities.textContent = String(new Set(branches.map((branch) => branch.city)).size);
+    branchKpiCities.textContent = String(
+      new Set(branches.map((branch) => branch.city)).size
+    );
   }
   if (branchKpiPhones) {
     branchKpiPhones.textContent = String(
@@ -1505,7 +1759,8 @@ var updateBusinessesView = () => {
   }
 };
 var updateBusinessPagination = (total, isAdmin) => {
-  if (!businessPagination || !businessPageInfo || !businessPagePrev || !businessPageNext) return;
+  if (!businessPagination || !businessPageInfo || !businessPagePrev || !businessPageNext)
+    return;
   if (!isAdmin) {
     businessPagination.hidden = true;
     return;
@@ -1533,14 +1788,7 @@ var loadUser = async () => {
   }
   renderUser();
 };
-var loadBusinesses = async () => {
-  if (!currentUser) return;
-  renderLoadingMessage(businessList, "Cargando negocios...");
-  businessSelects.forEach((select) => setSelectLoading(select, "Cargando negocios..."));
-  const isAdmin = currentUser.role === "ADMIN";
-  adminBusinessPage = 1;
-  const response = await apiFetch(isAdmin ? "/businesses" : "/businesses/mine");
-  businesses = response;
+var resetBusinessFilters = () => {
   businessFilters = {
     search: "",
     type: "all",
@@ -1567,33 +1815,55 @@ var loadBusinesses = async () => {
   if (businessInstagramFilter) {
     businessInstagramFilter.value = "all";
   }
+};
+var ensureCurrentBusiness = () => {
   if (!currentBusinessId && businesses.length > 0) {
     currentBusinessId = businesses[0]._id;
   }
-  updateBusinessesView();
-  populateBusinessSelects();
-  setBusinessSelectVisibility(isAdmin);
-  setAdminOnlyVisibility(isAdmin);
+};
+var updateBusinessFormAvailability = () => {
   const hasBusinesses = businesses.length > 0;
   setBranchFormEnabled(hasBusinesses);
   setPromoFormEnabled(hasBusinesses);
   if (!hasBusinesses) {
     setSelectLoading(branchSelect, "Sin sedes");
   }
-  if (businesses.length > 0) {
-    if (!currentBusinessId) {
-      currentBusinessId = businesses[0]._id;
-    }
-    if (isAdmin) {
-      await loadBranches("");
-      await loadPromotions();
-    } else {
-      await loadBranches(currentBusinessId);
-      await loadPromotions(currentBusinessId);
-    }
-    updatePromotionsView();
-    updateBusinessesView();
+};
+var loadBusinessDependencies = async (isAdmin) => {
+  if (businesses.length === 0) {
+    return;
   }
+  ensureCurrentBusiness();
+  if (isAdmin) {
+    await loadBranches("");
+    await loadPromotions();
+  } else if (currentBusinessId) {
+    await loadBranches(currentBusinessId);
+    await loadPromotions(currentBusinessId);
+  }
+  updatePromotionsView();
+  updateBusinessesView();
+};
+var loadBusinesses = async () => {
+  if (!currentUser) return;
+  renderLoadingMessage(businessList, "Cargando negocios...");
+  businessSelects.forEach(
+    (select) => setSelectLoading(select, "Cargando negocios...")
+  );
+  const isAdmin = currentUser.role === "ADMIN";
+  adminBusinessPage = 1;
+  const response = await apiFetch(
+    isAdmin ? "/businesses" : "/businesses/mine"
+  );
+  businesses = response;
+  resetBusinessFilters();
+  ensureCurrentBusiness();
+  updateBusinessesView();
+  populateBusinessSelects();
+  setBusinessSelectVisibility(isAdmin);
+  setAdminOnlyVisibility(isAdmin);
+  updateBusinessFormAvailability();
+  await loadBusinessDependencies(isAdmin);
 };
 var loadBranches = async (businessId) => {
   renderLoadingMessage(branchList, "Cargando sedes...");
@@ -1625,11 +1895,14 @@ var loadPromotions = async (businessId) => {
 var loadBranchOptionsForBusiness = async (businessId) => {
   if (!branchSelect) return;
   setSelectLoading(branchSelect, "Cargando sedes...");
-  const response = await apiFetch(`/branches?businessId=${businessId}`);
+  const response = await apiFetch(
+    `/branches?businessId=${businessId}`
+  );
   populateBranchSelect(businessId, response);
 };
 var updateCityPagination = (total) => {
-  if (!cityPagination || !cityPageInfo || !cityPagePrev || !cityPageNext) return;
+  if (!cityPagination || !cityPageInfo || !cityPagePrev || !cityPageNext)
+    return;
   const totalPages = Math.max(1, Math.ceil(total / ADMIN_CITY_PAGE_SIZE));
   if (adminCityPage > totalPages) {
     adminCityPage = totalPages;
@@ -1808,7 +2081,8 @@ var renderCategories = () => {
   updateCategoryPagination(categories.length);
 };
 var updateCategoryPagination = (total) => {
-  if (!categoryPagination || !categoryPageInfo || !categoryPagePrev || !categoryPageNext) return;
+  if (!categoryPagination || !categoryPageInfo || !categoryPagePrev || !categoryPageNext)
+    return;
   const totalPages = Math.max(1, Math.ceil(total / ADMIN_CATEGORY_PAGE_SIZE));
   if (adminCategoryPage > totalPages) {
     adminCategoryPage = totalPages;
@@ -1829,7 +2103,9 @@ var loadCities = async () => {
       branchCitySelect,
       [
         `<option value="">Selecciona una ciudad</option>`,
-        ...cities.map((city) => `<option value="${city.name}">${city.name}</option>`)
+        ...cities.map(
+          (city) => `<option value="${city.name}">${city.name}</option>`
+        )
       ].join("")
     );
   }
@@ -1843,9 +2119,9 @@ var loadCategories = async () => {
   if (categorySuggestions) {
     setSelectReady(
       categorySuggestions,
-      categories.map((category) => `<option value="${category.slug}">${category.name}</option>`).join(
-        ""
-      ),
+      categories.map(
+        (category) => `<option value="${category.slug}">${category.name}</option>`
+      ).join(""),
       false
     );
   }
@@ -1860,7 +2136,11 @@ var wireAdminActions = () => {
       if (viewId) {
         const city = cities.find((item) => item._id === viewId);
         if (city) {
-          setCityForm(city, { mode: "view", readOnly: true, title: "Detalle de la ciudad" });
+          setCityForm(city, {
+            mode: "view",
+            readOnly: true,
+            title: "Detalle de la ciudad"
+          });
           openModal("city");
         }
         return;
@@ -1868,7 +2148,11 @@ var wireAdminActions = () => {
       if (editId) {
         const city = cities.find((item) => item._id === editId);
         if (city) {
-          setCityForm(city, { mode: "edit", readOnly: false, title: "Editar ciudad" });
+          setCityForm(city, {
+            mode: "edit",
+            readOnly: false,
+            title: "Editar ciudad"
+          });
           openModal("city");
         }
       }
@@ -1899,7 +2183,11 @@ var wireAdminActions = () => {
       if (editId) {
         const category = categories.find((item) => item._id === editId);
         if (category) {
-          setCategoryForm(category, { mode: "edit", readOnly: false, title: "Editar categor\xEDa" });
+          setCategoryForm(category, {
+            mode: "edit",
+            readOnly: false,
+            title: "Editar categor\xEDa"
+          });
           openModal("category");
         }
       }
@@ -1918,10 +2206,15 @@ var handleBusinessForm = () => {
       return;
     }
     const businessEditing = businessForm.dataset.mode === "edit";
-    setMessage(businessMessage, businessEditing ? "Actualizando negocio..." : "Guardando negocio...");
+    setMessage(
+      businessMessage,
+      businessEditing ? "Actualizando negocio..." : "Guardando negocio..."
+    );
     const data = new FormData(businessForm);
     const categoryValues = Array.from(
-      businessForm.querySelectorAll("[name='categories'] option:checked")
+      businessForm.querySelectorAll(
+        "[name='categories'] option:checked"
+      )
     ).map((option) => option.value);
     const slug = normalizeSlug(String(data.get("slug") ?? ""));
     const slugConflict = businesses.some(
@@ -1936,18 +2229,21 @@ var handleBusinessForm = () => {
     await withLoading(businessForm, async () => {
       try {
         const payload = {
-          name: data.get("name"),
+          name: String(data.get("name") ?? ""),
           slug,
-          type: data.get("type"),
+          type: String(data.get("type") ?? ""),
           categories: categoryValues,
-          description: data.get("description"),
-          instagram: data.get("instagram")
+          description: String(data.get("description") ?? "") || void 0,
+          instagram: String(data.get("instagram") ?? "") || void 0
         };
         if (businessForm.dataset.mode === "edit" && businessForm.dataset.editId) {
-          await apiFetch(`/businesses/${businessForm.dataset.editId}`, {
-            method: "PATCH",
-            body: JSON.stringify(payload)
-          });
+          await apiFetch(
+            `/businesses/${businessForm.dataset.editId}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify(payload)
+            }
+          );
         } else {
           await apiFetch("/businesses", {
             method: "POST",
@@ -1986,16 +2282,19 @@ var handleBranchForm = () => {
       return;
     }
     const branchEditing = branchForm.dataset.mode === "edit";
-    setMessage(branchMessage, branchEditing ? "Actualizando sede..." : "Guardando sede...");
+    setMessage(
+      branchMessage,
+      branchEditing ? "Actualizando sede..." : "Guardando sede..."
+    );
     const data = new FormData(branchForm);
     await withLoading(branchForm, async () => {
       try {
         const payload = {
-          businessId: data.get("businessId"),
-          city: data.get("city"),
-          address: data.get("address"),
-          zone: data.get("zone") || void 0,
-          phone: data.get("phone") || void 0
+          businessId: String(data.get("businessId") ?? ""),
+          city: String(data.get("city") ?? ""),
+          address: String(data.get("address") ?? ""),
+          zone: String(data.get("zone") ?? "") || void 0,
+          phone: String(data.get("phone") ?? "") || void 0
         };
         if (branchForm.dataset.mode === "edit" && branchForm.dataset.editId) {
           await apiFetch(`/branches/${branchForm.dataset.editId}`, {
@@ -2009,7 +2308,10 @@ var handleBranchForm = () => {
           });
         }
         branchForm.reset();
-        setMessage(branchMessage, branchEditing ? "Sede actualizada." : "Sede creada.");
+        setMessage(
+          branchMessage,
+          branchEditing ? "Sede actualizada." : "Sede creada."
+        );
         setBranchForm();
         const businessId = String(data.get("businessId") ?? "");
         if (businessId) {
@@ -2018,7 +2320,11 @@ var handleBranchForm = () => {
           await loadPromotions(businessId);
           updatePromotionsView();
         }
-        showToast("Listo", branchEditing ? "Sede actualizada." : "Sede creada.", "success");
+        showToast(
+          "Listo",
+          branchEditing ? "Sede actualizada." : "Sede creada.",
+          "success"
+        );
         closeAllModals();
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando sede";
@@ -2028,9 +2334,58 @@ var handleBranchForm = () => {
     });
   });
 };
+var buildPromoFormValues = (form) => {
+  const data = new FormData(form);
+  const days = data.getAll("daysOfWeek").map(String);
+  const startDateValue = String(data.get("startDate") ?? "");
+  const endDateValue = String(data.get("endDate") ?? "");
+  const startDateIso = startDateValue ? (/* @__PURE__ */ new Date(`${startDateValue}T00:00:00`)).toISOString() : null;
+  const endDateIso = endDateValue ? (/* @__PURE__ */ new Date(`${endDateValue}T23:59:59`)).toISOString() : null;
+  const startHourValue = String(data.get("startHour") ?? "");
+  const endHourValue = String(data.get("endHour") ?? "");
+  const startHour = startHourValue.length > 0 ? startHourValue : null;
+  const endHour = endHourValue.length > 0 ? endHourValue : null;
+  const imageUrlValue = String(data.get("imageUrl") ?? "").trim();
+  const imageUrl = imageUrlValue.length > 0 ? imageUrlValue : null;
+  return {
+    businessId: String(data.get("businessId") ?? ""),
+    branchId: String(data.get("branchId") ?? "") || null,
+    title: String(data.get("title") ?? ""),
+    description: String(data.get("description") ?? "") || void 0,
+    promoType: String(data.get("promoType") ?? ""),
+    value: String(data.get("value") ?? "") || void 0,
+    days,
+    startDateIso,
+    endDateIso,
+    startHour,
+    endHour,
+    imageUrl,
+    active: Boolean(data.get("active"))
+  };
+};
+var validatePromoForm = (values) => {
+  if (values.days.length === 0) {
+    return "Selecciona al menos un d\xEDa de la semana.";
+  }
+  if (values.startDateIso && !values.endDateIso || !values.startDateIso && values.endDateIso) {
+    return "Si defines fechas, debes completar inicio y fin.";
+  }
+  if (values.startDateIso && values.endDateIso && !isValidDateRange(values.startDateIso, values.endDateIso)) {
+    return "La fecha de fin debe ser posterior a la fecha de inicio.";
+  }
+  if (values.startHour && !values.endHour || !values.startHour && values.endHour) {
+    return "Si defines horas, debes completar inicio y fin.";
+  }
+  if (values.startHour && values.endHour && !isValidTimeRange(values.startHour, values.endHour)) {
+    return "La hora fin debe ser posterior a la hora inicio.";
+  }
+  return null;
+};
 var handlePromoForm = () => {
   if (!promoForm) return;
-  const promoImageUrlInput = promoForm.querySelector('input[name="imageUrl"]');
+  const promoImageUrlInput = promoForm.querySelector(
+    'input[name="imageUrl"]'
+  );
   promoImageUrlInput?.addEventListener("input", () => {
     const value = promoImageUrlInput.value.trim();
     setPromoImagePreview(value.length > 0 ? value : null);
@@ -2059,65 +2414,33 @@ var handlePromoForm = () => {
       return;
     }
     const promoEditing = promoForm.dataset.mode === "edit";
-    setMessage(promoMessage, promoEditing ? "Actualizando promoci\xF3n..." : "Guardando promoci\xF3n...");
-    const data = new FormData(promoForm);
-    const days = data.getAll("daysOfWeek").map((day) => String(day));
-    const startDateValue = String(data.get("startDate") ?? "");
-    const endDateValue = String(data.get("endDate") ?? "");
-    const startDateIso = startDateValue ? (/* @__PURE__ */ new Date(`${startDateValue}T00:00:00`)).toISOString() : null;
-    const endDateIso = endDateValue ? (/* @__PURE__ */ new Date(`${endDateValue}T23:59:59`)).toISOString() : null;
-    const startHourValue = String(data.get("startHour") ?? "");
-    const endHourValue = String(data.get("endHour") ?? "");
-    const startHour = startHourValue.length > 0 ? startHourValue : null;
-    const endHour = endHourValue.length > 0 ? endHourValue : null;
-    const imageUrlValue = String(data.get("imageUrl") ?? "").trim();
-    const imageUrl = imageUrlValue.length > 0 ? imageUrlValue : null;
-    if (days.length === 0) {
-      const message = "Selecciona al menos un d\xEDa de la semana.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (startDateValue && !endDateValue || !startDateValue && endDateValue) {
-      const message = "Si defines fechas, debes completar inicio y fin.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (startHourValue && !endHourValue || !startHourValue && endHourValue) {
-      const message = "Si defines horas, debes completar inicio y fin.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (startDateIso && endDateIso && !isValidDateRange(startDateIso, endDateIso)) {
-      const message = "La fecha de fin debe ser posterior a la fecha de inicio.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
-      return;
-    }
-    if (startHour && endHour && !isValidTimeRange(startHour, endHour)) {
-      const message = "La hora fin debe ser posterior a la hora inicio.";
-      setMessage(promoMessage, message);
-      showToast("Error", message, "error");
+    setMessage(
+      promoMessage,
+      promoEditing ? "Actualizando promoci\xF3n..." : "Guardando promoci\xF3n..."
+    );
+    const values = buildPromoFormValues(promoForm);
+    const validationMessage = validatePromoForm(values);
+    if (validationMessage) {
+      setMessage(promoMessage, validationMessage);
+      showToast("Error", validationMessage, "error");
       return;
     }
     await withLoading(promoForm, async () => {
       try {
         const payload = {
-          businessId: data.get("businessId"),
-          branchId: data.get("branchId") || null,
-          title: data.get("title"),
-          description: data.get("description") || void 0,
-          imageUrl,
-          promoType: data.get("promoType"),
-          value: data.get("value") || void 0,
-          startDate: startDateIso,
-          endDate: endDateIso,
-          daysOfWeek: days,
-          startHour,
-          endHour,
-          active: Boolean(data.get("active"))
+          businessId: values.businessId,
+          branchId: values.branchId,
+          title: values.title,
+          description: values.description,
+          imageUrl: values.imageUrl,
+          promoType: values.promoType,
+          value: values.value,
+          startDate: values.startDateIso,
+          endDate: values.endDateIso,
+          daysOfWeek: values.days,
+          startHour: values.startHour,
+          endHour: values.endHour,
+          active: values.active
         };
         if (promoForm.dataset.mode === "edit" && promoForm.dataset.editId) {
           await apiFetch(`/promotions/${promoForm.dataset.editId}`, {
@@ -2131,7 +2454,10 @@ var handlePromoForm = () => {
           });
         }
         promoForm.reset();
-        setMessage(promoMessage, promoEditing ? "Promoci\xF3n actualizada." : "Promoci\xF3n creada.");
+        setMessage(
+          promoMessage,
+          promoEditing ? "Promoci\xF3n actualizada." : "Promoci\xF3n creada."
+        );
         setPromoForm();
         if (currentBusinessId) {
           await loadPromotions(currentBusinessId);
@@ -2159,12 +2485,15 @@ var handleCityForm = () => {
       return;
     }
     const cityEditing = cityForm.dataset.mode === "edit";
-    setMessage(cityMessage, cityEditing ? "Actualizando ciudad..." : "Guardando ciudad...");
+    setMessage(
+      cityMessage,
+      cityEditing ? "Actualizando ciudad..." : "Guardando ciudad..."
+    );
     const data = new FormData(cityForm);
     await withLoading(cityForm, async () => {
       try {
         const payload = {
-          name: data.get("name"),
+          name: String(data.get("name") ?? ""),
           countryCode: String(data.get("countryCode") ?? "").toUpperCase()
         };
         if (cityForm.dataset.mode === "edit" && cityForm.dataset.editId) {
@@ -2179,10 +2508,17 @@ var handleCityForm = () => {
           });
         }
         cityForm.reset();
-        setMessage(cityMessage, cityEditing ? "Ciudad actualizada." : "Ciudad creada.");
+        setMessage(
+          cityMessage,
+          cityEditing ? "Ciudad actualizada." : "Ciudad creada."
+        );
         setCityForm();
         await loadCities();
-        showToast("Listo", cityEditing ? "Ciudad actualizada." : "Ciudad creada.", "success");
+        showToast(
+          "Listo",
+          cityEditing ? "Ciudad actualizada." : "Ciudad creada.",
+          "success"
+        );
       } catch (error) {
         const message = error instanceof Error ? error.message : "Error creando ciudad";
         setMessage(cityMessage, message);
@@ -2199,19 +2535,25 @@ var handleCategoryForm = () => {
       return;
     }
     const categoryEditing = categoryForm.dataset.mode === "edit";
-    setMessage(categoryMessage, categoryEditing ? "Actualizando categor\xEDa..." : "Guardando categor\xEDa...");
+    setMessage(
+      categoryMessage,
+      categoryEditing ? "Actualizando categor\xEDa..." : "Guardando categor\xEDa..."
+    );
     const data = new FormData(categoryForm);
     await withLoading(categoryForm, async () => {
       try {
         const payload = {
-          name: data.get("name"),
+          name: String(data.get("name") ?? ""),
           slug: String(data.get("slug") ?? "").toLowerCase()
         };
         if (categoryForm.dataset.mode === "edit" && categoryForm.dataset.editId) {
-          await apiFetch(`/categories/${categoryForm.dataset.editId}`, {
-            method: "PATCH",
-            body: JSON.stringify(payload)
-          });
+          await apiFetch(
+            `/categories/${categoryForm.dataset.editId}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify(payload)
+            }
+          );
         } else {
           await apiFetch("/categories", {
             method: "POST",
@@ -2289,7 +2631,11 @@ var wireBusinessActions = () => {
     if (editId) {
       const business = businesses.find((item) => item._id === editId);
       if (business) {
-        setBusinessForm(business, { mode: "edit", readOnly: false, title: "Editar negocio" });
+        setBusinessForm(business, {
+          mode: "edit",
+          readOnly: false,
+          title: "Editar negocio"
+        });
         setActiveDashboardTab("business");
         openModal("business");
         currentBusinessId = business._id;
@@ -2302,7 +2648,9 @@ var wireBusinessActions = () => {
       }
     }
     if (deleteId) {
-      const confirmed = window.confirm("\xBFEliminar este negocio? Tambi\xE9n perder\xE1s sus sedes y promos.");
+      const confirmed = globalThis.confirm(
+        "\xBFEliminar este negocio? Tambi\xE9n perder\xE1s sus sedes y promos."
+      );
       if (!confirmed) return;
       businesses = businesses.filter((business) => business._id !== deleteId);
       updateBusinessesView();
@@ -2332,7 +2680,11 @@ var wireOwnerBusinessEdit = () => {
   ownerBusinessEdit.addEventListener("click", async () => {
     const business = businesses.find((item) => item._id === currentBusinessId) ?? businesses[0];
     if (!business) return;
-    setBusinessForm(business, { mode: "edit", readOnly: false, title: "Editar negocio" });
+    setBusinessForm(business, {
+      mode: "edit",
+      readOnly: false,
+      title: "Editar negocio"
+    });
     setActiveDashboardTab("business");
     openModal("business");
   });
@@ -2347,7 +2699,11 @@ var wireBranchActions = () => {
     if (viewId) {
       const branch = branches.find((item) => item._id === viewId);
       if (branch) {
-        setBranchForm(branch, { mode: "view", readOnly: true, title: "Detalle de la sede" });
+        setBranchForm(branch, {
+          mode: "view",
+          readOnly: true,
+          title: "Detalle de la sede"
+        });
         setActiveDashboardTab("branches");
         openModal("branch");
         if (currentUser?.role === "ADMIN") {
@@ -2365,7 +2721,11 @@ var wireBranchActions = () => {
     if (editId) {
       const branch = branches.find((item) => item._id === editId);
       if (branch) {
-        setBranchForm(branch, { mode: "edit", readOnly: false, title: "Editar sede" });
+        setBranchForm(branch, {
+          mode: "edit",
+          readOnly: false,
+          title: "Editar sede"
+        });
         setActiveDashboardTab("branches");
         openModal("branch");
         if (currentUser?.role === "ADMIN") {
@@ -2380,7 +2740,7 @@ var wireBranchActions = () => {
       }
     }
     if (!deleteId) return;
-    const confirmed = window.confirm("\xBFEliminar esta sede?");
+    const confirmed = globalThis.confirm("\xBFEliminar esta sede?");
     if (!confirmed) return;
     branches = branches.filter((branch) => branch._id !== deleteId);
     updateBranchesView();
@@ -2391,66 +2751,84 @@ var wireBranchActions = () => {
     }
   });
 };
+var handleInstagramDeepLink = (event, target) => {
+  const instagramLink = target.closest(
+    "[data-instagram-link]"
+  );
+  if (!instagramLink) return false;
+  const handle = instagramLink.dataset.instagramHandle ?? "";
+  if (handle && isMobileDevice()) {
+    event.preventDefault();
+    const deepLink = `instagram://user?username=${handle}`;
+    globalThis.location.href = deepLink;
+    globalThis.setTimeout(() => {
+      globalThis.open(`https://instagram.com/${handle}`, "_blank", "noopener");
+    }, 500);
+  }
+  return true;
+};
+var findPromoById = async (id) => {
+  let promo = promotions.find((item) => item._id === id);
+  if (!promo && currentBusinessId) {
+    const promos = await loadPromotions(currentBusinessId);
+    promo = promos.find((item) => item._id === id);
+  }
+  return promo;
+};
+var handlePromoView = async (id) => {
+  const promo = await findPromoById(id);
+  if (!promo) return;
+  await setPromoForm(promo, {
+    mode: "view",
+    readOnly: true,
+    title: "Detalle de la promoci\xF3n"
+  });
+  setActiveDashboardTab("promos");
+  openModal("promo");
+};
+var handlePromoEdit = async (id) => {
+  const promo = await findPromoById(id);
+  if (!promo) return;
+  await setPromoForm(promo, {
+    mode: "edit",
+    readOnly: false,
+    title: "Editar promoci\xF3n"
+  });
+  setActiveDashboardTab("promos");
+  openModal("promo");
+};
+var handlePromoDelete = async (id) => {
+  const confirmed = globalThis.confirm("\xBFEliminar esta promoci\xF3n?");
+  if (!confirmed) return;
+  promotions = promotions.filter((promo) => promo._id !== id);
+  updatePromotionsView();
+  await apiFetch(`/promotions/${id}`, { method: "DELETE" });
+  showToast("Listo", "Promoci\xF3n eliminada.", "success");
+  if (currentBusinessId) {
+    await loadPromotions(currentBusinessId);
+    updatePromotionsView();
+  }
+};
 var wirePromoActions = () => {
   if (!promoList) return;
   promoList.addEventListener("click", async (event) => {
     const target = event.target;
-    const instagramLink = target.closest("[data-instagram-link]");
-    if (instagramLink) {
-      const handle = instagramLink.dataset.instagramHandle ?? "";
-      if (handle && isMobileDevice()) {
-        event.preventDefault();
-        const deepLink = `instagram://user?username=${handle}`;
-        window.location.href = deepLink;
-        window.setTimeout(() => {
-          window.open(`https://instagram.com/${handle}`, "_blank", "noopener");
-        }, 500);
-      }
+    if (handleInstagramDeepLink(event, target)) {
       return;
     }
     const viewId = target.dataset.promoView;
     const editId = target.dataset.promoEdit;
     const deleteId = target.dataset.promoDelete;
     if (viewId) {
-      let promo = promotions.find((item) => item._id === viewId);
-      if (!promo && currentBusinessId) {
-        const promos = await loadPromotions(currentBusinessId);
-        promo = promos.find((item) => item._id === viewId);
-      }
-      if (promo) {
-        await setPromoForm(promo, {
-          mode: "view",
-          readOnly: true,
-          title: "Detalle de la promoci\xF3n"
-        });
-        setActiveDashboardTab("promos");
-        openModal("promo");
-      }
+      await handlePromoView(viewId);
       return;
     }
     if (editId) {
-      let promo = promotions.find((item) => item._id === editId);
-      if (!promo && currentBusinessId) {
-        const promos = await loadPromotions(currentBusinessId);
-        promo = promos.find((item) => item._id === editId);
-      }
-      if (promo) {
-        await setPromoForm(promo, { mode: "edit", readOnly: false, title: "Editar promoci\xF3n" });
-        setActiveDashboardTab("promos");
-        openModal("promo");
-      }
+      await handlePromoEdit(editId);
+      return;
     }
     if (!deleteId) return;
-    const confirmed = window.confirm("\xBFEliminar esta promoci\xF3n?");
-    if (!confirmed) return;
-    promotions = promotions.filter((promo) => promo._id !== deleteId);
-    updatePromotionsView();
-    await apiFetch(`/promotions/${deleteId}`, { method: "DELETE" });
-    showToast("Listo", "Promoci\xF3n eliminada.", "success");
-    if (currentBusinessId) {
-      await loadPromotions(currentBusinessId);
-      updatePromotionsView();
-    }
+    await handlePromoDelete(deleteId);
   });
 };
 var wireEmptyStateActions = () => {
@@ -2643,7 +3021,7 @@ var wireBusinessFilters = () => {
   businessVerifiedFilter?.addEventListener("change", updateFilters);
   businessInstagramFilter?.addEventListener("change", updateFilters);
 };
-(async () => {
+var initDashboard = async () => {
   setDashboardLoading(true);
   try {
     setBusinessForm();
@@ -2685,7 +3063,8 @@ var wireBusinessFilters = () => {
     handleBusinessForm();
     handleBranchForm();
     handlePromoForm();
-    if (currentUser?.role === "ADMIN") {
+    const adminUser = currentUser;
+    if (adminUser?.role === "ADMIN") {
       handleCityForm();
       handleCategoryForm();
       wireAdminActions();
@@ -2693,4 +3072,5 @@ var wireBusinessFilters = () => {
   } finally {
     setDashboardLoading(false);
   }
-})();
+};
+await initDashboard();

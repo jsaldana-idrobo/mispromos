@@ -18,7 +18,7 @@ var apiFetch = async (path, options) => {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers ?? {}
+      ...options?.headers
     },
     ...options
   });
@@ -37,7 +37,9 @@ var apiFetch = async (path, options) => {
 
 // apps/web/src/scripts/ui.ts
 var getContainer = () => {
-  let container = document.querySelector("[data-toast-container]");
+  let container = document.querySelector(
+    "[data-toast-container]"
+  );
   if (!container) {
     container = document.createElement("div");
     container.dataset.toastContainer = "true";
@@ -49,7 +51,12 @@ var getContainer = () => {
 var showToast = (title, description, variant = "info") => {
   const container = getContainer();
   const toast = document.createElement("div");
-  const variantClass = variant === "success" ? "toast-success" : variant === "error" ? "toast-error" : "";
+  let variantClass = "";
+  if (variant === "success") {
+    variantClass = "toast-success";
+  } else if (variant === "error") {
+    variantClass = "toast-error";
+  }
   toast.className = `toast ${variantClass}`;
   toast.innerHTML = `
     <div>
@@ -62,24 +69,23 @@ var showToast = (title, description, variant = "info") => {
     toast.remove();
   }, 3600);
 };
-var setButtonLoading = (button, loading, text) => {
-  if (loading) {
-    button.dataset.originalText = button.textContent ?? "";
-    button.disabled = true;
-    button.innerHTML = `
-      <span class="loader">
-        <span class="loader-dot"></span>
-        <span class="loader-dot"></span>
-        <span class="loader-dot"></span>
-        ${text ?? "Procesando"}
-      </span>
-    `;
-  } else {
-    button.disabled = false;
-    if (button.dataset.originalText) {
-      button.textContent = button.dataset.originalText;
-      button.dataset.originalText = "";
-    }
+var startButtonLoading = (button, text) => {
+  button.dataset.originalText = button.textContent ?? "";
+  button.disabled = true;
+  button.innerHTML = `
+    <span class="loader">
+      <span class="loader-dot"></span>
+      <span class="loader-dot"></span>
+      <span class="loader-dot"></span>
+      ${text ?? "Procesando"}
+    </span>
+  `;
+};
+var stopButtonLoading = (button) => {
+  button.disabled = false;
+  if (button.dataset.originalText) {
+    button.textContent = button.dataset.originalText;
+    button.dataset.originalText = "";
   }
 };
 
@@ -89,7 +95,9 @@ var messageEl = document.querySelector("[data-auth-message]");
 var redirectIfAuthenticated = async () => {
   if (!form) return false;
   try {
-    const response = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
+    const response = await fetch(`${API_BASE}/auth/me`, {
+      credentials: "include"
+    });
     if (!response.ok) {
       return false;
     }
@@ -98,7 +106,7 @@ var redirectIfAuthenticated = async () => {
       if (messageEl) {
         messageEl.textContent = "Ya tienes una sesi\xF3n activa. Redirigiendo...";
       }
-      window.location.href = "/dashboard";
+      globalThis.location.href = "/dashboard";
       return true;
     }
     return false;
@@ -114,9 +122,11 @@ if (form) {
     if (messageEl) {
       messageEl.textContent = "Procesando...";
     }
-    const submitButton = form.querySelector("button[type='submit']");
+    const submitButton = form.querySelector(
+      "button[type='submit']"
+    );
     if (submitButton) {
-      setButtonLoading(submitButton, true, "Ingresando");
+      startButtonLoading(submitButton, "Ingresando");
     }
     const formData = new FormData(form);
     const payload = {
@@ -133,7 +143,7 @@ if (form) {
       } catch {
       }
       showToast("Listo", "Bienvenido a Tus promos.", "success");
-      window.location.href = "/dashboard";
+      globalThis.location.href = "/dashboard";
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al autenticar";
       if (messageEl) {
@@ -142,7 +152,7 @@ if (form) {
       showToast("Error", message, "error");
     } finally {
       if (submitButton) {
-        setButtonLoading(submitButton, false);
+        stopButtonLoading(submitButton);
       }
     }
   });

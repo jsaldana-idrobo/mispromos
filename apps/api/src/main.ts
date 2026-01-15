@@ -1,12 +1,12 @@
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import express from "express";
-import path from "path";
+import path from "node:path";
 import cookieParser from "cookie-parser";
 import { AppModule } from "./app.module";
 import { MongoExceptionFilter } from "./common/filters/mongo-exception.filter";
 
-async function bootstrap() {
+async function bootstrap() { // NOSONAR - top-level await is not available in CommonJS
   const app = await NestFactory.create(AppModule, {
     logger: ["log", "warn", "error"],
   });
@@ -17,7 +17,7 @@ async function bootstrap() {
   const rawOrigins = process.env.WEB_ORIGIN ?? "";
   const allowedOrigins = rawOrigins
     .split(",")
-    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
     .filter(Boolean);
   const defaultOrigins = [
     "https://mispromos-web.vercel.app",
@@ -33,7 +33,7 @@ async function bootstrap() {
         callback(null, true);
         return;
       }
-      const normalized = origin.replace(/\/$/, "");
+      const normalized = origin.replace(/\/+$/, "");
       if (originSet.size === 0) {
         callback(null, true);
         return;
@@ -67,4 +67,7 @@ async function bootstrap() {
   console.log(`🚀 API mispromos escuchando en puerto ${port}`);
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  console.error("Fallo al iniciar la API", error);
+  process.exit(1);
+}); // NOSONAR
