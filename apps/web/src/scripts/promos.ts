@@ -407,8 +407,17 @@ if (form && container) {
       const response = await apiFetch<PromotionsResponse>(
         `/promotions/active?${query.toString()}`,
       );
-      totalFeatured = response.total ?? response.items?.length ?? 0;
-      renderFeaturedPromos(response.items ?? []);
+      const items = response.items ?? [];
+      if (items.length < FEATURED_COUNT) {
+        featuredIds.clear();
+        featuredContainer.innerHTML = "";
+        featuredSection.classList.add("hidden");
+        totalFeatured = 0;
+        updateCounter();
+        return;
+      }
+      totalFeatured = response.total ?? items.length;
+      renderFeaturedPromos(items);
       updateCounter();
     } catch {
       featuredIds.clear();

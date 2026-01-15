@@ -44,6 +44,10 @@ body {
   box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
 }
 
+select.input-field {
+  padding-right: 3rem;
+}
+
 .button-primary {
   @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-bold text-white transition;
   background: rgb(var(--primary-500));

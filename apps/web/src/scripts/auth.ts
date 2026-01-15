@@ -9,6 +9,10 @@ type AuthResponse = {
 
 const form = document.querySelector<HTMLFormElement>("[data-auth-form]");
 const messageEl = document.querySelector<HTMLElement>("[data-auth-message]");
+const emailInput = form?.querySelector<HTMLInputElement>("input[name='email']");
+const passwordInput = form?.querySelector<HTMLInputElement>(
+  "input[name='password']",
+);
 
 const redirectIfAuthenticated = async () => {
   if (!form) return false;
@@ -38,8 +42,55 @@ if (form) {
 
   redirectIfAuthenticated();
 
+  const clearCustomValidity = () => {
+    emailInput?.setCustomValidity("");
+    passwordInput?.setCustomValidity("");
+  };
+
+  const validateAuthFields = () => {
+    if (!emailInput || !passwordInput) return true;
+    clearCustomValidity();
+    const emailValue = emailInput.value.trim();
+    const passwordValue = passwordInput.value;
+    if (!emailValue) {
+      emailInput.setCustomValidity("El email es obligatorio.");
+    } else if (emailInput.validity.typeMismatch) {
+      emailInput.setCustomValidity("Ingresa un email valido.");
+    }
+    if (!passwordValue) {
+      passwordInput.setCustomValidity("La contrasena es obligatoria.");
+    } else if (passwordValue.length < 8) {
+      passwordInput.setCustomValidity(
+        "La contrasena debe tener al menos 8 caracteres.",
+      );
+    }
+    const isValid = form.checkValidity();
+    if (!isValid) {
+      form.reportValidity();
+      const message =
+        emailInput.validationMessage ||
+        passwordInput.validationMessage ||
+        "Revisa los campos del formulario.";
+      if (messageEl) {
+        messageEl.textContent = message;
+      }
+      showToast("Error", message, "error");
+    }
+    return isValid;
+  };
+
+  emailInput?.addEventListener("input", () => {
+    emailInput.setCustomValidity("");
+  });
+  passwordInput?.addEventListener("input", () => {
+    passwordInput.setCustomValidity("");
+  });
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (!validateAuthFields()) {
+      return;
+    }
     if (messageEl) {
       messageEl.textContent = "Procesando...";
     }

@@ -1,7 +1,11 @@
 import { apiFetch, API_BASE } from "./api";
 import { showToast, startButtonLoading, stopButtonLoading } from "./ui";
 import { isValidDateRange, isValidTimeRange } from "./validators";
-import { businessTypeLabels, promoTypeLabels } from "../data/catalog";
+import {
+  businessTypes,
+  businessTypeLabels,
+  promoTypeLabels,
+} from "../data/catalog";
 
 type User = {
   id: string;
@@ -458,6 +462,7 @@ let adminCityPage = 1;
 const ADMIN_CITY_PAGE_SIZE = 10;
 let adminCategoryPage = 1;
 const ADMIN_CATEGORY_PAGE_SIZE = 10;
+let autoBusinessCreationAttempted = false;
 
 type FormMode = "create" | "edit" | "view";
 
@@ -474,6 +479,16 @@ const normalizeSlug = (value: string) =>
     .replaceAll(/[^a-z0-9-]+/g, "-")
     .replaceAll(/-{2,}/g, "-")
     .replaceAll(/(^-|-$)/g, "");
+
+const buildDefaultBusinessPayload = (user: User) => {
+  const baseName = "Mi negocio";
+  const suffix = user.id?.slice(0, 6) || String(Date.now()).slice(-6);
+  return {
+    name: baseName,
+    slug: normalizeSlug(`${baseName}-${suffix}`),
+    type: businessTypes[0],
+  };
+};
 
 const renderLoadingMessage = (
   container: HTMLElement | null,
@@ -2077,9 +2092,35 @@ const loadBusinesses = async () => {
   );
   const isAdmin = currentUser.role === "ADMIN";
   adminBusinessPage = 1;
-  const response = await apiFetch<Business[]>(
+  let response = await apiFetch<Business[]>(
     isAdmin ? "/businesses" : "/businesses/mine",
   );
+  if (
+    !isAdmin &&
+    response.length === 0 &&
+    !autoBusinessCreationAttempted &&
+    currentUser.role === "BUSINESS_OWNER"
+  ) {
+    autoBusinessCreationAttempted = true;
+    try {
+      await apiFetch<Business>("/businesses", {
+        method: "POST",
+        body: JSON.stringify(buildDefaultBusinessPayload(currentUser)),
+      });
+      response = await apiFetch<Business[]>("/businesses/mine");
+      showToast(
+        "Listo",
+        "Creamos tu negocio inicial. Completa la informacion en Editar negocio.",
+        "success",
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No pudimos crear tu negocio inicial.";
+      showToast("Error", message, "error");
+    }
+  }
   businesses = response;
   resetBusinessFilters();
   ensureCurrentBusiness();
