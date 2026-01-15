@@ -2,12 +2,14 @@ import {
   BadRequestException,
   Controller,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
 import { v2 as cloudinary } from "cloudinary";
+import type { Request } from "express";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const MAX_WIDTH = 1200;
@@ -45,8 +47,19 @@ export class UploadController {
     }),
   )
   async uploadPromoImage(
+    @Req() req: Request,
     @UploadedFile() file: Express.Multer.File | undefined,
   ) {
+    const contentLength = req.headers["content-length"];
+    if (contentLength) {
+      const contentLengthValue = Number.parseInt(contentLength, 10);
+      if (
+        Number.isFinite(contentLengthValue) &&
+        contentLengthValue > MAX_FILE_SIZE
+      ) {
+        throw new BadRequestException("La imagen supera el tamaño permitido.");
+      }
+    }
     if (!file) {
       throw new BadRequestException("No se encontró imagen para subir.");
     }

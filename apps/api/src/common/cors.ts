@@ -28,6 +28,7 @@ const isAllowedVercelOrigin = (value: string) => {
   if (!branch) return false;
   for (let i = 0; i < branch.length; i += 1) {
     const code = branch.codePointAt(i);
+    if (code === undefined) return false;
     const isDigit = code >= 48 && code <= 57;
     const isLower = code >= 97 && code <= 122;
     if (!(isDigit || isLower || code === 45)) return false;
