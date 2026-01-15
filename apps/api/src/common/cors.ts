@@ -5,7 +5,7 @@ const DEFAULT_ORIGINS = [
 
 const normalizeOrigin = (value: string) => {
   let end = value.length;
-  while (end > 0 && value.charCodeAt(end - 1) === 47) {
+  while (end > 0 && value.codePointAt(end - 1) === 47) {
     end -= 1;
   }
   return end === value.length ? value : value.slice(0, end);
@@ -27,7 +27,7 @@ const isAllowedVercelOrigin = (value: string) => {
   const branch = hostname.slice(prefix.length, hostname.length - suffix.length);
   if (!branch) return false;
   for (let i = 0; i < branch.length; i += 1) {
-    const code = branch.charCodeAt(i);
+    const code = branch.codePointAt(i);
     const isDigit = code >= 48 && code <= 57;
     const isLower = code >= 97 && code <= 122;
     if (!(isDigit || isLower || code === 45)) return false;
