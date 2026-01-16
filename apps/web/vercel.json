@@ -3,10 +3,5 @@
   "installCommand": "bash ../../scripts/vercel-install.sh web",
   "buildCommand": "pnpm --filter @mispromos/web build",
   "outputDirectory": "dist",
-  "ignoreCommand": "bash ../../scripts/vercel-ignore.sh web",
-  "functions": {
-    "_render": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "ignoreCommand": "bash ../../scripts/vercel-ignore.sh web"
 }
