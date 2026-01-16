@@ -58,12 +58,16 @@ const { businessTypes = [], businessTypeLabels = {} } =
         </select>
       </label>
       <label class="grid gap-2 text-sm font-semibold">
-        Categorías (separadas por coma)
+        Categorías (selecciona varias)
         <select
           class="input-field"
           name="categories"
           data-business-category-select
+          size="5"
           multiple></select>
+        <span class="text-xs font-normal text-ink-900/60">
+          En desktop usa Ctrl/Cmd + click para seleccionar varias.
+        </span>
       </label>
       <label class="grid gap-2 text-sm font-semibold">
         Descripción
