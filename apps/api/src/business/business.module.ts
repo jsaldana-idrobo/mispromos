@@ -3,6 +3,8 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { BusinessController } from "./business.controller";
 import { BusinessService } from "./business.service";
 import { Business, BusinessSchema } from "./business.schema";
+import { User, UserSchema } from "../auth/user.schema";
+import { EmailService } from "../notifications/email.service";
 
 @Module({
   imports: [
@@ -11,9 +13,13 @@ import { Business, BusinessSchema } from "./business.schema";
         name: Business.name,
         schema: BusinessSchema,
       },
+      {
+        name: User.name,
+        schema: UserSchema,
+      },
     ]),
   ],
   controllers: [BusinessController],
-  providers: [BusinessService],
+  providers: [BusinessService, EmailService],
 })
 export class BusinessModule {}

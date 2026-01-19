@@ -9,6 +9,8 @@ import { UserRole } from "@mispromos/shared";
 import { Business, type BusinessDocument } from "./business.schema";
 import { CreateBusinessDto } from "./dto/create-business.dto";
 import { UpdateBusinessDto } from "./dto/update-business.dto";
+import { User, type UserDocument } from "../auth/user.schema";
+import { EmailService } from "../notifications/email.service";
 
 type Actor = {
   id: string;
@@ -20,6 +22,9 @@ export class BusinessService {
   constructor(
     @InjectModel(Business.name)
     private readonly businessModel: Model<BusinessDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
+    private readonly emailService: EmailService,
   ) {}
 
   private assertOwner(business: BusinessDocument, actor: Actor) {
@@ -81,5 +86,42 @@ export class BusinessService {
       throw new NotFoundException("Negocio no encontrado");
     }
     return removed;
+  }
+
+  async updateApproval(id: string, approved: boolean) {
+    const business = await this.businessModel.findById(id).exec();
+    if (!business) {
+      throw new NotFoundException("Negocio no encontrado");
+    }
+
+    const updated = await this.businessModel
+      .findByIdAndUpdate(id, { approved }, { new: true })
+      .exec();
+    if (!updated) {
+      throw new NotFoundException("Negocio no encontrado");
+    }
+
+    if (approved && !business.approved) {
+      const owner = await this.userModel
+        .findById(business.ownerId)
+        .select("+pendingPassword")
+        .exec();
+      if (owner?.email && owner.pendingPassword) {
+        try {
+          await this.emailService.sendApprovalEmail({
+            to: owner.email,
+            businessName: business.name,
+            password: owner.pendingPassword,
+          });
+          await this.userModel
+            .findByIdAndUpdate(owner.id, { $unset: { pendingPassword: 1 } })
+            .exec();
+        } catch {
+          // avoid blocking approval on email failures
+        }
+      }
+    }
+
+    return updated;
   }
 }

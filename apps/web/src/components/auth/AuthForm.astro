@@ -5,6 +5,8 @@ const {
   subtitle = "",
   submitLabel = "Enviar",
   hint = "",
+  businessTypes = [],
+  businessTypeLabels = {},
 } = Astro.props;
 ---
 
@@ -18,6 +20,58 @@ const {
     ) : null
   }
   <form class="grid gap-4" data-auth-form data-mode={mode}>
+    {
+      mode === "register" ? (
+        <>
+          <label class="grid gap-2 text-sm font-semibold">
+            Nombre del negocio
+            <input class="input-field" name="name" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Slug
+            <input class="input-field" name="slug" required />
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Tipo
+            <select class="input-field" name="type" required>
+              {businessTypes.map((type: string) => (
+                <option value={type}>
+                  {businessTypeLabels[type] ?? type}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Categorías (selecciona varias)
+            <select
+              class="input-field"
+              name="categories"
+              data-register-category-select
+              size="5"
+              multiple></select>
+            <span class="text-xs font-normal text-ink-900/60">
+              En desktop usa Ctrl/Cmd + click para seleccionar varias.
+            </span>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Descripción
+            <textarea class="input-field" name="description" rows={2}></textarea>
+          </label>
+          <label class="grid gap-2 text-sm font-semibold">
+            Instagram (obligatorio)
+            <input
+              class="input-field"
+              name="instagram"
+              placeholder="tu_negocio"
+              required
+            />
+            <span class="text-xs font-normal text-ink-900/60">
+              Es obligatorio para verificar tu negocio.
+            </span>
+          </label>
+        </>
+      ) : null
+    }
     <label class="grid gap-2 text-sm font-semibold">
       Email
       <input class="input-field" type="email" name="email" required />

@@ -28,7 +28,7 @@ export class Business {
   ownerId!: string;
 
   @Prop({ default: false })
-  verified!: boolean;
+  approved!: boolean;
 
   @Prop({ default: () => new Date() })
   createdAt!: Date;

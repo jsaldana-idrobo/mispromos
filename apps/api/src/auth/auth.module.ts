@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { User, UserSchema } from "./user.schema";
+import { Business, BusinessSchema } from "../business/business.schema";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "./guards/optional-jwt-auth.guard";
 import { RolesGuard } from "./guards/roles.guard";
@@ -18,6 +19,10 @@ import { AuthSeedService } from "./auth-seed.service";
       {
         name: User.name,
         schema: UserSchema,
+      },
+      {
+        name: Business.name,
+        schema: BusinessSchema,
       },
     ]),
     JwtModule.registerAsync({

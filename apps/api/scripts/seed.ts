@@ -625,7 +625,7 @@ type BusinessDoc = {
   description?: string;
   instagram?: string;
   ownerId: string;
-  verified: boolean;
+  approved: boolean;
   createdAt: Date;
 };
 type BranchDoc = {
@@ -860,7 +860,7 @@ const seedBusinessesData = async (
       description: business.description,
       instagram: business.instagram,
       ownerId,
-      verified: true,
+      approved: true,
       createdAt: new Date(),
     });
 

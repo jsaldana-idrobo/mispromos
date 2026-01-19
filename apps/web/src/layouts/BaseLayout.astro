@@ -29,13 +29,11 @@ const hasAuthCookie = cookieHeader.includes("auth=");
     <link rel="icon" href={faviconSrc} type="image/png" />
     <link rel="apple-touch-icon" href={faviconSrc} />
     <style>
-      html[data-auth-loading="true"] [data-nav-login],
       html[data-auth-loading="true"] [data-nav-register],
       html[data-auth-loading="true"] [data-nav-dashboard],
       html[data-auth-loading="true"] [data-nav-logout] {
         visibility: hidden;
       }
-      html[data-authenticated="true"] [data-nav-login],
       html[data-authenticated="true"] [data-nav-register] {
         display: none !important;
       }
@@ -71,23 +69,22 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       const apiBase =
         document.body?.dataset?.apiBase || "http://localhost:3000/api/v1";
       const dashboardLink = document.querySelector("[data-nav-dashboard]");
-      const loginLink = document.querySelector("[data-nav-login]");
       const registerLink = document.querySelector("[data-nav-register]");
       const logoutButton = document.querySelector("[data-nav-logout]");
       const setAuthLinks = (isAuthenticated) => {
+        const path = window.location.pathname;
+        const isRegisterPage = path.startsWith("/register");
+        const isHomePage = path === "/";
         if (dashboardLink) {
           dashboardLink.hidden = !isAuthenticated;
           dashboardLink.style.display = isAuthenticated
             ? "inline-flex"
             : "none";
         }
-        if (loginLink) {
-          loginLink.hidden = isAuthenticated;
-          loginLink.style.display = isAuthenticated ? "none" : "inline-flex";
-        }
         if (registerLink) {
-          registerLink.hidden = isAuthenticated;
-          registerLink.style.display = isAuthenticated ? "none" : "inline-flex";
+          const shouldHide = isAuthenticated || isRegisterPage || !isHomePage;
+          registerLink.hidden = shouldHide;
+          registerLink.style.display = shouldHide ? "none" : "inline-flex";
         }
         if (logoutButton) {
           logoutButton.hidden = !isAuthenticated;

@@ -14,6 +14,7 @@ import { UserRole } from "@mispromos/shared";
 import { BusinessService } from "./business.service";
 import { CreateBusinessDto } from "./dto/create-business.dto";
 import { UpdateBusinessDto } from "./dto/update-business.dto";
+import { UpdateBusinessApprovalDto } from "./dto/update-business-approval.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/roles.decorator";
@@ -65,6 +66,16 @@ export class BusinessController {
       throw new UnauthorizedException("No autenticado");
     }
     return this.businessService.update(id, dto, req.user);
+  }
+
+  @Patch(":id/approval")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  updateApproval(
+    @Param("id") id: string,
+    @Body() dto: UpdateBusinessApprovalDto,
+  ) {
+    return this.businessService.updateApproval(id, dto.approved);
   }
 
   @Delete(":id")

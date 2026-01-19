@@ -1,6 +1,8 @@
 const DEFAULT_ORIGINS = [
   "https://mispromos-web.vercel.app",
   "https://mispromos-web-git-main-juansaldanas-projects.vercel.app",
+  "https://tuspromos.com",
+  "https://www.tuspromos.com",
 ];
 
 const normalizeOrigin = (value: string) => {

@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import AuthForm from "../components/auth/AuthForm.astro";
 import RegisterAside from "../components/auth/RegisterAside.astro";
+import { businessTypes, businessTypeLabels } from "../data/catalog";
 ---
 
 <BaseLayout title="Tus promos | Registro">
@@ -9,14 +10,17 @@ import RegisterAside from "../components/auth/RegisterAside.astro";
     <RegisterAside />
     <AuthForm
       mode="register"
-      title="Crear cuenta"
-      subtitle="Activa tu negocio y empieza a publicar promociones visibles en minutos."
+      title="Solicitud de negocio"
+      subtitle="Completa los datos de tu negocio. El admin revisa tu solicitud y te avisamos cuando este aprobada."
       hint="Usa una contraseña de al menos 8 caracteres."
-      submitLabel="Crear cuenta"
+      businessTypes={businessTypes}
+      businessTypeLabels={businessTypeLabels}
+      submitLabel="Enviar solicitud"
     />
   </section>
 
   <script>
     import "../scripts/auth.ts";
+    import "../scripts/register.ts";
   </script>
 </BaseLayout>

@@ -27,7 +27,7 @@ export const businessSchema = z.object({
   description: z.string().optional(),
   instagram: z.string().optional(),
   ownerId: idSchema,
-  verified: z.boolean().default(false),
+  approved: z.boolean().default(false),
   createdAt: timestampSchema,
 });
 

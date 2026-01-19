@@ -29,6 +29,6 @@ export class CreateBusinessDto {
   description?: string;
 
   @IsString()
-  @IsOptional()
-  instagram?: string;
+  @MinLength(1)
+  instagram!: string;
 }

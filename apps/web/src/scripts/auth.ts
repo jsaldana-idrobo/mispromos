@@ -39,6 +39,7 @@ const redirectIfAuthenticated = async () => {
 
 if (form) {
   const mode = form.dataset.mode === "register" ? "register" : "login";
+  const isRegister = mode === "register";
 
   redirectIfAuthenticated();
 
@@ -98,7 +99,7 @@ if (form) {
       "button[type='submit']",
     );
     if (submitButton) {
-      startButtonLoading(submitButton, "Ingresando");
+      startButtonLoading(submitButton, isRegister ? "Enviando" : "Ingresando");
     }
 
     const formData = new FormData(form);
@@ -106,23 +107,51 @@ if (form) {
       const value = formData.get(key);
       return typeof value === "string" ? value : "";
     };
-    const payload = {
+    const payload: Record<string, unknown> = {
       email: getField("email"),
       password: getField("password"),
     };
+    if (isRegister) {
+      const categoryValues = Array.from(
+        form.querySelectorAll<HTMLSelectElement>(
+          "[name='categories'] option:checked",
+        ),
+      )
+        .map((option) => option.value)
+        .filter(Boolean);
+      payload.name = getField("name");
+      payload.slug = getField("slug");
+      payload.type = getField("type");
+      payload.categories = categoryValues;
+      payload.description = getField("description");
+      payload.instagram = getField("instagram");
+    }
 
     try {
-      await apiFetch<AuthResponse>(`/auth/${mode}`, {
+      await apiFetch<AuthResponse | { ok: true }>(`/auth/${mode}`, {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      try {
-        localStorage.setItem("auth", "true");
-      } catch {
-        // ignore storage errors
+      if (isRegister) {
+        showToast(
+          "Solicitud enviada",
+          "Te avisaremos cuando tu negocio sea aprobado.",
+          "success",
+        );
+        if (messageEl) {
+          messageEl.textContent =
+            "Solicitud enviada. Te avisaremos por correo cuando sea aprobada.";
+        }
+        form.reset();
+      } else {
+        try {
+          localStorage.setItem("auth", "true");
+        } catch {
+          // ignore storage errors
+        }
+        showToast("Listo", "Bienvenido a Tus promos.", "success");
+        globalThis.location.href = "/dashboard";
       }
-      showToast("Listo", "Bienvenido a Tus promos.", "success");
-      globalThis.location.href = "/dashboard";
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error al autenticar";

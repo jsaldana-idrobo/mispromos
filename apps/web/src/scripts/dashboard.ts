@@ -21,7 +21,7 @@ type Business = {
   categories?: string[];
   description?: string;
   instagram?: string;
-  verified?: boolean;
+  approved?: boolean;
 };
 
 type Branch = {
@@ -192,8 +192,8 @@ const businessCityFilter = document.querySelector<HTMLSelectElement>(
 const businessCategoryFilter = document.querySelector<HTMLSelectElement>(
   "[data-business-category-filter]",
 );
-const businessVerifiedFilter = document.querySelector<HTMLSelectElement>(
-  "[data-business-verified-filter]",
+const businessApprovedFilter = document.querySelector<HTMLSelectElement>(
+  "[data-business-approved-filter]",
 );
 const businessInstagramFilter = document.querySelector<HTMLSelectElement>(
   "[data-business-instagram-filter]",
@@ -453,7 +453,7 @@ let businessFilters = {
   type: "all",
   city: "all",
   category: "all",
-  verified: "all",
+  approved: "all",
   instagram: "all",
 };
 let adminPromoPage = 1;
@@ -917,16 +917,12 @@ const setDashboardLoading = (isLoading: boolean) => {
 };
 
 const setHeaderAuthState = (isAuthenticated: boolean) => {
-  const loginLink = document.querySelector<HTMLElement>("[data-nav-login]");
   const registerLink = document.querySelector<HTMLElement>(
     "[data-nav-register]",
   );
   const dashboardLink = document.querySelector<HTMLElement>(
     "[data-nav-dashboard]",
   );
-  if (loginLink) {
-    loginLink.hidden = isAuthenticated;
-  }
   if (registerLink) {
     registerLink.hidden = isAuthenticated;
   }
@@ -1322,10 +1318,10 @@ const getFilteredBusinesses = () => {
     const cityMatch =
       businessFilters.city === "all" ||
       businessCities.includes(businessFilters.city);
-    const verifiedMatch =
-      businessFilters.verified === "all" ||
-      (businessFilters.verified === "verified" && business.verified) ||
-      (businessFilters.verified === "unverified" && !business.verified);
+    const approvedMatch =
+      businessFilters.approved === "all" ||
+      (businessFilters.approved === "approved" && business.approved) ||
+      (businessFilters.approved === "pending" && !business.approved);
     const hasInstagram = Boolean((business.instagram ?? "").trim());
     const instagramMatch =
       businessFilters.instagram === "all" ||
@@ -1341,7 +1337,7 @@ const getFilteredBusinesses = () => {
       typeMatch &&
       categoryMatch &&
       cityMatch &&
-      verifiedMatch &&
+      approvedMatch &&
       instagramMatch &&
       textMatch
     );
@@ -1448,13 +1444,19 @@ const renderBusinesses = (list: Business[], total: number) => {
                     ${business.instagram ? `@${business.instagram}` : "—"}
                   </td>
                   <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
-                    ${business.verified ? "Verificado" : "Pendiente"}
+                    ${business.approved ? "Aprobado" : "Pendiente"}
                   </td>
                   <td class="rounded-r-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
                     <div class="flex flex-wrap gap-2 text-xs">
                       <button class="action-btn action-view" data-business-select="${business._id}">Ver</button>
                       <button class="action-btn action-edit" data-business-edit="${business._id}">Editar</button>
                       <button class="action-btn action-delete" data-business-delete="${business._id}">Eliminar</button>
+                      ${
+                        business.approved
+                          ? `<span class="text-xs text-ink-900/60">Aprobado</span>`
+                          : `<button class="action-btn" data-business-approve="${business._id}">Aprobar</button>
+                             <button class="action-btn" data-business-reject="${business._id}">Rechazar</button>`
+                      }
                     </div>
                   </td>
                 </tr>
@@ -1479,12 +1481,18 @@ const renderBusinesses = (list: Business[], total: number) => {
                   </p>
                   <p class="text-xs text-ink-900/60 truncate">${formatBusinessCategories(business)}</p>
                 </div>
-                <span class="text-xs text-ink-900/60">${business.verified ? "Verificado" : "Pendiente"}</span>
+                <span class="text-xs text-ink-900/60">${business.approved ? "Aprobado" : "Pendiente"}</span>
               </div>
               <div class="mt-3 flex flex-wrap gap-2 text-xs">
                 <button class="action-btn action-view" data-business-select="${business._id}">Ver</button>
                 <button class="action-btn action-edit" data-business-edit="${business._id}">Editar</button>
                 <button class="action-btn action-delete" data-business-delete="${business._id}">Eliminar</button>
+                ${
+                  business.approved
+                    ? `<span class="text-xs text-ink-900/60">Aprobado</span>`
+                    : `<button class="action-btn" data-business-approve="${business._id}">Aprobar</button>
+                       <button class="action-btn" data-business-reject="${business._id}">Rechazar</button>`
+                }
               </div>
             </div>
           `,
@@ -2030,7 +2038,7 @@ const resetBusinessFilters = () => {
     type: "all",
     city: "all",
     category: "all",
-    verified: "all",
+    approved: "all",
     instagram: "all",
   };
   if (businessSearchInput) {
@@ -2045,8 +2053,8 @@ const resetBusinessFilters = () => {
   if (businessCategoryFilter) {
     businessCategoryFilter.value = "all";
   }
-  if (businessVerifiedFilter) {
-    businessVerifiedFilter.value = "all";
+  if (businessApprovedFilter) {
+    businessApprovedFilter.value = "all";
   }
   if (businessInstagramFilter) {
     businessInstagramFilter.value = "all";
@@ -2964,6 +2972,8 @@ const wireBusinessActions = () => {
     const selectId = target.dataset.businessSelect;
     const editId = target.dataset.businessEdit;
     const deleteId = target.dataset.businessDelete;
+    const approveId = target.dataset.businessApprove;
+    const rejectId = target.dataset.businessReject;
 
     if (selectId) {
       if (currentUser?.role === "ADMIN") {
@@ -3006,6 +3016,39 @@ const wireBusinessActions = () => {
         await loadPromotions(business._id);
         updatePromotionsView();
       }
+    }
+
+    if (approveId) {
+      const confirmed = globalThis.confirm(
+        "¿Aprobar este negocio y habilitar su acceso?",
+      );
+      if (!confirmed) return;
+      const updated = await apiFetch<Business>(
+        `/businesses/${approveId}/approval`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ approved: true }),
+        },
+      );
+      businesses = businesses.map((business) =>
+        business._id === approveId ? updated : business,
+      );
+      updateBusinessesView();
+      showToast("Listo", "Negocio aprobado.", "success");
+      return;
+    }
+
+    if (rejectId) {
+      const confirmed = globalThis.confirm(
+        "¿Rechazar esta solicitud? Se eliminara el negocio.",
+      );
+      if (!confirmed) return;
+      businesses = businesses.filter((business) => business._id !== rejectId);
+      updateBusinessesView();
+      await apiFetch(`/businesses/${rejectId}`, { method: "DELETE" });
+      showToast("Listo", "Solicitud rechazada.", "success");
+      await loadBusinesses();
+      return;
     }
 
     if (deleteId) {
@@ -3398,7 +3441,7 @@ const wireBusinessFilters = () => {
       type: businessTypeFilter.value,
       city: businessCityFilter?.value ?? "all",
       category: businessCategoryFilter?.value ?? "all",
-      verified: businessVerifiedFilter?.value ?? "all",
+      approved: businessApprovedFilter?.value ?? "all",
       instagram: businessInstagramFilter?.value ?? "all",
     };
     adminBusinessPage = 1;
@@ -3408,7 +3451,7 @@ const wireBusinessFilters = () => {
   businessTypeFilter.addEventListener("change", updateFilters);
   businessCityFilter?.addEventListener("change", updateFilters);
   businessCategoryFilter?.addEventListener("change", updateFilters);
-  businessVerifiedFilter?.addEventListener("change", updateFilters);
+  businessApprovedFilter?.addEventListener("change", updateFilters);
   businessInstagramFilter?.addEventListener("change", updateFilters);
 };
 
