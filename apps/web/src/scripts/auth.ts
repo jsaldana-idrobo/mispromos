@@ -43,6 +43,12 @@ if (form) {
 
   redirectIfAuthenticated();
 
+  const setAuthMessage = (text: string) => {
+    if (messageEl) {
+      messageEl.textContent = text;
+    }
+  };
+
   const clearCustomValidity = () => {
     emailInput?.setCustomValidity("");
     passwordInput?.setCustomValidity("");
@@ -80,6 +86,65 @@ if (form) {
     return isValid;
   };
 
+  const getCategoryValues = () =>
+    Array.from(
+      form.querySelectorAll<HTMLSelectElement>(
+        "[name='categories'] option:checked",
+      ),
+    )
+      .map((option) => option.value)
+      .filter(Boolean);
+
+  const buildPayload = (data: FormData) => {
+    const getField = (key: string) => {
+      const value = data.get(key);
+      return typeof value === "string" ? value : "";
+    };
+    const payload: Record<string, unknown> = {
+      email: getField("email"),
+      password: getField("password"),
+    };
+    if (isRegister) {
+      payload.name = getField("name");
+      payload.slug = getField("slug");
+      payload.type = getField("type");
+      payload.categories = getCategoryValues();
+      payload.description = getField("description");
+      payload.instagram = getField("instagram");
+    }
+    return payload;
+  };
+
+  const handleRegisterSuccess = () => {
+    showToast(
+      "Solicitud enviada",
+      "Te avisaremos cuando tu negocio sea aprobado.",
+      "success",
+    );
+    setAuthMessage(
+      "Solicitud enviada. Te avisaremos por correo cuando sea aprobada.",
+    );
+    form.reset();
+  };
+
+  const handleLoginSuccess = () => {
+    try {
+      localStorage.setItem("auth", "true");
+    } catch {
+      // ignore storage errors
+    }
+    showToast("Listo", "Bienvenido a Tus promos.", "success");
+    globalThis.location.href = "/dashboard";
+  };
+
+  const handleAuthSuccess = () => {
+    if (isRegister) {
+      handleRegisterSuccess();
+    } else {
+      handleLoginSuccess();
+    }
+  };
+
   emailInput?.addEventListener("input", () => {
     emailInput.setCustomValidity("");
   });
@@ -92,9 +157,7 @@ if (form) {
     if (!validateAuthFields()) {
       return;
     }
-    if (messageEl) {
-      messageEl.textContent = "Procesando...";
-    }
+    setAuthMessage("Procesando...");
     const submitButton = form.querySelector<HTMLButtonElement>(
       "button[type='submit']",
     );
@@ -102,62 +165,17 @@ if (form) {
       startButtonLoading(submitButton, isRegister ? "Enviando" : "Ingresando");
     }
 
-    const formData = new FormData(form);
-    const getField = (key: string) => {
-      const value = formData.get(key);
-      return typeof value === "string" ? value : "";
-    };
-    const payload: Record<string, unknown> = {
-      email: getField("email"),
-      password: getField("password"),
-    };
-    if (isRegister) {
-      const categoryValues = Array.from(
-        form.querySelectorAll<HTMLSelectElement>(
-          "[name='categories'] option:checked",
-        ),
-      )
-        .map((option) => option.value)
-        .filter(Boolean);
-      payload.name = getField("name");
-      payload.slug = getField("slug");
-      payload.type = getField("type");
-      payload.categories = categoryValues;
-      payload.description = getField("description");
-      payload.instagram = getField("instagram");
-    }
-
+    const payload = buildPayload(new FormData(form));
     try {
       await apiFetch<AuthResponse | { ok: true }>(`/auth/${mode}`, {
         method: "POST",
         body: JSON.stringify(payload),
       });
-      if (isRegister) {
-        showToast(
-          "Solicitud enviada",
-          "Te avisaremos cuando tu negocio sea aprobado.",
-          "success",
-        );
-        if (messageEl) {
-          messageEl.textContent =
-            "Solicitud enviada. Te avisaremos por correo cuando sea aprobada.";
-        }
-        form.reset();
-      } else {
-        try {
-          localStorage.setItem("auth", "true");
-        } catch {
-          // ignore storage errors
-        }
-        showToast("Listo", "Bienvenido a Tus promos.", "success");
-        globalThis.location.href = "/dashboard";
-      }
+      handleAuthSuccess();
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Error al autenticar";
-      if (messageEl) {
-        messageEl.textContent = message;
-      }
+      setAuthMessage(message);
       showToast("Error", message, "error");
     } finally {
       if (submitButton) {

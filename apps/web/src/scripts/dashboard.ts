@@ -2965,6 +2965,103 @@ const wireSelectors = () => {
   });
 };
 
+const handleBusinessSelect = async (selectId: string) => {
+  if (currentUser?.role === "ADMIN") {
+    const business = businesses.find((item) => item._id === selectId);
+    if (business) {
+      setBusinessForm(business, {
+        mode: "view",
+        readOnly: true,
+        title: "Detalle del negocio",
+      });
+      setActiveDashboardTab("business");
+      openModal("business");
+    }
+    return;
+  }
+  currentBusinessId = selectId;
+  businessSelects.forEach((select) => {
+    select.value = selectId;
+  });
+  await loadBranches(selectId);
+  await loadPromotions(selectId);
+  updatePromotionsView();
+};
+
+const handleBusinessEdit = async (editId: string) => {
+  const business = businesses.find((item) => item._id === editId);
+  if (!business) return;
+  setBusinessForm(business, {
+    mode: "edit",
+    readOnly: false,
+    title: "Editar negocio",
+  });
+  setActiveDashboardTab("business");
+  openModal("business");
+  currentBusinessId = business._id;
+  businessSelects.forEach((select) => {
+    select.value = business._id;
+  });
+  await loadBranches(business._id);
+  await loadPromotions(business._id);
+  updatePromotionsView();
+};
+
+const handleBusinessApprove = async (approveId: string) => {
+  const confirmed = globalThis.confirm(
+    "¿Aprobar este negocio y habilitar su acceso?",
+  );
+  if (!confirmed) return;
+  const updated = await apiFetch<Business>(`/businesses/${approveId}/approval`, {
+    method: "PATCH",
+    body: JSON.stringify({ approved: true }),
+  });
+  businesses = businesses.map((business) =>
+    business._id === approveId ? updated : business,
+  );
+  updateBusinessesView();
+  showToast("Listo", "Negocio aprobado.", "success");
+};
+
+const handleBusinessReject = async (rejectId: string) => {
+  const confirmed = globalThis.confirm(
+    "¿Rechazar esta solicitud? Se eliminara el negocio.",
+  );
+  if (!confirmed) return;
+  businesses = businesses.filter((business) => business._id !== rejectId);
+  updateBusinessesView();
+  await apiFetch(`/businesses/${rejectId}`, { method: "DELETE" });
+  showToast("Listo", "Solicitud rechazada.", "success");
+  await loadBusinesses();
+};
+
+const handleBusinessDelete = async (deleteId: string) => {
+  const confirmed = globalThis.confirm(
+    "¿Eliminar este negocio? También perderás sus sedes y promos.",
+  );
+  if (!confirmed) return;
+  businesses = businesses.filter((business) => business._id !== deleteId);
+  updateBusinessesView();
+  await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
+  showToast("Listo", "Negocio eliminado.", "success");
+  await loadBusinesses();
+  if (businesses.length > 0) {
+    currentBusinessId = businesses[0]._id;
+    await loadBranches(currentBusinessId);
+    await loadPromotions(currentBusinessId);
+    updatePromotionsView();
+    updateBusinessesView();
+  } else {
+    currentBusinessId = "";
+    branches = [];
+    updateBranchCityFilterOptions();
+    updateBranchesView();
+    promotions = [];
+    updatePromotionsView();
+    updateBusinessesView();
+  }
+};
+
 const wireBusinessActions = () => {
   if (!businessList) return;
   businessList.addEventListener("click", async (event) => {
@@ -2976,106 +3073,23 @@ const wireBusinessActions = () => {
     const rejectId = target.dataset.businessReject;
 
     if (selectId) {
-      if (currentUser?.role === "ADMIN") {
-        const business = businesses.find((item) => item._id === selectId);
-        if (business) {
-          setBusinessForm(business, {
-            mode: "view",
-            readOnly: true,
-            title: "Detalle del negocio",
-          });
-          setActiveDashboardTab("business");
-          openModal("business");
-        }
-        return;
-      }
-      currentBusinessId = selectId;
-      businessSelects.forEach((select) => {
-        select.value = selectId;
-      });
-      await loadBranches(selectId);
-      await loadPromotions(selectId);
-      updatePromotionsView();
+      await handleBusinessSelect(selectId);
+      return;
     }
-
     if (editId) {
-      const business = businesses.find((item) => item._id === editId);
-      if (business) {
-        setBusinessForm(business, {
-          mode: "edit",
-          readOnly: false,
-          title: "Editar negocio",
-        });
-        setActiveDashboardTab("business");
-        openModal("business");
-        currentBusinessId = business._id;
-        businessSelects.forEach((select) => {
-          select.value = business._id;
-        });
-        await loadBranches(business._id);
-        await loadPromotions(business._id);
-        updatePromotionsView();
-      }
+      await handleBusinessEdit(editId);
+      return;
     }
-
     if (approveId) {
-      const confirmed = globalThis.confirm(
-        "¿Aprobar este negocio y habilitar su acceso?",
-      );
-      if (!confirmed) return;
-      const updated = await apiFetch<Business>(
-        `/businesses/${approveId}/approval`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({ approved: true }),
-        },
-      );
-      businesses = businesses.map((business) =>
-        business._id === approveId ? updated : business,
-      );
-      updateBusinessesView();
-      showToast("Listo", "Negocio aprobado.", "success");
+      await handleBusinessApprove(approveId);
       return;
     }
-
     if (rejectId) {
-      const confirmed = globalThis.confirm(
-        "¿Rechazar esta solicitud? Se eliminara el negocio.",
-      );
-      if (!confirmed) return;
-      businesses = businesses.filter((business) => business._id !== rejectId);
-      updateBusinessesView();
-      await apiFetch(`/businesses/${rejectId}`, { method: "DELETE" });
-      showToast("Listo", "Solicitud rechazada.", "success");
-      await loadBusinesses();
+      await handleBusinessReject(rejectId);
       return;
     }
-
     if (deleteId) {
-      const confirmed = globalThis.confirm(
-        "¿Eliminar este negocio? También perderás sus sedes y promos.",
-      );
-      if (!confirmed) return;
-      businesses = businesses.filter((business) => business._id !== deleteId);
-      updateBusinessesView();
-      await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
-      showToast("Listo", "Negocio eliminado.", "success");
-      await loadBusinesses();
-      if (businesses.length > 0) {
-        currentBusinessId = businesses[0]._id;
-        await loadBranches(currentBusinessId);
-        await loadPromotions(currentBusinessId);
-        updatePromotionsView();
-        updateBusinessesView();
-      } else {
-        currentBusinessId = "";
-        branches = [];
-        updateBranchCityFilterOptions();
-        updateBranchesView();
-        promotions = [];
-        updatePromotionsView();
-        updateBusinessesView();
-      }
+      await handleBusinessDelete(deleteId);
     }
   });
 };

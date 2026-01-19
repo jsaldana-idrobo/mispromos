@@ -11,6 +11,12 @@ export class EmailService {
   private createTransport() {
     const smtpUrl = this.configService.get<string>("SMTP_URL");
     if (smtpUrl) {
+      if (smtpUrl.startsWith("http://") || smtpUrl.startsWith("https://")) {
+        this.logger.warn(
+          "SMTP_URL debe usar smtp:// o smtps://, no http/https.",
+        );
+        return null;
+      }
       return nodemailer.createTransport(smtpUrl);
     }
 
