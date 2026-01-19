@@ -11,13 +11,33 @@ export class EmailService {
   private createTransport() {
     const smtpUrl = this.configService.get<string>("SMTP_URL");
     if (smtpUrl) {
-      if (smtpUrl.startsWith("http://") || smtpUrl.startsWith("https://")) {
-        this.logger.warn(
-          "SMTP_URL debe usar smtp:// o smtps://, no http/https.",
-        );
+      try {
+        const parsed = new URL(smtpUrl);
+        if (parsed.protocol !== "smtp:" && parsed.protocol !== "smtps:") {
+          this.logger.warn(
+            "SMTP_URL debe usar smtp:// o smtps://, no http/https.",
+          );
+          return null;
+        }
+        const user =
+          parsed.username.length > 0
+            ? decodeURIComponent(parsed.username)
+            : undefined;
+        const pass =
+          parsed.password.length > 0
+            ? decodeURIComponent(parsed.password)
+            : undefined;
+        const port = parsed.port ? Number(parsed.port) : undefined;
+        return nodemailer.createTransport({
+          host: parsed.hostname,
+          port,
+          secure: parsed.protocol === "smtps:",
+          auth: user && pass ? { user, pass } : undefined,
+        });
+      } catch {
+        this.logger.warn("SMTP_URL invalida.");
         return null;
       }
-      return nodemailer.createTransport(smtpUrl);
     }
 
     const host = this.configService.get<string>("SMTP_HOST");
