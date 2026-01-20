@@ -1227,6 +1227,27 @@ const setPromoFormEnabled = (enabled: boolean) => {
   });
 };
 
+const refreshTabData = async (tab: string) => {
+  if (!currentUser) return;
+  const isAdmin = currentUser.role === "ADMIN";
+  if (tab === "business" || tab === "requests") {
+    await loadBusinesses();
+    return;
+  }
+  if (tab === "promos" || tab === "branches") {
+    await loadBusinesses();
+    await loadBusinessDependencies(isAdmin);
+    return;
+  }
+  if (tab === "cities" && isAdmin) {
+    await loadCities();
+    return;
+  }
+  if (tab === "categories" && isAdmin) {
+    await loadCategories();
+  }
+};
+
 let confirmResolver: ((value: boolean) => void) | null = null;
 
 const openConfirmModal = (options: {
@@ -3440,9 +3461,12 @@ const wireCancelButtons = () => {
 const wireDashboardTabs = () => {
   if (dashboardTabs.length === 0) return;
   dashboardTabs.forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       const tab = button.dataset.dashboardTab ?? "promos";
-      setActiveDashboardTab(tab);
+      if (tab !== activeDashboardTab) {
+        setActiveDashboardTab(tab);
+        await refreshTabData(tab);
+      }
       setDashboardMenuOpen(false);
     });
   });
@@ -3479,7 +3503,11 @@ const wireDashboardDelegates = () => {
     const tabButton = target.closest<HTMLElement>("[data-dashboard-tab]");
     if (tabButton?.dataset.dashboardTab) {
       event.preventDefault();
-      setActiveDashboardTab(tabButton.dataset.dashboardTab);
+      const tab = tabButton.dataset.dashboardTab;
+      if (tab !== activeDashboardTab) {
+        setActiveDashboardTab(tab);
+        void refreshTabData(tab);
+      }
       setDashboardMenuOpen(false);
       return;
     }

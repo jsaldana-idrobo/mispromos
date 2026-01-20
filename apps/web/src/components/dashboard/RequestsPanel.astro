@@ -1,3 +1,13 @@
+---
+type RequestsPanelProps = {
+  businessTypes?: string[];
+  businessTypeLabels?: Record<string, string>;
+};
+
+const { businessTypes = [], businessTypeLabels = {} } =
+  Astro.props as RequestsPanelProps;
+---
+
 <section
   class="rounded-3xl border border-ink-900/10 bg-white/80 p-6"
   data-dashboard-panel="requests"
@@ -28,6 +38,11 @@
       Tipo
       <select class="input-field" name="type" data-business-type-filter>
         <option value="all">Todos</option>
+        {
+          businessTypes.map((type: string) => (
+            <option value={type}>{businessTypeLabels[type] ?? type}</option>
+          ))
+        }
       </select>
     </label>
     <label class="grid gap-2 text-sm font-semibold">
