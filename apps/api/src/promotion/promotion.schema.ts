@@ -65,4 +65,5 @@ PromotionSchema.index({
   daysOfWeek: 1,
   startHour: 1,
   endHour: 1,
+  createdAt: -1,
 });

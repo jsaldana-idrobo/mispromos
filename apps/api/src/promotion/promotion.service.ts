@@ -294,11 +294,10 @@ export class PromotionService {
 
     const { day, time } = this.getTimePartsInZone(now, "America/Bogota");
 
-    const branchFilter = await this.buildBranchFilter(city);
-    const businessFilter = await this.buildBusinessFilter(
-      category,
-      businessType,
-    );
+    const [branchFilter, businessFilter] = await Promise.all([
+      this.buildBranchFilter(city),
+      this.buildBusinessFilter(category, businessType),
+    ]);
     const promoTypeFilter = promoType ? { promoType } : {};
     const featuredFilter = this.buildFeaturedFilter(featured);
     const queryFilter = this.buildQueryFilter(q);

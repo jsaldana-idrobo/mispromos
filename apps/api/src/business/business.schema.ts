@@ -39,3 +39,5 @@ export type BusinessDocument = Business & Document;
 export const BusinessSchema = SchemaFactory.createForClass(Business);
 BusinessSchema.index({ slug: 1 }, { unique: true });
 BusinessSchema.index({ ownerId: 1 });
+BusinessSchema.index({ type: 1 });
+BusinessSchema.index({ categories: 1 });
