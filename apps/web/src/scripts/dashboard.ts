@@ -1231,19 +1231,25 @@ const refreshTabData = async (tab: string) => {
   if (!currentUser) return;
   const isAdmin = currentUser.role === "ADMIN";
   if (tab === "business" || tab === "requests") {
+    renderLoadingMessage(businessList, "Cargando negocios...");
+    renderLoadingMessage(businessRequestsList, "Cargando solicitudes...");
     await loadBusinesses();
     return;
   }
   if (tab === "promos" || tab === "branches") {
+    renderLoadingMessage(branchList, "Cargando sedes...");
+    renderLoadingMessage(promoList, "Cargando promociones...");
     await loadBusinesses();
     await loadBusinessDependencies(isAdmin);
     return;
   }
   if (tab === "cities" && isAdmin) {
+    renderLoadingMessage(cityList, "Cargando ciudades...");
     await loadCities();
     return;
   }
   if (tab === "categories" && isAdmin) {
+    renderLoadingMessage(categoryList, "Cargando categorías...");
     await loadCategories();
   }
 };
