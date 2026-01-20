@@ -6,7 +6,7 @@ import type {
   Category,
   City,
   Promotion,
-  PromotionsResponse,
+  PromotionsFeedResponse,
 } from "./promos/types";
 
 const form = document.querySelector<HTMLFormElement>("[data-promos-form]");
@@ -171,7 +171,7 @@ if (form && container) {
     loadToken += 1;
     const token = loadToken;
     startPrimaryLoad();
-    await Promise.allSettled([fetchFeaturedPromos(), fetchPromos(false)]);
+    await fetchFeed();
     if (token === loadToken) {
       setContentLoading(false);
     }
@@ -359,14 +359,14 @@ if (form && container) {
       const query = new URLSearchParams(baseQuery);
       query.set("offset", String(offset));
       query.set("limit", String(PAGE_SIZE));
-      query.set("featured", "false");
+      query.set("includeFeatured", "false");
       const queryString = query.toString();
       const querySuffix = queryString ? `?${queryString}` : "";
-      const response = await apiFetch<PromotionsResponse>(
-        `/promotions/active${querySuffix}`,
+      const response = await apiFetch<PromotionsFeedResponse>(
+        `/promotions/active-feed${querySuffix}`,
       );
       const promos = response.items ?? [];
-      totalRegular = response.total ?? 0;
+      totalRegular = response.totalRegular ?? 0;
       if (!append) {
         totalLoaded = 0;
         offset = 0;
@@ -381,7 +381,7 @@ if (form && container) {
       totalLoaded += promos.length;
       offset += promos.length;
       updateCounter();
-      hasMore = promos.length === PAGE_SIZE;
+      hasMore = totalLoaded < totalRegular;
       updateLoadMore(
         hasMore ? "Desliza para cargar más." : "No hay más promociones.",
       );
@@ -397,34 +397,51 @@ if (form && container) {
     }
   };
 
-  const fetchFeaturedPromos = async () => {
-    if (!featuredContainer || !featuredSection) return;
+  const fetchFeed = async () => {
     try {
       const query = new URLSearchParams(baseQuery);
-      query.set("featured", "true");
       query.set("offset", "0");
-      query.set("limit", String(FEATURED_COUNT));
-      const response = await apiFetch<PromotionsResponse>(
-        `/promotions/active?${query.toString()}`,
+      query.set("limit", String(PAGE_SIZE));
+      query.set("featuredLimit", String(FEATURED_COUNT));
+      const response = await apiFetch<PromotionsFeedResponse>(
+        `/promotions/active-feed?${query.toString()}`,
       );
-      const items = response.items ?? [];
-      if (items.length < FEATURED_COUNT) {
-        featuredIds.clear();
-        featuredContainer.innerHTML = "";
-        featuredSection.classList.add("hidden");
-        totalFeatured = 0;
+      const featured = response.featured ?? [];
+      const promos = response.items ?? [];
+      totalRegular = response.totalRegular ?? 0;
+      totalFeatured = response.totalFeatured ?? featured.length;
+      totalLoaded = promos.length;
+      offset = promos.length;
+      if (featuredContainer && featuredSection) {
+        if (featured.length < FEATURED_COUNT) {
+          featuredIds.clear();
+          featuredContainer.innerHTML = "";
+          featuredSection.classList.add("hidden");
+          totalFeatured = 0;
+        } else {
+          renderFeaturedPromos(featured);
+        }
+      }
+      if (promos.length === 0) {
+        renderMessage("No encontramos promos activas con esos filtros.");
+        updateLoadMore("");
+        hasMore = false;
         updateCounter();
         return;
       }
-      totalFeatured = response.total ?? items.length;
-      renderFeaturedPromos(items);
+      renderPromos(promos, false);
       updateCounter();
-    } catch {
-      featuredIds.clear();
-      featuredContainer.innerHTML = "";
-      featuredSection.classList.add("hidden");
-      totalFeatured = 0;
-      updateCounter();
+      hasMore = totalLoaded < totalRegular;
+      updateLoadMore(
+        hasMore ? "Desliza para cargar más." : "No hay más promociones.",
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error consultando promociones";
+      renderMessage(message);
+      updateLoadMore("");
     }
   };
 

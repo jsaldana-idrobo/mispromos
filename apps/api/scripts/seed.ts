@@ -809,9 +809,19 @@ const buildPromoInsert = (
   promo: SeedBusiness["promotions"][number],
   businessId: string,
   branchId: ObjectId | undefined,
+  businessSnapshot: {
+    name: string;
+    slug: string;
+    categories: string[];
+    instagram?: string;
+  },
   dates: { startDate: Date; endDate: Date }
 ) => ({
   businessId,
+  businessName: businessSnapshot.name,
+  businessSlug: businessSnapshot.slug,
+  businessCategories: businessSnapshot.categories,
+  businessInstagram: businessSnapshot.instagram,
   branchId: branchId ? branchId.toString() : null,
   title: promo.title,
   description: promo.description,
@@ -831,6 +841,12 @@ const upsertPromosForBusiness = async (
   businessId: string,
   branchIds: ObjectId[],
   promoList: SeedBusiness["promotions"],
+  businessSnapshot: {
+    name: string;
+    slug: string;
+    categories: string[];
+    instagram?: string;
+  },
   dates: { startDate: Date; endDate: Date }
 ) => {
   for (const promo of promoList) {
@@ -838,7 +854,15 @@ const upsertPromosForBusiness = async (
       typeof promo.branchIndex === "number" ? branchIds[promo.branchIndex] : undefined;
     await promotions.updateOne(
       { businessId, title: promo.title },
-      { $setOnInsert: buildPromoInsert(promo, businessId, branchId, dates) },
+      {
+        $setOnInsert: buildPromoInsert(
+          promo,
+          businessId,
+          branchId,
+          businessSnapshot,
+          dates
+        ),
+      },
       { upsert: true }
     );
   }
@@ -879,6 +903,12 @@ const seedBusinessesData = async (
       businessId,
       branchIds,
       business.promotions,
+      {
+        name: business.name,
+        slug: business.slug,
+        categories: business.categories,
+        instagram: business.instagram,
+      },
       dates
     );
   }

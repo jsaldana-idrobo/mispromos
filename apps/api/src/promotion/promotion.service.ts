@@ -29,6 +29,35 @@ export class PromotionService {
     private readonly businessModel: Model<BusinessDocument>,
   ) {}
 
+  private async getBusinessForActor(businessId: string, actor: Actor) {
+    const business = await this.businessModel
+      .findById(businessId)
+      .select("_id name slug categories instagram ownerId")
+      .lean()
+      .exec();
+    if (!business) {
+      throw new NotFoundException("Negocio no encontrado");
+    }
+    if (actor.role !== UserRole.ADMIN && business.ownerId !== actor.id) {
+      throw new ForbiddenException("No autorizado");
+    }
+    return business;
+  }
+
+  private buildBusinessSnapshotFrom(business: {
+    name: string;
+    slug: string;
+    categories?: string[];
+    instagram?: string;
+  }) {
+    return {
+      businessName: business.name,
+      businessSlug: business.slug,
+      businessCategories: business.categories ?? [],
+      businessInstagram: business.instagram,
+    };
+  }
+
   private async assertBusinessOwner(businessId: string, actor: Actor) {
     if (actor.role === UserRole.ADMIN) {
       return;
@@ -62,14 +91,18 @@ export class PromotionService {
   }
 
   async create(dto: CreatePromotionDto, actor: Actor) {
-    await this.assertBusinessOwner(dto.businessId, actor);
+    const business = await this.getBusinessForActor(dto.businessId, actor);
     if (dto.featured !== undefined && actor.role !== UserRole.ADMIN) {
       throw new ForbiddenException("No autorizado");
     }
     if (dto.branchId) {
       await this.assertBranchMatchesBusiness(dto.branchId, dto.businessId);
     }
-    const created = await this.promotionModel.create(dto);
+    const businessSnapshot = this.buildBusinessSnapshotFrom(business);
+    const created = await this.promotionModel.create({
+      ...dto,
+      ...businessSnapshot,
+    });
     return created;
   }
 
@@ -265,28 +298,38 @@ export class PromotionService {
     };
   }
 
-  async findActiveByCity(params: {
+  private getPromoListProjection() {
+    return {
+      _id: 1,
+      businessId: 1,
+      branchId: 1,
+      title: 1,
+      description: 1,
+      promoType: 1,
+      value: 1,
+      imageUrl: 1,
+      startDate: 1,
+      endDate: 1,
+      daysOfWeek: 1,
+      startHour: 1,
+      endHour: 1,
+      featured: 1,
+      businessName: 1,
+      businessSlug: 1,
+      businessCategories: 1,
+      businessInstagram: 1,
+    };
+  }
+
+  private async buildActiveBaseFilter(params: {
     city?: string;
     at?: string;
     promoType?: string;
     category?: string;
     businessType?: string;
-    featured?: boolean;
     q?: string;
-    offset?: number;
-    limit?: number;
   }) {
-    const {
-      city,
-      at,
-      promoType,
-      category,
-      businessType,
-      featured,
-      q,
-      offset,
-      limit,
-    } = params;
+    const { city, at, promoType, category, businessType, q } = params;
     const now = at ? new Date(at) : new Date();
     if (Number.isNaN(now.valueOf())) {
       throw new BadRequestException("Formato de fecha inválido");
@@ -299,25 +342,132 @@ export class PromotionService {
       this.buildBusinessFilter(category, businessType),
     ]);
     const promoTypeFilter = promoType ? { promoType } : {};
-    const featuredFilter = this.buildFeaturedFilter(featured);
     const queryFilter = this.buildQueryFilter(q);
 
-    const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
-    const safeOffset = Math.max(offset ?? 0, 0);
     const dateFilter = this.buildDateFilter(now);
     const timeFilter = this.buildTimeFilter(time);
 
-    const filter = {
+    const baseFilter = {
       ...branchFilter,
       ...businessFilter,
       ...promoTypeFilter,
-      ...featuredFilter,
       ...queryFilter,
       active: true,
       ...dateFilter,
       ...timeFilter,
       daysOfWeek: day,
     };
+
+    return { baseFilter };
+  }
+
+  private async buildBusinessMap(
+    promos: Array<{
+      businessId?: string;
+      businessName?: string;
+    }>,
+  ) {
+    const missingIds = new Set<string>();
+    for (const promo of promos) {
+      if (!promo.businessName && promo.businessId) {
+        missingIds.add(String(promo.businessId));
+      }
+    }
+    if (missingIds.size === 0) {
+      return new Map<
+        string,
+        {
+          _id: string;
+          name: string;
+          slug: string;
+          categories?: string[];
+          instagram?: string;
+        }
+      >();
+    }
+    const businesses = await this.businessModel
+      .find({ _id: { $in: Array.from(missingIds) } })
+      .select("_id name slug categories instagram")
+      .lean()
+      .exec();
+    return new Map(
+      businesses.map((business) => [String(business._id), business]),
+    );
+  }
+
+  private buildBusinessSummary(
+    promo: {
+      businessId?: string;
+      businessName?: string;
+      businessSlug?: string;
+      businessCategories?: string[];
+      businessInstagram?: string;
+    },
+    businessMap: Map<
+      string,
+      {
+        _id: string;
+        name: string;
+        slug: string;
+        categories?: string[];
+        instagram?: string;
+      }
+    >,
+  ) {
+    if (promo.businessName) {
+      return {
+        _id: promo.businessId ?? "",
+        name: promo.businessName,
+        slug: promo.businessSlug ?? "",
+        categories: promo.businessCategories ?? [],
+        instagram: promo.businessInstagram,
+      };
+    }
+    if (!promo.businessId) {
+      return null;
+    }
+    return businessMap.get(String(promo.businessId)) ?? null;
+  }
+
+  private stripBusinessSnapshot<
+    T extends {
+      businessName?: string;
+      businessSlug?: string;
+      businessCategories?: string[];
+      businessInstagram?: string;
+    },
+  >(promo: T, business: unknown) {
+    const {
+      businessName,
+      businessSlug,
+      businessCategories,
+      businessInstagram,
+      ...rest
+    } = promo;
+    return { ...rest, business };
+  }
+
+  async findActiveByCity(params: {
+    city?: string;
+    at?: string;
+    promoType?: string;
+    category?: string;
+    businessType?: string;
+    featured?: boolean;
+    q?: string;
+    offset?: number;
+    limit?: number;
+  }) {
+    const { featured, offset, limit } = params;
+    const { baseFilter } = await this.buildActiveBaseFilter(params);
+    const featuredFilter = this.buildFeaturedFilter(featured);
+    const filter = {
+      ...baseFilter,
+      ...featuredFilter,
+    };
+
+    const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
+    const safeOffset = Math.max(offset ?? 0, 0);
 
     const [total, promos] = await Promise.all([
       this.promotionModel.countDocuments(filter).exec(),
@@ -330,26 +480,104 @@ export class PromotionService {
         .exec(),
     ]);
 
-    const businessIds = Array.from(
-      new Set(promos.map((promo) => promo.businessId).filter(Boolean)),
-    );
-    const businesses = businessIds.length
-      ? await this.businessModel
-          .find({ _id: { $in: businessIds } })
-          .select("_id name slug categories instagram")
+    const businessMap = await this.buildBusinessMap(promos);
+
+    return {
+      items: promos.map((promo) =>
+        this.stripBusinessSnapshot(
+          promo,
+          this.buildBusinessSummary(promo, businessMap),
+        ),
+      ),
+      total,
+    };
+  }
+
+  async findActiveFeed(params: {
+    city?: string;
+    at?: string;
+    promoType?: string;
+    category?: string;
+    businessType?: string;
+    q?: string;
+    offset?: number;
+    limit?: number;
+    includeFeatured?: boolean;
+    featuredLimit?: number;
+  }) {
+    const { offset, limit, includeFeatured, featuredLimit } = params;
+    const { baseFilter } = await this.buildActiveBaseFilter(params);
+    const safeLimit = Math.min(Math.max(limit ?? 10, 1), 50);
+    const safeOffset = Math.max(offset ?? 0, 0);
+    const safeFeaturedLimit = Math.min(Math.max(featuredLimit ?? 4, 1), 10);
+    const projection = this.getPromoListProjection();
+    const regularFilter = {
+      ...baseFilter,
+      ...this.buildFeaturedFilter(false),
+    };
+    const featuredFilter = {
+      ...baseFilter,
+      ...this.buildFeaturedFilter(true),
+    };
+
+    const regularCountPromise = this.promotionModel
+      .countDocuments(regularFilter)
+      .exec();
+    const regularItemsPromise = this.promotionModel
+      .find(regularFilter)
+      .sort({ createdAt: -1 })
+      .skip(safeOffset)
+      .limit(safeLimit)
+      .select(projection)
+      .lean()
+      .exec();
+
+    const featuredRequested = includeFeatured ?? true;
+    const featuredCountPromise = featuredRequested
+      ? this.promotionModel.countDocuments(featuredFilter).exec()
+      : Promise.resolve(0);
+    const featuredItemsPromise = featuredRequested
+      ? this.promotionModel
+          .find(featuredFilter)
+          .sort({ createdAt: -1 })
+          .limit(safeFeaturedLimit)
+          .select(projection)
           .lean()
           .exec()
-      : [];
-    const businessMap = new Map(
-      businesses.map((business) => [String(business._id), business]),
+      : Promise.resolve([]);
+
+    const [totalRegular, regularItems, totalFeatured, featuredItems] =
+      await Promise.all([
+        regularCountPromise,
+        regularItemsPromise,
+        featuredCountPromise,
+        featuredItemsPromise,
+      ]);
+
+    const combined = featuredRequested
+      ? [...regularItems, ...featuredItems]
+      : regularItems;
+    const businessMap = await this.buildBusinessMap(combined);
+
+    const items = regularItems.map((promo) =>
+      this.stripBusinessSnapshot(
+        promo,
+        this.buildBusinessSummary(promo, businessMap),
+      ),
+    );
+    const featured = featuredItems.map((promo) =>
+      this.stripBusinessSnapshot(
+        promo,
+        this.buildBusinessSummary(promo, businessMap),
+      ),
     );
 
     return {
-      items: promos.map((promo) => ({
-        ...promo,
-        business: businessMap.get(promo.businessId) ?? null,
-      })),
-      total,
+      items,
+      featured,
+      totalRegular,
+      totalFeatured,
+      total: totalRegular + totalFeatured,
     };
   }
 
@@ -370,12 +598,13 @@ export class PromotionService {
       throw new ForbiddenException("No autorizado");
     }
     const targetBusinessId = dto.businessId ?? promo.businessId;
-    await this.assertBusinessOwner(targetBusinessId, actor);
+    const business = await this.getBusinessForActor(targetBusinessId, actor);
     if (dto.branchId) {
       await this.assertBranchMatchesBusiness(dto.branchId, targetBusinessId);
     }
+    const businessSnapshot = this.buildBusinessSnapshotFrom(business);
     const updated = await this.promotionModel
-      .findByIdAndUpdate(id, dto, { new: true })
+      .findByIdAndUpdate(id, { ...dto, ...businessSnapshot }, { new: true })
       .exec();
     if (!updated) {
       throw new NotFoundException("Promoción no encontrada");

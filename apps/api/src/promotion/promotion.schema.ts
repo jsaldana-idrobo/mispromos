@@ -10,6 +10,18 @@ export class Promotion {
   @Prop({ required: true })
   businessId!: string;
 
+  @Prop({ trim: true })
+  businessName?: string;
+
+  @Prop({ trim: true })
+  businessSlug?: string;
+
+  @Prop({ type: [String], default: [] })
+  businessCategories?: string[];
+
+  @Prop({ trim: true })
+  businessInstagram?: string;
+
   @Prop({ type: String, default: null })
   branchId?: string | null;
 

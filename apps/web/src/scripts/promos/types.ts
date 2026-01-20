@@ -30,6 +30,14 @@ export type PromotionsResponse = {
   total: number;
 };
 
+export type PromotionsFeedResponse = {
+  items: Promotion[];
+  featured: Promotion[];
+  total: number;
+  totalRegular: number;
+  totalFeatured: number;
+};
+
 export type Category = {
   _id: string;
   name: string;

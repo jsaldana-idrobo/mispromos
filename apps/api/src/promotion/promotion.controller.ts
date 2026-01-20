@@ -83,6 +83,48 @@ export class PromotionController {
     });
   }
 
+  @Get("active-feed")
+  findActiveFeed(@Req() req: Request) {
+    const query = req.query as Record<string, string | undefined>;
+    const city = query.city?.trim() || undefined;
+    const at = query.at?.trim() || undefined;
+    const promoType = Object.values(PromotionType).includes(
+      query.promoType as PromotionType,
+    )
+      ? (query.promoType as PromotionType)
+      : undefined;
+    const category = query.category?.trim() || undefined;
+    const businessType = Object.values(BusinessType).includes(
+      query.businessType as BusinessType,
+    )
+      ? (query.businessType as BusinessType)
+      : undefined;
+    const includeFeatured =
+      query.includeFeatured?.trim().toLowerCase() === "false" ? false : true;
+    const q = query.q?.trim() || undefined;
+    const offset = Number.isFinite(Number(query.offset))
+      ? Number(query.offset)
+      : undefined;
+    const limit = Number.isFinite(Number(query.limit))
+      ? Number(query.limit)
+      : undefined;
+    const featuredLimit = Number.isFinite(Number(query.featuredLimit))
+      ? Number(query.featuredLimit)
+      : undefined;
+    return this.promotionService.findActiveFeed({
+      city,
+      at,
+      promoType,
+      category,
+      businessType,
+      q,
+      offset,
+      limit,
+      includeFeatured,
+      featuredLimit,
+    });
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.promotionService.findOne(id);
