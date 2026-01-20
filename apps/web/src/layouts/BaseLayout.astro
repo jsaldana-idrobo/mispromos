@@ -48,6 +48,29 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       body:not([data-role="ADMIN"]) [data-admin-only] {
         display: none !important;
       }
+      .net-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background: linear-gradient(
+          90deg,
+          rgba(17, 45, 91, 0.15),
+          rgba(17, 45, 91, 0.85)
+        );
+        transform: scaleX(0);
+        transform-origin: left;
+        opacity: 0;
+        transition:
+          opacity 0.2s ease,
+          transform 0.4s ease;
+        z-index: 60;
+      }
+      html[data-net-loading="true"] .net-loader {
+        opacity: 1;
+        transform: scaleX(1);
+      }
     </style>
     <script>
       document.documentElement.dataset.authLoading = "true";
@@ -55,6 +78,7 @@ const hasAuthCookie = cookieHeader.includes("auth=");
   </head>
   <body class="min-h-screen bg-white text-ink-900" data-api-base={apiBase}>
     <div class="min-h-screen bg-white">
+      <div class="net-loader" aria-hidden="true"></div>
       <SiteHeader
         isAuthenticated={hasAuthCookie}
         logoSrc={logoSrc}
@@ -68,6 +92,18 @@ const hasAuthCookie = cookieHeader.includes("auth=");
     <script type="module" is:inline>
       const apiBase =
         document.body?.dataset?.apiBase || "http://localhost:3000/api/v1";
+      const ensureNetLoading = (value) => {
+        const globalAny = window;
+        if (typeof globalAny.__setNetLoading === "function") {
+          globalAny.__setNetLoading(value);
+          return;
+        }
+        if (value) {
+          document.documentElement.dataset.netLoading = "true";
+        } else {
+          delete document.documentElement.dataset.netLoading;
+        }
+      };
       const dashboardLink = document.querySelector("[data-nav-dashboard]");
       const registerLink = document.querySelector("[data-nav-register]");
       const logoutButton = document.querySelector("[data-nav-logout]");
@@ -130,6 +166,7 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       setAuthState(authHint);
       const shouldCheckAuth = authHint || cookieAuth;
       if (shouldCheckAuth) {
+        ensureNetLoading(true);
         fetch(`${apiBase}/auth/me`, {
           credentials: "include",
           cache: "no-store",
@@ -153,10 +190,14 @@ const hasAuthCookie = cookieHeader.includes("auth=");
           })
           .catch(() => {
             // keep last known state on network errors
+          })
+          .finally(() => {
+            ensureNetLoading(false);
           });
       }
       if (logoutButton) {
         logoutButton.addEventListener("click", async () => {
+          ensureNetLoading(true);
           try {
             await fetch(`${apiBase}/auth/logout`, {
               method: "POST",
@@ -167,6 +208,7 @@ const hasAuthCookie = cookieHeader.includes("auth=");
           }
           writeAuthHint(false);
           window.location.href = "/login";
+          ensureNetLoading(false);
         });
       }
     </script>

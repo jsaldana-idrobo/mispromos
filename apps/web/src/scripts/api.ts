@@ -25,6 +25,23 @@ export const apiFetch = async <T>(
   path: string,
   options?: RequestInit,
 ): Promise<T> => {
+  const globalAny = globalThis as typeof globalThis & {
+    __netLoadingCount?: number;
+    __setNetLoading?: (value: boolean) => void;
+  };
+  if (!globalAny.__setNetLoading) {
+    globalAny.__netLoadingCount = 0;
+    globalAny.__setNetLoading = (value: boolean) => {
+      const next = (globalAny.__netLoadingCount ?? 0) + (value ? 1 : -1);
+      globalAny.__netLoadingCount = Math.max(0, next);
+      if (globalAny.__netLoadingCount > 0) {
+        document.documentElement.dataset.netLoading = "true";
+      } else {
+        delete document.documentElement.dataset.netLoading;
+      }
+    };
+  }
+  globalAny.__setNetLoading?.(true);
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: "include",
     headers: {
@@ -32,6 +49,8 @@ export const apiFetch = async <T>(
       ...options?.headers,
     },
     ...options,
+  }).finally(() => {
+    globalAny.__setNetLoading?.(false);
   });
 
   const contentType = response.headers.get("content-type") ?? "";
