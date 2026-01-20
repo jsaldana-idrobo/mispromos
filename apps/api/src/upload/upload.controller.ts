@@ -12,6 +12,8 @@ import { v2 as cloudinary } from "cloudinary";
 import type { Request } from "express";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_FIELDS = 0;
+const MAX_PARTS = 1;
 const MAX_WIDTH = 1200;
 
 const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
@@ -33,7 +35,12 @@ export class UploadController {
   @UseInterceptors(
     FileInterceptor("file", {
       storage: memoryStorage(),
-      limits: { fileSize: MAX_FILE_SIZE, files: 1 },
+      limits: {
+        fileSize: MAX_FILE_SIZE,
+        files: 1,
+        fields: MAX_FIELDS,
+        parts: MAX_PARTS,
+      },
       fileFilter: (_, file, callback) => {
         if (!file.mimetype.startsWith("image/")) {
           callback(
