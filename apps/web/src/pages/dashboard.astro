@@ -12,6 +12,7 @@ import BranchModal from "../components/dashboard/BranchModal.astro";
 import BranchPanel from "../components/dashboard/BranchPanel.astro";
 import BusinessModal from "../components/dashboard/BusinessModal.astro";
 import BusinessPanel from "../components/dashboard/BusinessPanel.astro";
+import RequestsPanel from "../components/dashboard/RequestsPanel.astro";
 import CategoriesPanel from "../components/dashboard/CategoriesPanel.astro";
 import CategoryModal from "../components/dashboard/CategoryModal.astro";
 import CitiesPanel from "../components/dashboard/CitiesPanel.astro";
@@ -50,6 +51,7 @@ const days = daysOfWeek;
           businessTypes={businessTypes}
           businessTypeLabels={businessTypeLabels}
         />
+        <RequestsPanel />
         <CitiesPanel />
         <CategoriesPanel />
       </div>

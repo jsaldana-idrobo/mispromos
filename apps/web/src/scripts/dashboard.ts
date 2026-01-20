@@ -1995,6 +1995,7 @@ const updateBusinessesView = () => {
       (business) => !business.approved,
     );
     const approvedFiltered = getFilteredBusinesses(approvedBusinesses);
+    const pendingFiltered = getFilteredBusinesses(pendingBusinesses);
     const start = (adminBusinessPage - 1) * ADMIN_BUSINESS_PAGE_SIZE;
     const paged = approvedFiltered.slice(
       start,
@@ -2007,8 +2008,8 @@ const updateBusinessesView = () => {
     });
     renderBusinessList(
       businessRequestsList,
-      pendingBusinesses,
-      pendingBusinesses.length,
+      pendingFiltered,
+      pendingFiltered.length,
       {
         emptyMessage: "No hay solicitudes pendientes.",
         showEmptyAction: false,
