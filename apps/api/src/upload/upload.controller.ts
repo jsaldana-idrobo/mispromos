@@ -12,6 +12,7 @@ import { v2 as cloudinary } from "cloudinary";
 import type { Request } from "express";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_CONTENT_LENGTH = MAX_FILE_SIZE + 256 * 1024;
 const MAX_FIELDS = 0;
 const MAX_PARTS = 1;
 const MAX_WIDTH = 1200;
@@ -40,6 +41,9 @@ export class UploadController {
         files: 1,
         fields: MAX_FIELDS,
         parts: MAX_PARTS,
+        fieldNameSize: 100,
+        fieldSize: 0,
+        headerPairs: 32,
       },
       fileFilter: (_, file, callback) => {
         if (!file.mimetype.startsWith("image/")) {
@@ -62,7 +66,7 @@ export class UploadController {
       const contentLengthValue = Number.parseInt(contentLength, 10);
       if (
         Number.isFinite(contentLengthValue) &&
-        contentLengthValue > MAX_FILE_SIZE
+        contentLengthValue > MAX_CONTENT_LENGTH
       ) {
         throw new BadRequestException("La imagen supera el tamaño permitido.");
       }
