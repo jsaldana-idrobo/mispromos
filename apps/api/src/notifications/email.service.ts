@@ -8,34 +8,6 @@ export class EmailService {
 
   constructor(private readonly configService: ConfigService) {}
 
-  private decodeUrlComponent(value: string) {
-    return value.length > 0 ? decodeURIComponent(value) : undefined;
-  }
-
-  private parseSmtpUrl(smtpUrl: string) {
-    try {
-      const parsed = new URL(smtpUrl);
-      if (parsed.protocol !== "smtp:" && parsed.protocol !== "smtps:") {
-        this.logger.warn(
-          "SMTP_URL debe usar smtp:// o smtps://, no http/https.",
-        );
-        return null;
-      }
-      const user = this.decodeUrlComponent(parsed.username);
-      const pass = this.decodeUrlComponent(parsed.password);
-      const port = parsed.port ? Number(parsed.port) : undefined;
-      return {
-        host: parsed.hostname,
-        port,
-        secure: parsed.protocol === "smtps:",
-        auth: user && pass ? { user, pass } : undefined,
-      };
-    } catch {
-      this.logger.warn("SMTP_URL invalida.");
-      return null;
-    }
-  }
-
   private buildEnvTransportConfig() {
     const host = this.configService.get<string>("SMTP_HOST");
     const port = Number(this.configService.get<string>("SMTP_PORT") ?? "587");
@@ -58,12 +30,6 @@ export class EmailService {
   }
 
   private createTransport() {
-    const smtpUrl = this.configService.get<string>("SMTP_URL");
-    if (smtpUrl) {
-      const config = this.parseSmtpUrl(smtpUrl);
-      return config ? nodemailer.createTransport(config) : null;
-    }
-
     const config = this.buildEnvTransportConfig();
     return config ? nodemailer.createTransport(config) : null;
   }
