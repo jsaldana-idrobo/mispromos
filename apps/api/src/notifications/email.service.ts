@@ -41,7 +41,8 @@ export class EmailService {
 Tu cuenta como negocio ha sido aprobada. Ya puedes iniciar sesion en Tus promos.
 Tu contrasena registrada es: ${payload.password}
 
-Entra a https://tuspromos.com para gestionar tus promos, sedes y horarios.
+Entra a https://tuspromos.com/dashboard para gestionar tus promos, sedes y horarios.
+Si necesitas ayuda, escribe a soporte@tuspromos.com.
 
 Gracias por unirte a la plataforma.`;
     const html = `
@@ -63,10 +64,11 @@ Gracias por unirte a la plataforma.`;
             <p style="margin:6px 0 0;font-size:16px;font-weight:700;color:#1f1f1f;">${payload.password}</p>
           </div>
           <p style="margin:0 0 16px;font-size:14px;color:#4a3f37;">
-            Entra al panel para subir promos, sedes y horarios. Si necesitas ayuda, responde este correo.
+            Entra al panel para subir promos, sedes y horarios. Si necesitas ayuda,
+            escribe a <strong>soporte@tuspromos.com</strong>.
           </p>
-          <a href="https://tuspromos.com" style="display:inline-block;background:#1f1f1f;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;">
-            Ir a Tus promos
+          <a href="https://tuspromos.com/dashboard" style="display:inline-block;background:#1f1f1f;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;">
+            Ir al panel
           </a>
           <p style="margin:18px 0 0;font-size:11px;color:#8a817a;">
             Gracias por unirte a la comunidad de negocios locales.
