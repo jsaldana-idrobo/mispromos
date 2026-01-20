@@ -198,9 +198,6 @@ const businessCityFilter = document.querySelector<HTMLSelectElement>(
 const businessCategoryFilter = document.querySelector<HTMLSelectElement>(
   "[data-business-category-filter]",
 );
-const businessApprovedFilter = document.querySelector<HTMLSelectElement>(
-  "[data-business-approved-filter]",
-);
 const businessInstagramFilter = document.querySelector<HTMLSelectElement>(
   "[data-business-instagram-filter]",
 );
@@ -459,7 +456,6 @@ let businessFilters = {
   type: "all",
   city: "all",
   category: "all",
-  approved: "all",
   instagram: "all",
 };
 let adminPromoPage = 1;
@@ -1312,12 +1308,8 @@ const formatBusinessCategories = (business: Business) => {
   return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
 };
 
-const getFilteredBusinesses = (
-  source: Business[],
-  options: { includeApprovalFilter?: boolean } = {},
-) => {
+const getFilteredBusinesses = (source: Business[]) => {
   const searchValue = businessFilters.search.trim().toLowerCase();
-  const includeApprovalFilter = options.includeApprovalFilter ?? true;
   return source.filter((business) => {
     const typeMatch =
       businessFilters.type === "all" || business.type === businessFilters.type;
@@ -1328,11 +1320,6 @@ const getFilteredBusinesses = (
     const cityMatch =
       businessFilters.city === "all" ||
       businessCities.includes(businessFilters.city);
-    const approvedMatch =
-      !includeApprovalFilter ||
-      businessFilters.approved === "all" ||
-      (businessFilters.approved === "approved" && business.approved) ||
-      (businessFilters.approved === "pending" && !business.approved);
     const hasInstagram = Boolean((business.instagram ?? "").trim());
     const instagramMatch =
       businessFilters.instagram === "all" ||
@@ -1345,12 +1332,7 @@ const getFilteredBusinesses = (
       (business.description ?? "").toLowerCase().includes(searchValue) ||
       (business.instagram ?? "").toLowerCase().includes(searchValue);
     return (
-      typeMatch &&
-      categoryMatch &&
-      cityMatch &&
-      approvedMatch &&
-      instagramMatch &&
-      textMatch
+      typeMatch && categoryMatch && cityMatch && instagramMatch && textMatch
     );
   });
 };
@@ -2003,9 +1985,7 @@ const updateBusinessesView = () => {
   if (businessKpiPromos) {
     businessKpiPromos.textContent = String(promotions.length);
   }
-  const filtered = getFilteredBusinesses(businesses, {
-    includeApprovalFilter: true,
-  });
+  const filtered = getFilteredBusinesses(businesses);
   const isAdmin = currentUser?.role === "ADMIN";
   if (isAdmin) {
     const approvedBusinesses = businesses.filter(
@@ -2014,9 +1994,7 @@ const updateBusinessesView = () => {
     const pendingBusinesses = businesses.filter(
       (business) => !business.approved,
     );
-    const approvedFiltered = getFilteredBusinesses(approvedBusinesses, {
-      includeApprovalFilter: false,
-    });
+    const approvedFiltered = getFilteredBusinesses(approvedBusinesses);
     const start = (adminBusinessPage - 1) * ADMIN_BUSINESS_PAGE_SIZE;
     const paged = approvedFiltered.slice(
       start,
@@ -2094,7 +2072,6 @@ const resetBusinessFilters = () => {
     type: "all",
     city: "all",
     category: "all",
-    approved: "all",
     instagram: "all",
   };
   if (businessSearchInput) {
@@ -2108,9 +2085,6 @@ const resetBusinessFilters = () => {
   }
   if (businessCategoryFilter) {
     businessCategoryFilter.value = "all";
-  }
-  if (businessApprovedFilter) {
-    businessApprovedFilter.value = "all";
   }
   if (businessInstagramFilter) {
     businessInstagramFilter.value = "all";
@@ -3517,7 +3491,6 @@ const wireBusinessFilters = () => {
       type: businessTypeFilter.value,
       city: businessCityFilter?.value ?? "all",
       category: businessCategoryFilter?.value ?? "all",
-      approved: businessApprovedFilter?.value ?? "all",
       instagram: businessInstagramFilter?.value ?? "all",
     };
     adminBusinessPage = 1;
@@ -3527,7 +3500,6 @@ const wireBusinessFilters = () => {
   businessTypeFilter.addEventListener("change", updateFilters);
   businessCityFilter?.addEventListener("change", updateFilters);
   businessCategoryFilter?.addEventListener("change", updateFilters);
-  businessApprovedFilter?.addEventListener("change", updateFilters);
   businessInstagramFilter?.addEventListener("change", updateFilters);
 };
 
