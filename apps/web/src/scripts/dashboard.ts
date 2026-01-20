@@ -120,6 +120,21 @@ const promoImagePreview = document.querySelector<HTMLImageElement>(
 const promoImagePreviewWrapper = document.querySelector<HTMLElement>(
   "[data-promo-image-preview-wrapper]",
 );
+const confirmOverlay = document.querySelector<HTMLElement>(
+  "[data-confirm-overlay]",
+);
+const confirmTitle = document.querySelector<HTMLElement>(
+  "[data-confirm-title]",
+);
+const confirmMessage = document.querySelector<HTMLElement>(
+  "[data-confirm-message]",
+);
+const confirmAccept = document.querySelector<HTMLButtonElement>(
+  "[data-confirm-accept]",
+);
+const confirmCancel = document.querySelector<HTMLButtonElement>(
+  "[data-confirm-cancel]",
+);
 const promoMessage = document.querySelector<HTMLElement>(
   "[data-promo-message]",
 );
@@ -1211,6 +1226,46 @@ const setPromoFormEnabled = (enabled: boolean) => {
     }
   });
 };
+
+let confirmResolver: ((value: boolean) => void) | null = null;
+
+const openConfirmModal = (options: {
+  title?: string;
+  message: string;
+  confirmLabel?: string;
+}) =>
+  new Promise<boolean>((resolve) => {
+    if (!confirmOverlay || !confirmMessage || !confirmAccept) {
+      resolve(false);
+      return;
+    }
+    confirmResolver = resolve;
+    if (confirmTitle) {
+      confirmTitle.textContent = options.title ?? "Confirmar acción";
+    }
+    confirmMessage.textContent = options.message;
+    confirmAccept.textContent = options.confirmLabel ?? "Confirmar";
+    confirmOverlay.hidden = false;
+    confirmOverlay.classList.remove("hidden");
+  });
+
+const closeConfirmModal = (confirmed: boolean) => {
+  if (!confirmResolver) return;
+  confirmOverlay?.classList.add("hidden");
+  if (confirmOverlay) {
+    confirmOverlay.hidden = true;
+  }
+  confirmResolver(confirmed);
+  confirmResolver = null;
+};
+
+confirmAccept?.addEventListener("click", () => closeConfirmModal(true));
+confirmCancel?.addEventListener("click", () => closeConfirmModal(false));
+confirmOverlay?.addEventListener("click", (event) => {
+  if (event.target === confirmOverlay) {
+    closeConfirmModal(false);
+  }
+});
 
 const renderUser = () => {
   if (!userCard) return;
@@ -3050,9 +3105,11 @@ const handleBusinessEdit = async (editId: string) => {
 };
 
 const handleBusinessApprove = async (approveId: string) => {
-  const confirmed = globalThis.confirm(
-    "¿Aprobar este negocio y habilitar su acceso?",
-  );
+  const confirmed = await openConfirmModal({
+    title: "Aprobar solicitud",
+    message: "¿Aprobar este negocio y habilitar su acceso?",
+    confirmLabel: "Aprobar",
+  });
   if (!confirmed) return;
   const updated = await apiFetch<Business>(
     `/businesses/${approveId}/approval`,
@@ -3069,9 +3126,11 @@ const handleBusinessApprove = async (approveId: string) => {
 };
 
 const handleBusinessReject = async (rejectId: string) => {
-  const confirmed = globalThis.confirm(
-    "¿Rechazar esta solicitud? Se eliminara el negocio.",
-  );
+  const confirmed = await openConfirmModal({
+    title: "Rechazar solicitud",
+    message: "¿Rechazar esta solicitud? Se eliminará el negocio.",
+    confirmLabel: "Rechazar",
+  });
   if (!confirmed) return;
   businesses = businesses.filter((business) => business._id !== rejectId);
   updateBusinessesView();
@@ -3081,9 +3140,11 @@ const handleBusinessReject = async (rejectId: string) => {
 };
 
 const handleBusinessDelete = async (deleteId: string) => {
-  const confirmed = globalThis.confirm(
-    "¿Eliminar este negocio? También perderás sus sedes y promos.",
-  );
+  const confirmed = await openConfirmModal({
+    title: "Eliminar negocio",
+    message: "¿Eliminar este negocio? También perderás sus sedes y promos.",
+    confirmLabel: "Eliminar",
+  });
   if (!confirmed) return;
   businesses = businesses.filter((business) => business._id !== deleteId);
   updateBusinessesView();
