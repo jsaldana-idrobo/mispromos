@@ -1006,6 +1006,9 @@ const setBranchLabels = (isAdmin: boolean) => {
 
 const setAdminOnlyVisibility = (isAdmin: boolean) => {
   adminOnlySections.forEach((section) => {
+    if (section.dataset.dashboardPanel) {
+      return;
+    }
     section.hidden = !isAdmin;
   });
   if (ownerBusinessPanel) {
