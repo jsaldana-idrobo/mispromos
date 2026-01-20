@@ -1233,6 +1233,7 @@ const openConfirmModal = (options: {
   title?: string;
   message: string;
   confirmLabel?: string;
+  cancelLabel?: string;
 }) =>
   new Promise<boolean>((resolve) => {
     if (!confirmOverlay || !confirmMessage || !confirmAccept) {
@@ -1245,6 +1246,9 @@ const openConfirmModal = (options: {
     }
     confirmMessage.textContent = options.message;
     confirmAccept.textContent = options.confirmLabel ?? "Confirmar";
+    if (confirmCancel) {
+      confirmCancel.textContent = options.cancelLabel ?? "Cancelar";
+    }
     confirmOverlay.hidden = false;
     confirmOverlay.classList.remove("hidden");
   });
@@ -3104,67 +3108,119 @@ const handleBusinessEdit = async (editId: string) => {
   updatePromotionsView();
 };
 
-const handleBusinessApprove = async (approveId: string) => {
+const handleBusinessApprove = async (
+  approveId: string,
+  trigger?: HTMLButtonElement,
+) => {
   const confirmed = await openConfirmModal({
     title: "Aprobar solicitud",
     message: "¿Aprobar este negocio y habilitar su acceso?",
     confirmLabel: "Aprobar",
   });
   if (!confirmed) return;
-  const updated = await apiFetch<Business>(
-    `/businesses/${approveId}/approval`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ approved: true }),
-    },
-  );
-  businesses = businesses.map((business) =>
-    business._id === approveId ? updated : business,
-  );
-  updateBusinessesView();
-  showToast("Listo", "Negocio aprobado.", "success");
+  if (trigger) {
+    startButtonLoading(trigger, "Aprobando");
+  }
+  try {
+    const updated = await apiFetch<Business>(
+      `/businesses/${approveId}/approval`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ approved: true }),
+      },
+    );
+    businesses = businesses.map((business) =>
+      business._id === approveId ? updated : business,
+    );
+    updateBusinessesView();
+    showToast("Listo", "Negocio aprobado.", "success");
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "No pudimos aprobar el negocio.";
+    showToast("Error", message, "error");
+  } finally {
+    if (trigger) {
+      stopButtonLoading(trigger);
+    }
+  }
 };
 
-const handleBusinessReject = async (rejectId: string) => {
+const handleBusinessReject = async (
+  rejectId: string,
+  trigger?: HTMLButtonElement,
+) => {
   const confirmed = await openConfirmModal({
     title: "Rechazar solicitud",
     message: "¿Rechazar esta solicitud? Se eliminará el negocio.",
     confirmLabel: "Rechazar",
   });
   if (!confirmed) return;
-  businesses = businesses.filter((business) => business._id !== rejectId);
-  updateBusinessesView();
-  await apiFetch(`/businesses/${rejectId}`, { method: "DELETE" });
-  showToast("Listo", "Solicitud rechazada.", "success");
-  await loadBusinesses();
+  if (trigger) {
+    startButtonLoading(trigger, "Rechazando");
+  }
+  try {
+    businesses = businesses.filter((business) => business._id !== rejectId);
+    updateBusinessesView();
+    await apiFetch(`/businesses/${rejectId}`, { method: "DELETE" });
+    showToast("Listo", "Solicitud rechazada.", "success");
+    await loadBusinesses();
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No pudimos rechazar la solicitud.";
+    showToast("Error", message, "error");
+  } finally {
+    if (trigger) {
+      stopButtonLoading(trigger);
+    }
+  }
 };
 
-const handleBusinessDelete = async (deleteId: string) => {
+const handleBusinessDelete = async (
+  deleteId: string,
+  trigger?: HTMLButtonElement,
+) => {
   const confirmed = await openConfirmModal({
     title: "Eliminar negocio",
     message: "¿Eliminar este negocio? También perderás sus sedes y promos.",
     confirmLabel: "Eliminar",
   });
   if (!confirmed) return;
-  businesses = businesses.filter((business) => business._id !== deleteId);
-  updateBusinessesView();
-  await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
-  showToast("Listo", "Negocio eliminado.", "success");
-  await loadBusinesses();
-  if (businesses.length > 0) {
-    currentBusinessId = businesses[0]._id;
-    await loadBranches(currentBusinessId);
-    await loadPromotions(currentBusinessId);
-    updatePromotionsView();
+  if (trigger) {
+    startButtonLoading(trigger, "Eliminando");
+  }
+  try {
+    businesses = businesses.filter((business) => business._id !== deleteId);
     updateBusinessesView();
-  } else {
-    currentBusinessId = "";
-    branches = [];
-    updateBranchCityFilterOptions();
-    updateBranchesView();
-    promotions = [];
-    updatePromotionsView();
-    updateBusinessesView();
+    await apiFetch(`/businesses/${deleteId}`, { method: "DELETE" });
+    showToast("Listo", "Negocio eliminado.", "success");
+    await loadBusinesses();
+    if (businesses.length > 0) {
+      currentBusinessId = businesses[0]._id;
+      await loadBranches(currentBusinessId);
+      await loadPromotions(currentBusinessId);
+      updatePromotionsView();
+      updateBusinessesView();
+    } else {
+      currentBusinessId = "";
+      branches = [];
+      updateBranchCityFilterOptions();
+      updateBranchesView();
+      promotions = [];
+      updatePromotionsView();
+      updateBusinessesView();
+    }
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "No pudimos eliminar el negocio.";
+    showToast("Error", message, "error");
+  } finally {
+    if (trigger) {
+      stopButtonLoading(trigger);
+    }
   }
 };
 
@@ -3188,15 +3244,15 @@ const wireBusinessActions = () => {
         return;
       }
       if (approveId) {
-        await handleBusinessApprove(approveId);
+        await handleBusinessApprove(approveId, target as HTMLButtonElement);
         return;
       }
       if (rejectId) {
-        await handleBusinessReject(rejectId);
+        await handleBusinessReject(rejectId, target as HTMLButtonElement);
         return;
       }
       if (deleteId) {
-        await handleBusinessDelete(deleteId);
+        await handleBusinessDelete(deleteId, target as HTMLButtonElement);
       }
     });
   });
