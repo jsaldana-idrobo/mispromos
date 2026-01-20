@@ -186,20 +186,24 @@ const branchKpiCities = document.querySelector<HTMLElement>(
 const branchKpiPhones = document.querySelector<HTMLElement>(
   "[data-branch-kpi-phones]",
 );
-const businessSearchInput = document.querySelector<HTMLInputElement>(
-  "[data-business-search]",
+const businessSearchInputs = Array.from(
+  document.querySelectorAll<HTMLInputElement>("[data-business-search]"),
 );
-const businessTypeFilter = document.querySelector<HTMLSelectElement>(
-  "[data-business-type-filter]",
+const businessTypeFilters = Array.from(
+  document.querySelectorAll<HTMLSelectElement>("[data-business-type-filter]"),
 );
-const businessCityFilter = document.querySelector<HTMLSelectElement>(
-  "[data-business-city-filter]",
+const businessCityFilters = Array.from(
+  document.querySelectorAll<HTMLSelectElement>("[data-business-city-filter]"),
 );
-const businessCategoryFilter = document.querySelector<HTMLSelectElement>(
-  "[data-business-category-filter]",
+const businessCategoryFilters = Array.from(
+  document.querySelectorAll<HTMLSelectElement>(
+    "[data-business-category-filter]",
+  ),
 );
-const businessInstagramFilter = document.querySelector<HTMLSelectElement>(
-  "[data-business-instagram-filter]",
+const businessInstagramFilters = Array.from(
+  document.querySelectorAll<HTMLSelectElement>(
+    "[data-business-instagram-filter]",
+  ),
 );
 const businessPagination = document.querySelector<HTMLElement>(
   "[data-business-pagination]",
@@ -1338,21 +1342,24 @@ const getFilteredBusinesses = (source: Business[]) => {
 };
 
 const updateBusinessCityFilterOptions = () => {
-  if (!businessCityFilter) return;
-  const selected = businessCityFilter.value || "all";
+  if (businessCityFilters.length === 0) return;
+  const selected = businessCityFilters[0]?.value || "all";
   const cities = Array.from(
     new Set(branches.map((branch) => branch.city)),
   ).sort(compareLabels);
-  businessCityFilter.innerHTML = `
+  const optionsHtml = `
     <option value="all">Todas</option>
     ${cities.map((city) => `<option value="${city}">${city}</option>`).join("")}
   `;
-  businessCityFilter.value = cities.includes(selected) ? selected : "all";
+  businessCityFilters.forEach((filter) => {
+    filter.innerHTML = optionsHtml;
+    filter.value = cities.includes(selected) ? selected : "all";
+  });
 };
 
 const updateBusinessCategoryFilterOptions = () => {
-  if (!businessCategoryFilter) return;
-  const selected = businessCategoryFilter.value || "all";
+  if (businessCategoryFilters.length === 0) return;
+  const selected = businessCategoryFilters[0]?.value || "all";
   const options =
     categories.length > 0
       ? categories.map((category) => ({
@@ -1362,13 +1369,16 @@ const updateBusinessCategoryFilterOptions = () => {
       : Array.from(
           new Set(businesses.flatMap((business) => business.categories ?? [])),
         ).map((slug) => ({ value: slug, label: slug }));
-  businessCategoryFilter.innerHTML = `
+  const optionsHtml = `
     <option value="all">Todas</option>
     ${options.map((item) => `<option value="${item.value}">${item.label}</option>`).join("")}
   `;
-  businessCategoryFilter.value = options.some((item) => item.value === selected)
-    ? selected
-    : "all";
+  businessCategoryFilters.forEach((filter) => {
+    filter.innerHTML = optionsHtml;
+    filter.value = options.some((item) => item.value === selected)
+      ? selected
+      : "all";
+  });
 };
 
 const renderBusinessList = (
@@ -2075,21 +2085,21 @@ const resetBusinessFilters = () => {
     category: "all",
     instagram: "all",
   };
-  if (businessSearchInput) {
-    businessSearchInput.value = "";
-  }
-  if (businessTypeFilter) {
-    businessTypeFilter.value = "all";
-  }
-  if (businessCityFilter) {
-    businessCityFilter.value = "all";
-  }
-  if (businessCategoryFilter) {
-    businessCategoryFilter.value = "all";
-  }
-  if (businessInstagramFilter) {
-    businessInstagramFilter.value = "all";
-  }
+  businessSearchInputs.forEach((input) => {
+    input.value = "";
+  });
+  businessTypeFilters.forEach((filter) => {
+    filter.value = "all";
+  });
+  businessCityFilters.forEach((filter) => {
+    filter.value = "all";
+  });
+  businessCategoryFilters.forEach((filter) => {
+    filter.value = "all";
+  });
+  businessInstagramFilters.forEach((filter) => {
+    filter.value = "all";
+  });
 };
 
 const ensureCurrentBusiness = () => {
@@ -3485,23 +3495,65 @@ const wireBranchFilters = () => {
 };
 
 const wireBusinessFilters = () => {
-  if (!businessSearchInput || !businessTypeFilter) return;
+  if (businessSearchInputs.length === 0 || businessTypeFilters.length === 0) {
+    return;
+  }
+  const syncInputs = <T extends HTMLInputElement | HTMLSelectElement>(
+    inputs: T[],
+    value: string,
+  ) => {
+    inputs.forEach((input) => {
+      if (input.value !== value) {
+        input.value = value;
+      }
+    });
+  };
   const updateFilters = () => {
     businessFilters = {
-      search: businessSearchInput.value,
-      type: businessTypeFilter.value,
-      city: businessCityFilter?.value ?? "all",
-      category: businessCategoryFilter?.value ?? "all",
-      instagram: businessInstagramFilter?.value ?? "all",
+      search: businessSearchInputs[0]?.value ?? "",
+      type: businessTypeFilters[0]?.value ?? "all",
+      city: businessCityFilters[0]?.value ?? "all",
+      category: businessCategoryFilters[0]?.value ?? "all",
+      instagram: businessInstagramFilters[0]?.value ?? "all",
     };
     adminBusinessPage = 1;
     updateBusinessesView();
   };
-  businessSearchInput.addEventListener("input", updateFilters);
-  businessTypeFilter.addEventListener("change", updateFilters);
-  businessCityFilter?.addEventListener("change", updateFilters);
-  businessCategoryFilter?.addEventListener("change", updateFilters);
-  businessInstagramFilter?.addEventListener("change", updateFilters);
+  businessSearchInputs.forEach((input) => {
+    input.addEventListener("input", (event) => {
+      const value = (event.currentTarget as HTMLInputElement).value;
+      syncInputs(businessSearchInputs, value);
+      updateFilters();
+    });
+  });
+  businessTypeFilters.forEach((filter) => {
+    filter.addEventListener("change", (event) => {
+      const value = (event.currentTarget as HTMLSelectElement).value;
+      syncInputs(businessTypeFilters, value);
+      updateFilters();
+    });
+  });
+  businessCityFilters.forEach((filter) => {
+    filter.addEventListener("change", (event) => {
+      const value = (event.currentTarget as HTMLSelectElement).value;
+      syncInputs(businessCityFilters, value);
+      updateFilters();
+    });
+  });
+  businessCategoryFilters.forEach((filter) => {
+    filter.addEventListener("change", (event) => {
+      const value = (event.currentTarget as HTMLSelectElement).value;
+      syncInputs(businessCategoryFilters, value);
+      updateFilters();
+    });
+  });
+  businessInstagramFilters.forEach((filter) => {
+    filter.addEventListener("change", (event) => {
+      const value = (event.currentTarget as HTMLSelectElement).value;
+      syncInputs(businessInstagramFilters, value);
+      updateFilters();
+    });
+  });
 };
 
 const initDashboard = async () => {

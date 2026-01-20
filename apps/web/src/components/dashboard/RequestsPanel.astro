@@ -12,6 +12,49 @@
       </p>
     </div>
   </div>
+  <div
+    class="mt-5 grid gap-3 rounded-3xl border border-ink-900/10 bg-white/90 p-4 md:grid-cols-3"
+  >
+    <label class="grid gap-2 text-sm font-semibold">
+      Buscar negocio
+      <input
+        class="input-field"
+        name="search"
+        placeholder="Nombre, slug o Instagram..."
+        data-business-search
+      />
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Tipo
+      <select class="input-field" name="type" data-business-type-filter>
+        <option value="all">Todos</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Ciudad
+      <select class="input-field" name="city" data-business-city-filter>
+        <option value="all">Todas</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Categoría
+      <select class="input-field" name="category" data-business-category-filter>
+        <option value="all">Todas</option>
+      </select>
+    </label>
+    <label class="grid gap-2 text-sm font-semibold">
+      Instagram
+      <select
+        class="input-field"
+        name="instagram"
+        data-business-instagram-filter
+      >
+        <option value="all">Todos</option>
+        <option value="with">Con Instagram</option>
+        <option value="without">Sin Instagram</option>
+      </select>
+    </label>
+  </div>
   <div class="mt-4 grid gap-3" data-business-requests data-business-actions>
     <div
       class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
