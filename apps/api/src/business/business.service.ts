@@ -11,6 +11,10 @@ import { CreateBusinessDto } from "./dto/create-business.dto";
 import { UpdateBusinessDto } from "./dto/update-business.dto";
 import { User, type UserDocument } from "../auth/user.schema";
 import { EmailService } from "../notifications/email.service";
+import {
+  Promotion,
+  type PromotionDocument,
+} from "../promotion/promotion.schema";
 
 type Actor = {
   id: string;
@@ -22,6 +26,8 @@ export class BusinessService {
   constructor(
     @InjectModel(Business.name)
     private readonly businessModel: Model<BusinessDocument>,
+    @InjectModel(Promotion.name)
+    private readonly promotionModel: Model<PromotionDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
     private readonly emailService: EmailService,
@@ -72,6 +78,19 @@ export class BusinessService {
     if (!updated) {
       throw new NotFoundException("Negocio no encontrado");
     }
+    await this.promotionModel
+      .updateMany(
+        { businessId: id },
+        {
+          $set: {
+            businessName: updated.name,
+            businessSlug: updated.slug,
+            businessCategories: updated.categories ?? [],
+            businessInstagram: updated.instagram,
+          },
+        },
+      )
+      .exec();
     return updated;
   }
 
