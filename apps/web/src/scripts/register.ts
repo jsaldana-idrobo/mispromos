@@ -22,7 +22,7 @@ const loadCategories = async () => {
       .join("");
   } catch {
     categorySelect.innerHTML =
-      "<option value=\"\">Sin categorias disponibles</option>";
+      '<option value="">Sin categorias disponibles</option>';
     categorySelect.disabled = true;
   }
 };

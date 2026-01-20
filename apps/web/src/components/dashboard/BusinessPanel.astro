@@ -89,14 +89,6 @@ const { businessTypes = [], businessTypeLabels = {} } =
       </select>
     </label>
     <label class="grid gap-2 text-sm font-semibold">
-      Aprobación
-      <select class="input-field" name="approved" data-business-approved-filter>
-        <option value="all">Todas</option>
-        <option value="approved">Aprobado</option>
-        <option value="pending">Pendiente</option>
-      </select>
-    </label>
-    <label class="grid gap-2 text-sm font-semibold">
       Instagram
       <select
         class="input-field"
@@ -109,34 +101,61 @@ const { businessTypes = [], businessTypeLabels = {} } =
       </select>
     </label>
   </div>
-  <div class="mt-4 grid gap-3" data-business-list data-admin-only hidden>
-    <div
-      class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
-    >
-      Aun no hay negocios.
+  <div class="mt-6 space-y-6" data-admin-only hidden>
+    <div>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-ink-900">Negocios aprobados</h3>
+      </div>
+      <div
+        class="mt-3 grid gap-3"
+        data-business-list-approved
+        data-business-actions
+      >
+        <div
+          class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+        >
+          Aun no hay negocios aprobados.
+        </div>
+      </div>
+      <div
+        class="mt-4 flex items-center justify-between text-sm text-ink-900/60"
+        data-business-pagination
+        hidden
+      >
+        <button
+          class="rounded-full border border-ink-900/20 px-4 py-1"
+          type="button"
+          data-business-page-prev
+        >
+          Anterior
+        </button>
+        <span data-business-page-info>Página 1</span>
+        <button
+          class="rounded-full border border-ink-900/20 px-4 py-1"
+          type="button"
+          data-business-page-next
+        >
+          Siguiente
+        </button>
+      </div>
     </div>
-  </div>
-  <div
-    class="mt-4 flex items-center justify-between text-sm text-ink-900/60"
-    data-business-pagination
-    data-admin-only
-    hidden
-  >
-    <button
-      class="rounded-full border border-ink-900/20 px-4 py-1"
-      type="button"
-      data-business-page-prev
-    >
-      Anterior
-    </button>
-    <span data-business-page-info>Página 1</span>
-    <button
-      class="rounded-full border border-ink-900/20 px-4 py-1"
-      type="button"
-      data-business-page-next
-    >
-      Siguiente
-    </button>
+    <div>
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-ink-900">
+          Solicitudes pendientes
+        </h3>
+        <p class="text-xs text-ink-900/50">
+          Revisa Instagram antes de aprobar.
+        </p>
+      </div>
+      <div class="mt-3 grid gap-3" data-business-requests data-business-actions>
+        <div
+          class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70"
+        >
+          No hay solicitudes pendientes.
+        </div>
+      </div>
+    </div>
   </div>
   <div
     class="mt-4 rounded-3xl border border-ink-900/10 bg-white/90 p-5"

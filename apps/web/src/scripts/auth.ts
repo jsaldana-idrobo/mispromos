@@ -9,6 +9,7 @@ type AuthResponse = {
 
 const form = document.querySelector<HTMLFormElement>("[data-auth-form]");
 const messageEl = document.querySelector<HTMLElement>("[data-auth-message]");
+const successEl = document.querySelector<HTMLElement>("[data-auth-success]");
 const emailInput = form?.querySelector<HTMLInputElement>("input[name='email']");
 const passwordInput = form?.querySelector<HTMLInputElement>(
   "input[name='password']",
@@ -118,13 +119,18 @@ if (form) {
   const handleRegisterSuccess = () => {
     showToast(
       "Solicitud enviada",
-      "Te avisaremos cuando tu negocio sea aprobado.",
+      "Validaremos tu Instagram y te avisaremos por correo.",
       "success",
     );
     setAuthMessage(
-      "Solicitud enviada. Te avisaremos por correo cuando sea aprobada.",
+      "Solicitud enviada. Te avisaremos por correo cuando esté aprobada.",
     );
     form.reset();
+    form.hidden = true;
+    if (successEl) {
+      successEl.classList.remove("hidden");
+      successEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const handleLoginSuccess = () => {

@@ -75,7 +75,13 @@ const compareLabels = (left: string, right: string) =>
 
 const userCard = document.querySelector<HTMLElement>("[data-user-card]");
 const businessList = document.querySelector<HTMLElement>(
-  "[data-business-list]",
+  "[data-business-list-approved]",
+);
+const businessRequestsList = document.querySelector<HTMLElement>(
+  "[data-business-requests]",
+);
+const businessActionLists = Array.from(
+  document.querySelectorAll<HTMLElement>("[data-business-actions]"),
 );
 const branchList = document.querySelector<HTMLElement>("[data-branch-list]");
 const promoList = document.querySelector<HTMLElement>("[data-promo-list]");
@@ -1306,9 +1312,13 @@ const formatBusinessCategories = (business: Business) => {
   return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
 };
 
-const getFilteredBusinesses = () => {
+const getFilteredBusinesses = (
+  source: Business[],
+  options: { includeApprovalFilter?: boolean } = {},
+) => {
   const searchValue = businessFilters.search.trim().toLowerCase();
-  return businesses.filter((business) => {
+  const includeApprovalFilter = options.includeApprovalFilter ?? true;
+  return source.filter((business) => {
     const typeMatch =
       businessFilters.type === "all" || business.type === businessFilters.type;
     const categoryMatch =
@@ -1319,6 +1329,7 @@ const getFilteredBusinesses = () => {
       businessFilters.city === "all" ||
       businessCities.includes(businessFilters.city);
     const approvedMatch =
+      !includeApprovalFilter ||
       businessFilters.approved === "all" ||
       (businessFilters.approved === "approved" && business.approved) ||
       (businessFilters.approved === "pending" && !business.approved);
@@ -1378,28 +1389,41 @@ const updateBusinessCategoryFilterOptions = () => {
     : "all";
 };
 
-const renderBusinesses = (list: Business[], total: number) => {
-  if (!businessList) return;
+const renderBusinessList = (
+  target: HTMLElement | null,
+  list: Business[],
+  total: number,
+  options: {
+    emptyMessage: string;
+    showEmptyAction?: boolean;
+    showApprovalActions?: boolean;
+  },
+) => {
+  if (!target) return;
   if (total === 0) {
-    businessList.innerHTML = `
+    target.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
-        Aun no hay negocios.
-        <button class="mt-3 inline-flex text-xs underline" data-empty-action="business">
+        ${options.emptyMessage}
+        ${
+          options.showEmptyAction
+            ? `<button class="mt-3 inline-flex text-xs underline" data-empty-action="business">
           Crear mi primer negocio
-        </button>
+        </button>`
+            : ""
+        }
       </div>
     `;
     return;
   }
   if (list.length === 0) {
-    businessList.innerHTML = `
+    target.innerHTML = `
       <div class="rounded-2xl border border-ink-900/10 bg-sand-100 px-4 py-3 text-sm text-ink-900/70">
         No hay negocios que coincidan con los filtros.
       </div>
     `;
     return;
   }
-  businessList.innerHTML = `
+  target.innerHTML = `
     <div class="hidden md:block">
       <table class="w-full table-fixed border-separate border-spacing-y-3">
         <colgroup>
@@ -1452,10 +1476,10 @@ const renderBusinesses = (list: Business[], total: number) => {
                       <button class="action-btn action-edit" data-business-edit="${business._id}">Editar</button>
                       <button class="action-btn action-delete" data-business-delete="${business._id}">Eliminar</button>
                       ${
-                        business.approved
-                          ? `<span class="text-xs text-ink-900/60">Aprobado</span>`
-                          : `<button class="action-btn" data-business-approve="${business._id}">Aprobar</button>
+                        options.showApprovalActions
+                          ? `<button class="action-btn" data-business-approve="${business._id}">Aprobar</button>
                              <button class="action-btn" data-business-reject="${business._id}">Rechazar</button>`
+                          : ""
                       }
                     </div>
                   </td>
@@ -1488,10 +1512,10 @@ const renderBusinesses = (list: Business[], total: number) => {
                 <button class="action-btn action-edit" data-business-edit="${business._id}">Editar</button>
                 <button class="action-btn action-delete" data-business-delete="${business._id}">Eliminar</button>
                 ${
-                  business.approved
-                    ? `<span class="text-xs text-ink-900/60">Aprobado</span>`
-                    : `<button class="action-btn" data-business-approve="${business._id}">Aprobar</button>
+                  options.showApprovalActions
+                    ? `<button class="action-btn" data-business-approve="${business._id}">Aprobar</button>
                        <button class="action-btn" data-business-reject="${business._id}">Rechazar</button>`
+                    : ""
                 }
               </div>
             </div>
@@ -1979,15 +2003,47 @@ const updateBusinessesView = () => {
   if (businessKpiPromos) {
     businessKpiPromos.textContent = String(promotions.length);
   }
-  const filtered = getFilteredBusinesses();
+  const filtered = getFilteredBusinesses(businesses, {
+    includeApprovalFilter: true,
+  });
   const isAdmin = currentUser?.role === "ADMIN";
   if (isAdmin) {
+    const approvedBusinesses = businesses.filter(
+      (business) => business.approved,
+    );
+    const pendingBusinesses = businesses.filter(
+      (business) => !business.approved,
+    );
+    const approvedFiltered = getFilteredBusinesses(approvedBusinesses, {
+      includeApprovalFilter: false,
+    });
     const start = (adminBusinessPage - 1) * ADMIN_BUSINESS_PAGE_SIZE;
-    const paged = filtered.slice(start, start + ADMIN_BUSINESS_PAGE_SIZE);
-    renderBusinesses(paged, total);
-    updateBusinessPagination(filtered.length, true);
+    const paged = approvedFiltered.slice(
+      start,
+      start + ADMIN_BUSINESS_PAGE_SIZE,
+    );
+    renderBusinessList(businessList, paged, approvedFiltered.length, {
+      emptyMessage: "Aun no hay negocios aprobados.",
+      showEmptyAction: true,
+      showApprovalActions: false,
+    });
+    renderBusinessList(
+      businessRequestsList,
+      pendingBusinesses,
+      pendingBusinesses.length,
+      {
+        emptyMessage: "No hay solicitudes pendientes.",
+        showEmptyAction: false,
+        showApprovalActions: true,
+      },
+    );
+    updateBusinessPagination(approvedFiltered.length, true);
   } else {
-    renderBusinesses(filtered, total);
+    renderBusinessList(businessList, filtered, total, {
+      emptyMessage: "Aun no hay negocios.",
+      showEmptyAction: true,
+      showApprovalActions: false,
+    });
     updateBusinessPagination(0, false);
   }
   if (!isAdmin) {
@@ -2095,6 +2151,7 @@ const loadBusinessDependencies = async (isAdmin: boolean) => {
 const loadBusinesses = async () => {
   if (!currentUser) return;
   renderLoadingMessage(businessList, "Cargando negocios...");
+  renderLoadingMessage(businessRequestsList, "Cargando solicitudes...");
   businessSelects.forEach((select) =>
     setSelectLoading(select, "Cargando negocios..."),
   );
@@ -3012,10 +3069,13 @@ const handleBusinessApprove = async (approveId: string) => {
     "¿Aprobar este negocio y habilitar su acceso?",
   );
   if (!confirmed) return;
-  const updated = await apiFetch<Business>(`/businesses/${approveId}/approval`, {
-    method: "PATCH",
-    body: JSON.stringify({ approved: true }),
-  });
+  const updated = await apiFetch<Business>(
+    `/businesses/${approveId}/approval`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ approved: true }),
+    },
+  );
   businesses = businesses.map((business) =>
     business._id === approveId ? updated : business,
   );
@@ -3063,34 +3123,36 @@ const handleBusinessDelete = async (deleteId: string) => {
 };
 
 const wireBusinessActions = () => {
-  if (!businessList) return;
-  businessList.addEventListener("click", async (event) => {
-    const target = event.target as HTMLElement;
-    const selectId = target.dataset.businessSelect;
-    const editId = target.dataset.businessEdit;
-    const deleteId = target.dataset.businessDelete;
-    const approveId = target.dataset.businessApprove;
-    const rejectId = target.dataset.businessReject;
+  if (businessActionLists.length === 0) return;
+  businessActionLists.forEach((listEl) => {
+    listEl.addEventListener("click", async (event) => {
+      const target = event.target as HTMLElement;
+      const selectId = target.dataset.businessSelect;
+      const editId = target.dataset.businessEdit;
+      const deleteId = target.dataset.businessDelete;
+      const approveId = target.dataset.businessApprove;
+      const rejectId = target.dataset.businessReject;
 
-    if (selectId) {
-      await handleBusinessSelect(selectId);
-      return;
-    }
-    if (editId) {
-      await handleBusinessEdit(editId);
-      return;
-    }
-    if (approveId) {
-      await handleBusinessApprove(approveId);
-      return;
-    }
-    if (rejectId) {
-      await handleBusinessReject(rejectId);
-      return;
-    }
-    if (deleteId) {
-      await handleBusinessDelete(deleteId);
-    }
+      if (selectId) {
+        await handleBusinessSelect(selectId);
+        return;
+      }
+      if (editId) {
+        await handleBusinessEdit(editId);
+        return;
+      }
+      if (approveId) {
+        await handleBusinessApprove(approveId);
+        return;
+      }
+      if (rejectId) {
+        await handleBusinessReject(rejectId);
+        return;
+      }
+      if (deleteId) {
+        await handleBusinessDelete(deleteId);
+      }
+    });
   });
 };
 
