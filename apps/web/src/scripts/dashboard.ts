@@ -1317,7 +1317,7 @@ const renderUser = () => {
       authGateText.textContent =
         "Inicia sesión con una cuenta de negocio para administrar promociones.";
     }
-    window.location.href = "/login";
+    globalThis.location.href = "/login";
     return;
   }
 

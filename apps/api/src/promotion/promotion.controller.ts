@@ -42,76 +42,72 @@ export class PromotionController {
 
   @Get("active")
   findActive(@Req() req: Request) {
-    const query = req.query as Record<string, string | undefined>;
-    const city = query.city?.trim() || undefined;
-    const at = query.at?.trim() || undefined;
-    const promoType = Object.values(PromotionType).includes(
-      query.promoType as PromotionType,
-    )
-      ? (query.promoType as PromotionType)
-      : undefined;
-    const category = query.category?.trim() || undefined;
-    const businessType = Object.values(BusinessType).includes(
-      query.businessType as BusinessType,
-    )
-      ? (query.businessType as BusinessType)
-      : undefined;
-    const featuredParam = query.featured?.trim().toLowerCase();
+    const parsed = this.parseActiveQuery(req.query);
+    const featuredParam = parsed.featuredRaw?.trim().toLowerCase();
     let featured: boolean | undefined;
     if (featuredParam === "true") {
       featured = true;
     } else if (featuredParam === "false") {
       featured = false;
     }
-    const q = query.q?.trim() || undefined;
-    const offset = Number.isFinite(Number(query.offset))
-      ? Number(query.offset)
-      : undefined;
-    const limit = Number.isFinite(Number(query.limit))
-      ? Number(query.limit)
-      : undefined;
     return this.promotionService.findActiveByCity({
-      city,
-      at,
-      promoType,
-      category,
-      businessType,
+      city: parsed.city,
+      at: parsed.at,
+      promoType: parsed.promoType,
+      category: parsed.category,
+      businessType: parsed.businessType,
       featured,
-      q,
-      offset,
-      limit,
+      q: parsed.q,
+      offset: parsed.offset,
+      limit: parsed.limit,
     });
   }
 
   @Get("active-feed")
   findActiveFeed(@Req() req: Request) {
-    const query = req.query as Record<string, string | undefined>;
-    const city = query.city?.trim() || undefined;
-    const at = query.at?.trim() || undefined;
-    const promoType = Object.values(PromotionType).includes(
-      query.promoType as PromotionType,
-    )
-      ? (query.promoType as PromotionType)
-      : undefined;
-    const category = query.category?.trim() || undefined;
-    const businessType = Object.values(BusinessType).includes(
-      query.businessType as BusinessType,
-    )
-      ? (query.businessType as BusinessType)
-      : undefined;
+    const parsed = this.parseActiveQuery(req.query);
     const includeFeatured =
-      query.includeFeatured?.trim().toLowerCase() === "false" ? false : true;
-    const q = query.q?.trim() || undefined;
-    const offset = Number.isFinite(Number(query.offset))
-      ? Number(query.offset)
-      : undefined;
-    const limit = Number.isFinite(Number(query.limit))
-      ? Number(query.limit)
-      : undefined;
-    const featuredLimit = Number.isFinite(Number(query.featuredLimit))
-      ? Number(query.featuredLimit)
-      : undefined;
+      parsed.includeFeaturedRaw?.trim().toLowerCase() !== "false";
     return this.promotionService.findActiveFeed({
+      city: parsed.city,
+      at: parsed.at,
+      promoType: parsed.promoType,
+      category: parsed.category,
+      businessType: parsed.businessType,
+      q: parsed.q,
+      offset: parsed.offset,
+      limit: parsed.limit,
+      includeFeatured,
+      featuredLimit: parsed.featuredLimit,
+    });
+  }
+
+  private parseActiveQuery(query: Request["query"]) {
+    const raw = query as Record<string, string | undefined>;
+    const city = raw.city?.trim() || undefined;
+    const at = raw.at?.trim() || undefined;
+    const promoType = Object.values(PromotionType).includes(
+      raw.promoType as PromotionType,
+    )
+      ? (raw.promoType as PromotionType)
+      : undefined;
+    const category = raw.category?.trim() || undefined;
+    const businessType = Object.values(BusinessType).includes(
+      raw.businessType as BusinessType,
+    )
+      ? (raw.businessType as BusinessType)
+      : undefined;
+    const q = raw.q?.trim() || undefined;
+    const offset = Number.isFinite(Number(raw.offset))
+      ? Number(raw.offset)
+      : undefined;
+    const limit = Number.isFinite(Number(raw.limit))
+      ? Number(raw.limit)
+      : undefined;
+    const featuredLimit = Number.isFinite(Number(raw.featuredLimit))
+      ? Number(raw.featuredLimit)
+      : undefined;
+    return {
       city,
       at,
       promoType,
@@ -120,9 +116,10 @@ export class PromotionController {
       q,
       offset,
       limit,
-      includeFeatured,
       featuredLimit,
-    });
+      featuredRaw: raw.featured,
+      includeFeaturedRaw: raw.includeFeatured,
+    };
   }
 
   @Get(":id")

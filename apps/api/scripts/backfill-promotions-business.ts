@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { MongoClient, type Collection } from "mongodb";
+import { MongoClient } from "mongodb";
 
 type BusinessDoc = {
   _id: string;
@@ -109,7 +109,11 @@ const run = async () => {
   }
 };
 
-run().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+void (async () => {
+  try {
+    await run();
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+})();
