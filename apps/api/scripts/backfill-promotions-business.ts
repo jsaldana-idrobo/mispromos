@@ -109,11 +109,9 @@ const run = async () => {
   }
 };
 
-void (async () => {
-  try {
-    await run();
-  } catch (error) {
-    console.error(error);
-    process.exit(1);
-  }
-})();
+try {
+  await run();
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
