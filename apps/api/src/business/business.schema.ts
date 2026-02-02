@@ -22,6 +22,9 @@ export class Business {
   description?: string;
 
   @Prop({ trim: true })
+  website?: string;
+
+  @Prop({ trim: true })
   instagram?: string;
 
   @Prop({ required: true })

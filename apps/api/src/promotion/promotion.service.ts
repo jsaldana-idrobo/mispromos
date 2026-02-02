@@ -32,7 +32,7 @@ export class PromotionService {
   private async getBusinessForActor(businessId: string, actor: Actor) {
     const business = await this.businessModel
       .findById(businessId)
-      .select("_id name slug categories instagram ownerId")
+      .select("_id name slug categories instagram website ownerId")
       .lean()
       .exec();
     if (!business) {
@@ -49,12 +49,14 @@ export class PromotionService {
     slug: string;
     categories?: string[];
     instagram?: string;
+    website?: string;
   }) {
     return {
       businessName: business.name,
       businessSlug: business.slug,
       businessCategories: business.categories ?? [],
       businessInstagram: business.instagram,
+      businessWebsite: business.website,
     };
   }
 
@@ -318,6 +320,7 @@ export class PromotionService {
       businessSlug: 1,
       businessCategories: 1,
       businessInstagram: 1,
+      businessWebsite: 1,
     };
   }
 
@@ -382,12 +385,13 @@ export class PromotionService {
           slug: string;
           categories?: string[];
           instagram?: string;
+          website?: string;
         }
       >();
     }
     const businesses = await this.businessModel
       .find({ _id: { $in: Array.from(missingIds) } })
-      .select("_id name slug categories instagram")
+      .select("_id name slug categories instagram website")
       .lean()
       .exec();
     return new Map(
@@ -402,6 +406,7 @@ export class PromotionService {
       businessSlug?: string;
       businessCategories?: string[];
       businessInstagram?: string;
+      businessWebsite?: string;
     },
     businessMap: Map<
       string,
@@ -411,6 +416,7 @@ export class PromotionService {
         slug: string;
         categories?: string[];
         instagram?: string;
+        website?: string;
       }
     >,
   ) {
@@ -421,6 +427,7 @@ export class PromotionService {
         slug: promo.businessSlug ?? "",
         categories: promo.businessCategories ?? [],
         instagram: promo.businessInstagram,
+        website: promo.businessWebsite,
       };
     }
     if (!promo.businessId) {
@@ -435,6 +442,7 @@ export class PromotionService {
       businessSlug?: string;
       businessCategories?: string[];
       businessInstagram?: string;
+      businessWebsite?: string;
     },
   >(promo: T, business: unknown) {
     const {
@@ -442,6 +450,7 @@ export class PromotionService {
       businessSlug,
       businessCategories,
       businessInstagram,
+      businessWebsite,
       ...rest
     } = promo;
     return { ...rest, business };

@@ -22,6 +22,9 @@ export class Promotion {
   @Prop({ trim: true })
   businessInstagram?: string;
 
+  @Prop({ trim: true })
+  businessWebsite?: string;
+
   @Prop({ type: String, default: null })
   branchId?: string | null;
 

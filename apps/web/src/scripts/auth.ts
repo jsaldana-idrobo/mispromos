@@ -96,6 +96,13 @@ if (form) {
       .map((option) => option.value)
       .filter(Boolean);
 
+  const normalizeExternalUrl = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
   const buildPayload = (data: FormData) => {
     const getField = (key: string) => {
       const value = data.get(key);
@@ -111,6 +118,7 @@ if (form) {
       payload.type = getField("type");
       payload.categories = getCategoryValues();
       payload.description = getField("description");
+      payload.website = normalizeExternalUrl(getField("website")) || undefined;
       payload.instagram = getField("instagram");
     }
     return payload;

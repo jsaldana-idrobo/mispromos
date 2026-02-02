@@ -59,6 +59,7 @@ type SeedBusiness = {
   type: (typeof BusinessType)[keyof typeof BusinessType];
   categories: string[];
   description: string;
+  website?: string;
   instagram?: string;
   branches: Array<{
     city: string;
@@ -161,6 +162,7 @@ const seedBusinesses: SeedBusiness[] = [
     type: BusinessType.RESTAURANT,
     categories: ["parrilla", "pollo"],
     description: "Parrilla criolla y pollo asado con combos familiares.",
+    website: "https://labrasapalmira.com",
     instagram: "labrasapalmira",
     branches: [
       {
@@ -624,6 +626,7 @@ type BusinessDoc = {
   categories: string[];
   description?: string;
   instagram?: string;
+  website?: string;
   ownerId: string;
   approved: boolean;
   createdAt: Date;
@@ -653,6 +656,7 @@ type PromotionDoc = {
   startHour: string;
   endHour: string;
   active: boolean;
+  businessWebsite?: string;
   createdAt: Date;
 };
 
@@ -705,11 +709,14 @@ const upsertUser = async (
 };
 
 const upsertBusiness = async (collection: Collection<BusinessDoc>, business: BusinessDoc) => {
-  const { instagram, ownerId, ...insertDoc } = business;
+  const { instagram, website, ownerId, ...insertDoc } = business;
   const update: Record<string, unknown> = { $setOnInsert: insertDoc };
   const setDoc: Record<string, unknown> = {};
   if (instagram) {
     setDoc.instagram = instagram;
+  }
+  if (website) {
+    setDoc.website = website;
   }
   if (ownerId) {
     setDoc.ownerId = ownerId;
@@ -814,6 +821,7 @@ const buildPromoInsert = (
     slug: string;
     categories: string[];
     instagram?: string;
+    website?: string;
   },
   dates: { startDate: Date; endDate: Date }
 ) => ({
@@ -822,6 +830,7 @@ const buildPromoInsert = (
   businessSlug: businessSnapshot.slug,
   businessCategories: businessSnapshot.categories,
   businessInstagram: businessSnapshot.instagram,
+  businessWebsite: businessSnapshot.website,
   branchId: branchId ? branchId.toString() : null,
   title: promo.title,
   description: promo.description,
@@ -846,6 +855,7 @@ const upsertPromosForBusiness = async (
     slug: string;
     categories: string[];
     instagram?: string;
+    website?: string;
   },
   dates: { startDate: Date; endDate: Date }
 ) => {
@@ -883,6 +893,7 @@ const seedBusinessesData = async (
       categories: business.categories,
       description: business.description,
       instagram: business.instagram,
+      website: business.website,
       ownerId,
       approved: true,
       createdAt: new Date(),
@@ -908,6 +919,7 @@ const seedBusinessesData = async (
         slug: business.slug,
         categories: business.categories,
         instagram: business.instagram,
+        website: business.website,
       },
       dates
     );

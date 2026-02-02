@@ -87,6 +87,7 @@ export class BusinessService {
             businessSlug: updated.slug,
             businessCategories: updated.categories ?? [],
             businessInstagram: updated.instagram,
+            businessWebsite: updated.website,
           },
         },
       )

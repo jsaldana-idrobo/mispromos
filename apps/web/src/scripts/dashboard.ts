@@ -21,6 +21,7 @@ type Business = {
   categories?: string[];
   description?: string;
   instagram?: string;
+  website?: string;
   approved?: boolean;
 };
 
@@ -263,6 +264,9 @@ const ownerBusinessCategories = document.querySelector<HTMLElement>(
 const ownerBusinessInstagram = document.querySelector<HTMLElement>(
   "[data-owner-business-instagram]",
 );
+const ownerBusinessWebsite = document.querySelector<HTMLElement>(
+  "[data-owner-business-website]",
+);
 const ownerBusinessDescription = document.querySelector<HTMLElement>(
   "[data-owner-business-description]",
 );
@@ -501,6 +505,13 @@ const normalizeSlug = (value: string) =>
     .replaceAll(/-{2,}/g, "-")
     .replaceAll(/(^-|-$)/g, "");
 
+const normalizeExternalUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
+
 const buildDefaultBusinessPayload = (user: User) => {
   const baseName = "Mi negocio";
   const suffix = user.id?.slice(0, 6) || String(Date.now()).slice(-6);
@@ -705,6 +716,7 @@ const setBusinessForm = (
     });
   }
   setInputValue(businessForm, "description", business.description ?? "");
+  setInputValue(businessForm, "website", business.website ?? "");
   setInputValue(businessForm, "instagram", business.instagram ?? "");
 };
 
@@ -1049,6 +1061,11 @@ const renderOwnerBusinessDetails = () => {
   if (ownerBusinessInstagram) {
     ownerBusinessInstagram.textContent = business.instagram
       ? `@${business.instagram}`
+      : "-";
+  }
+  if (ownerBusinessWebsite) {
+    ownerBusinessWebsite.textContent = business.website
+      ? business.website
       : "-";
   }
   if (ownerBusinessDescription) {
@@ -1893,19 +1910,28 @@ const renderPromotions = (promos: Promotion[], total: number) => {
                 ? businessMap.get(promo.businessId)
                 : businessMap.get(currentBusinessId);
               const businessName = promoBusiness?.name ?? "Negocio";
+              const websiteUrl = normalizeExternalUrl(
+                promoBusiness?.website ?? "",
+              );
+              const websiteLink = websiteUrl
+                ? `<a class="promo-link" href="${websiteUrl}" target="_blank" rel="noreferrer">Sitio web</a>`
+                : "";
               const instagramHandle = (promoBusiness?.instagram ?? "")
                 .replaceAll("@", "")
                 .trim();
               const instagramLink = instagramHandle
                 ? `<a class="promo-link" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
                 : "";
+              const promoLinks = [websiteLink, instagramLink]
+                .filter(Boolean)
+                .join(" · ");
               return `
                 <tr class="rounded-2xl bg-white/90">
                   <td class="rounded-l-2xl border border-ink-900/10 bg-white/90 px-4 py-3 align-top">
                     <p class="truncate text-sm font-semibold">${promo.title}</p>
                     <p class="text-xs text-ink-900/60">${dateLabel}</p>
                     <p class="text-xs text-ink-900/60">${businessName}</p>
-                    ${instagramLink ? `<div class="mt-1 text-xs text-ink-900/60">${instagramLink}</div>` : ""}
+                    ${promoLinks ? `<div class="mt-1 text-xs text-ink-900/60">${promoLinks}</div>` : ""}
                   </td>
                   <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
                     ${promoTypeLabels[promo.promoType as keyof typeof promoTypeLabels] ?? promo.promoType}
@@ -1942,11 +1968,25 @@ const renderPromotions = (promos: Promotion[], total: number) => {
             ? businessMap.get(promo.businessId)
             : businessMap.get(currentBusinessId);
           const businessName = promoBusiness?.name ?? "Negocio";
+          const websiteUrl = normalizeExternalUrl(promoBusiness?.website ?? "");
+          const websiteLink = websiteUrl
+            ? `<a class="promo-link" href="${websiteUrl}" target="_blank" rel="noreferrer">Sitio web</a>`
+            : "";
+          const instagramHandle = (promoBusiness?.instagram ?? "")
+            .replaceAll("@", "")
+            .trim();
+          const instagramLink = instagramHandle
+            ? `<a class="promo-link" data-instagram-link data-instagram-handle="${instagramHandle}" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
+            : "";
+          const promoLinks = [websiteLink, instagramLink]
+            .filter(Boolean)
+            .join(" · ");
           return `
             <div class="rounded-2xl border border-ink-900/10 bg-white/90 px-4 py-3">
               <p class="text-sm font-semibold">${promo.title}</p>
               <p class="text-xs text-ink-900/60">${dateLabel}</p>
               <p class="text-xs text-ink-900/60">${businessName}</p>
+              ${promoLinks ? `<div class="mt-1 text-xs text-ink-900/60">${promoLinks}</div>` : ""}
               <span class="mt-2 inline-flex w-fit rounded-full border border-ink-900/20 px-3 py-1 text-xs">
                 ${statusLabel}
               </span>
@@ -2675,6 +2715,8 @@ const handleBusinessForm = () => {
           type: getFormString(data, "type"),
           categories: categoryValues,
           description: getFormString(data, "description") || undefined,
+          website:
+            normalizeExternalUrl(getFormString(data, "website")) || undefined,
           instagram: getFormString(data, "instagram") || undefined,
         };
         if (

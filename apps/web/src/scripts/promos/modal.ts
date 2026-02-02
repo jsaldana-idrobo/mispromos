@@ -13,10 +13,12 @@ type PromoModalElements = {
   promoType: HTMLElement | null;
   value: HTMLElement | null;
   days: HTMLElement | null;
+  website: HTMLAnchorElement | null;
   instagram: HTMLAnchorElement | null;
   image: HTMLImageElement | null;
   emoji: HTMLElement | null;
   fieldValue: HTMLElement | null;
+  fieldWebsite: HTMLElement | null;
   fieldInstagram: HTMLElement | null;
 };
 
@@ -42,16 +44,38 @@ const getTagsHtml = (categories: string[]) => {
     .join("");
 };
 
-const updateInstagram = (elements: PromoModalElements, handle: string) => {
-  if (!elements.instagram) return;
-  if (handle) {
-    elements.instagram.textContent = `@${handle}`;
-    elements.instagram.href = `https://instagram.com/${handle}`;
-  } else {
-    elements.instagram.textContent = "";
-    elements.instagram.removeAttribute("href");
+const normalizeExternalUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
+
+const updateLinks = (
+  elements: PromoModalElements,
+  website: string,
+  instagramHandle: string,
+) => {
+  if (elements.website) {
+    if (website) {
+      elements.website.textContent = "Sitio web";
+      elements.website.href = website;
+    } else {
+      elements.website.textContent = "";
+      elements.website.removeAttribute("href");
+    }
   }
-  setModalFieldVisibility(elements.fieldInstagram, handle || null);
+  if (elements.instagram) {
+    if (instagramHandle) {
+      elements.instagram.textContent = `@${instagramHandle}`;
+      elements.instagram.href = `https://instagram.com/${instagramHandle}`;
+    } else {
+      elements.instagram.textContent = "";
+      elements.instagram.removeAttribute("href");
+    }
+  }
+  setModalFieldVisibility(elements.fieldWebsite, website || null);
+  setModalFieldVisibility(elements.fieldInstagram, instagramHandle || null);
 };
 
 const updateMedia = (
@@ -125,6 +149,7 @@ export const createPromoModal = (elements: PromoModalElements) => {
     const instagramHandle = (promo.business?.instagram ?? "")
       .replaceAll("@", "")
       .trim();
+    const websiteUrl = normalizeExternalUrl(promo.business?.website ?? "");
     updateTextFields(
       elements,
       promo,
@@ -133,7 +158,7 @@ export const createPromoModal = (elements: PromoModalElements) => {
       days,
       tagsHtml,
     );
-    updateInstagram(elements, instagramHandle);
+    updateLinks(elements, websiteUrl, instagramHandle);
     updateMedia(elements, promo, visual.emoji);
 
     elements.overlay.hidden = false;

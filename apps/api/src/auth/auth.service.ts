@@ -45,6 +45,7 @@ export class AuthService {
         type: dto.type,
         categories: dto.categories ?? [],
         description: dto.description,
+        website: dto.website,
         instagram: dto.instagram,
         ownerId: created.id,
         approved: false,

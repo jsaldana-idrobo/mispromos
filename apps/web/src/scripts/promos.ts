@@ -78,6 +78,9 @@ const promoModalDays = document.querySelector<HTMLElement>(
 const promoModalInstagram = document.querySelector<HTMLAnchorElement>(
   "[data-promos-modal-instagram]",
 );
+const promoModalWebsite = document.querySelector<HTMLAnchorElement>(
+  "[data-promos-modal-website]",
+);
 const promoModalImage = document.querySelector<HTMLImageElement>(
   "[data-promos-modal-image]",
 );
@@ -87,12 +90,22 @@ const promoModalEmoji = document.querySelector<HTMLElement>(
 const promoModalFieldValue = document.querySelector<HTMLElement>(
   '[data-promos-modal-field="value"]',
 );
+const promoModalFieldWebsite = document.querySelector<HTMLElement>(
+  '[data-promos-modal-field="website"]',
+);
 const promoModalFieldInstagram = document.querySelector<HTMLElement>(
   '[data-promos-modal-field="instagram"]',
 );
 
 const PAGE_SIZE = 10;
 const FEATURED_COUNT = 6;
+
+const normalizeExternalUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
 
 if (form && container) {
   let loading = false;
@@ -115,10 +128,12 @@ if (form && container) {
     promoType: promoModalType,
     value: promoModalValue,
     days: promoModalDays,
+    website: promoModalWebsite,
     instagram: promoModalInstagram,
     image: promoModalImage,
     emoji: promoModalEmoji,
     fieldValue: promoModalFieldValue,
+    fieldWebsite: promoModalFieldWebsite,
     fieldInstagram: promoModalFieldInstagram,
   });
 
@@ -186,6 +201,7 @@ if (form && container) {
     isFeatured: boolean,
   ) => {
     const businessName = promo.business?.name ?? "Negocio local";
+    const websiteUrl = normalizeExternalUrl(promo.business?.website ?? "");
     const instagramHandle = (promo.business?.instagram ?? "")
       .replaceAll("@", "")
       .trim();
@@ -217,9 +233,13 @@ if (form && container) {
       </article>
     `;
     }
+    const websiteLink = websiteUrl
+      ? `<a class="promo-link" href="${websiteUrl}" target="_blank" rel="noreferrer">Sitio web</a>`
+      : "";
     const instagramLink = instagramHandle
       ? `<a class="promo-link" href="https://instagram.com/${instagramHandle}" target="_blank" rel="noreferrer">@${instagramHandle}</a>`
       : "";
+    const promoLinks = [websiteLink, instagramLink].filter(Boolean).join(" · ");
     const featuredBadge = isFeatured
       ? `<span class="promo-badge promo-badge-featured">Destacada</span>`
       : "";
@@ -244,7 +264,7 @@ if (form && container) {
         </div>
         <div class="mt-3 flex flex-col gap-3 text-xs text-ink-900/60 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex flex-wrap gap-2">${categoryTags}</div>
-          <div class="w-full sm:w-auto">${instagramLink}</div>
+          <div class="w-full sm:w-auto">${promoLinks}</div>
         </div>
       </article>
     `;

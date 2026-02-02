@@ -7,6 +7,7 @@ type BusinessDoc = {
   slug: string;
   categories?: string[];
   instagram?: string;
+  website?: string;
 };
 
 type PromotionDoc = {
@@ -16,6 +17,7 @@ type PromotionDoc = {
   businessSlug?: string | null;
   businessCategories?: string[] | null;
   businessInstagram?: string | null;
+  businessWebsite?: string | null;
 };
 
 config({ path: ".env" });
@@ -45,6 +47,7 @@ const run = async () => {
             slug: 1,
             categories: 1,
             instagram: 1,
+            website: 1,
           },
         },
       )
@@ -60,6 +63,7 @@ const run = async () => {
         { businessSlug: { $exists: false } },
         { businessCategories: { $exists: false } },
         { businessInstagram: { $exists: false } },
+        { businessWebsite: { $exists: false } },
       ],
     });
 
@@ -84,6 +88,7 @@ const run = async () => {
               businessSlug: business.slug,
               businessCategories: business.categories ?? [],
               businessInstagram: business.instagram,
+              businessWebsite: business.website,
             },
           },
         },

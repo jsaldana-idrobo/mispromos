@@ -4,6 +4,7 @@ export type BusinessSummary = {
   slug: string;
   categories?: string[];
   instagram?: string;
+  website?: string;
 };
 
 export type Promotion = {

@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsOptional,
   IsString,
+  IsUrl,
   MinLength,
 } from "class-validator";
 import { BusinessType } from "@mispromos/shared";
@@ -27,6 +28,10 @@ export class CreateBusinessDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsUrl({ require_protocol: true })
+  @IsOptional()
+  website?: string;
 
   @IsString()
   @MinLength(1)
