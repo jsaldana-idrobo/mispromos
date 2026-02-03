@@ -15,6 +15,7 @@ import {
   Promotion,
   type PromotionDocument,
 } from "../promotion/promotion.schema";
+import { buildUniqueSlug } from "../common/slug";
 
 type Actor = {
   id: string;
@@ -43,8 +44,13 @@ export class BusinessService {
   }
 
   async create(dto: CreateBusinessDto, actor: Actor) {
+    const slug = await buildUniqueSlug(
+      this.businessModel,
+      dto.slug?.length ? dto.slug : dto.name,
+    );
     const created = await this.businessModel.create({
       ...dto,
+      slug,
       ownerId: actor.id,
     });
     return created;

@@ -15,6 +15,14 @@ const passwordInput = form?.querySelector<HTMLInputElement>(
   "input[name='password']",
 );
 
+const normalizeSlug = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/(^-|-$)/g, "");
+
 const redirectIfAuthenticated = async () => {
   if (!form) return false;
   try {
@@ -113,8 +121,9 @@ if (form) {
       password: getField("password"),
     };
     if (isRegister) {
-      payload.name = getField("name");
-      payload.slug = getField("slug");
+      const businessName = getField("name");
+      payload.name = businessName;
+      payload.slug = normalizeSlug(businessName) || "negocio";
       payload.type = getField("type");
       payload.categories = getCategoryValues();
       payload.description = getField("description");

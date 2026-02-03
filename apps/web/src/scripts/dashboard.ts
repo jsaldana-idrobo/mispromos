@@ -707,7 +707,6 @@ const setBusinessForm = (
     }
   }
   setInputValue(businessForm, "name", business.name);
-  setInputValue(businessForm, "slug", business.slug);
   setInputValue(businessForm, "type", business.type);
   if (categorySuggestions) {
     const selected = new Set(business.categories ?? []);
@@ -2693,25 +2692,24 @@ const handleBusinessForm = () => {
         "[name='categories'] option:checked",
       ),
     ).map((option) => option.value);
-    const slug = normalizeSlug(getFormString(data, "slug"));
-    const slugConflict = businesses.some(
-      (business) =>
-        business.slug.toLowerCase() === slug &&
-        (!businessForm.dataset.editId ||
-          business._id !== businessForm.dataset.editId),
-    );
-    if (slugConflict) {
-      const message = "Ese slug ya existe en tus negocios.";
-      setMessage(businessMessage, message);
-      showToast("Error", message, "error");
-      return;
+    const name = getFormString(data, "name");
+    const generatedSlug = normalizeSlug(name) || "negocio";
+    if (!businessEditing) {
+      const slugConflict = businesses.some(
+        (business) => business.slug.toLowerCase() === generatedSlug,
+      );
+      if (slugConflict) {
+        const message = "Ese slug ya existe en tus negocios.";
+        setMessage(businessMessage, message);
+        showToast("Error", message, "error");
+        return;
+      }
     }
 
     await withLoading(businessForm, async () => {
       try {
-        const payload = {
-          name: getFormString(data, "name"),
-          slug,
+        const payload: Record<string, unknown> = {
+          name,
           type: getFormString(data, "type"),
           categories: categoryValues,
           description: getFormString(data, "description") || undefined,
@@ -2719,6 +2717,9 @@ const handleBusinessForm = () => {
             normalizeExternalUrl(getFormString(data, "website")) || undefined,
           instagram: getFormString(data, "instagram") || undefined,
         };
+        if (!businessEditing) {
+          payload.slug = generatedSlug;
+        }
         if (
           businessForm.dataset.mode === "edit" &&
           businessForm.dataset.editId

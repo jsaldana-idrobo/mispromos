@@ -22,8 +22,9 @@ export class RegisterDto {
   name!: string;
 
   @IsString()
+  @IsOptional()
   @MinLength(1)
-  slug!: string;
+  slug?: string;
 
   @IsEnum(BusinessType)
   type!: BusinessType;

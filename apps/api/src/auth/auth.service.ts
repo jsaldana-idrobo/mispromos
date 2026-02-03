@@ -13,6 +13,7 @@ import { Business, type BusinessDocument } from "../business/business.schema";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { UserRole } from "@mispromos/shared";
+import { buildUniqueSlug } from "../common/slug";
 
 @Injectable()
 export class AuthService {
@@ -39,9 +40,13 @@ export class AuthService {
     });
 
     try {
+      const slug = await buildUniqueSlug(
+        this.businessModel,
+        dto.slug?.length ? dto.slug : dto.name,
+      );
       await this.businessModel.create({
         name: dto.name,
-        slug: dto.slug,
+        slug,
         type: dto.type,
         categories: dto.categories ?? [],
         description: dto.description,
