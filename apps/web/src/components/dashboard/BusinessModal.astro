@@ -44,6 +44,17 @@ const { businessTypes = [], businessTypeLabels = {} } =
         <input class="input-field" name="name" required />
       </label>
       <label class="grid gap-2 text-sm font-semibold">
+        Ciudad
+        <select
+          class="input-field"
+          name="city"
+          data-business-city-select
+          required
+        >
+          <option value="">Selecciona una ciudad</option>
+        </select>
+      </label>
+      <label class="grid gap-2 text-sm font-semibold">
         Tipo
         <select class="input-field" name="type" required>
           {
@@ -55,6 +66,41 @@ const { businessTypes = [], businessTypeLabels = {} } =
       </label>
       <label class="grid gap-2 text-sm font-semibold">
         Categorías (selecciona varias)
+        <input
+          class="input-field"
+          type="search"
+          placeholder="Buscar categorías..."
+          data-business-category-search
+        />
+        <div
+          class="flex flex-wrap gap-2 text-xs text-ink-900/70"
+          data-business-category-chips
+        ></div>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <button
+            class="rounded-full border border-ink-900/10 bg-white/90 px-3 py-1"
+            type="button"
+            data-business-category-select-all
+          >
+            Seleccionar todo
+          </button>
+          <button
+            class="rounded-full border border-ink-900/10 bg-white/90 px-3 py-1"
+            type="button"
+            data-business-category-clear
+          >
+            Limpiar selección
+          </button>
+        </div>
+        <p class="text-xs text-ink-900/60" data-business-category-count>
+          Seleccionadas: 0
+        </p>
+        <div
+          class="grid gap-2 rounded-2xl border border-ink-900/10 bg-white/70 p-3 text-xs text-ink-900/80"
+          data-business-category-results
+        >
+          <p class="text-ink-900/60">Escribe para buscar categorías.</p>
+        </div>
         <select
           class="input-field"
           name="categories"

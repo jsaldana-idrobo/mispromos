@@ -21,6 +21,7 @@ export const userSchema = z.object({
 export const businessSchema = z.object({
   id: idSchema,
   name: z.string().min(1),
+  city: z.string().min(1),
   slug: z.string().min(1),
   type: z.nativeEnum(BusinessType),
   categories: z.array(z.string()).default([]),

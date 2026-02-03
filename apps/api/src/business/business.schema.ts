@@ -9,6 +9,9 @@ export class Business {
   @Prop({ required: true, trim: true })
   name!: string;
 
+  @Prop({ required: true, trim: true })
+  city!: string;
+
   @Prop({ required: true, trim: true, lowercase: true })
   slug!: string;
 
@@ -44,3 +47,4 @@ BusinessSchema.index({ slug: 1 }, { unique: true });
 BusinessSchema.index({ ownerId: 1 });
 BusinessSchema.index({ type: 1 });
 BusinessSchema.index({ categories: 1 });
+BusinessSchema.index({ city: 1 });

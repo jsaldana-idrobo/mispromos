@@ -4,12 +4,15 @@ import { Model } from "mongoose";
 import { City, type CityDocument } from "./city.schema";
 import { CreateCityDto } from "./dto/create-city.dto";
 import { UpdateCityDto } from "./dto/update-city.dto";
+import { Business, type BusinessDocument } from "../business/business.schema";
 
 @Injectable()
 export class CityService {
   constructor(
     @InjectModel(City.name)
     private readonly cityModel: Model<CityDocument>,
+    @InjectModel(Business.name)
+    private readonly businessModel: Model<BusinessDocument>,
   ) {}
 
   async create(dto: CreateCityDto) {
@@ -18,6 +21,22 @@ export class CityService {
 
   async findAll() {
     return this.cityModel.find().sort({ name: 1 }).exec();
+  }
+
+  async findWithBusinesses() {
+    const businessCities = await this.businessModel
+      .distinct("city", {
+        approved: true,
+        city: { $exists: true, $ne: "" },
+      })
+      .exec();
+    if (businessCities.length === 0) {
+      return [];
+    }
+    return this.cityModel
+      .find({ name: { $in: businessCities } })
+      .sort({ name: 1 })
+      .exec();
   }
 
   async findOne(id: string) {

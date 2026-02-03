@@ -123,6 +123,7 @@ if (form) {
     if (isRegister) {
       const businessName = getField("name");
       payload.name = businessName;
+      payload.city = getField("city");
       payload.slug = normalizeSlug(businessName) || "negocio";
       payload.type = getField("type");
       payload.categories = getCategoryValues();

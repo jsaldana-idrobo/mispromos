@@ -38,6 +38,7 @@ Backend NestJS listo para iniciar con MongoDB y validaciones compartidas desde `
 - `GET /api/v1/promotions/active?city=Palmira&promoType=2x1&category=pizza` → promociones activas filtradas.
 - `GET /api/v1/promotions/active?city=Palmira&businessType=restaurant&q=pizza` → promos activas con filtros avanzados.
 - `GET /api/v1/cities` → listar ciudades.
+- `GET /api/v1/cities/with-businesses` → listar ciudades con negocios aprobados.
 - `GET /api/v1/categories` → listar categorías.
 - `POST /api/v1/cities` → crear ciudad (ADMIN).
 - `PATCH /api/v1/cities/:id` → actualizar ciudad (ADMIN).

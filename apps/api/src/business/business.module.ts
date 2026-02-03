@@ -6,6 +6,7 @@ import { Business, BusinessSchema } from "./business.schema";
 import { User, UserSchema } from "../auth/user.schema";
 import { EmailService } from "../notifications/email.service";
 import { Promotion, PromotionSchema } from "../promotion/promotion.schema";
+import { City, CitySchema } from "../city/city.schema";
 
 @Module({
   imports: [
@@ -21,6 +22,10 @@ import { Promotion, PromotionSchema } from "../promotion/promotion.schema";
       {
         name: Promotion.name,
         schema: PromotionSchema,
+      },
+      {
+        name: City.name,
+        schema: CitySchema,
       },
     ]),
   ],

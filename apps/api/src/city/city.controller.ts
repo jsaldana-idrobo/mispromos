@@ -32,6 +32,11 @@ export class CityController {
     return this.cityService.findAll();
   }
 
+  @Get("with-businesses")
+  findWithBusinesses() {
+    return this.cityService.findWithBusinesses();
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string) {
     return this.cityService.findOne(id);

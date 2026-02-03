@@ -532,7 +532,7 @@ if (categorySelect) {
 if (citySelect) {
   const initialCity = citySelect.dataset.initialCity ?? "";
   try {
-    const cities = await apiFetch<City[]>("/cities");
+    const cities = await apiFetch<City[]>("/cities/with-businesses");
     const options = cities.map(
       (city) => `<option value="${city.name}">${city.name}</option>`,
     );

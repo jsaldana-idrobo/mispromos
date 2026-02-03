@@ -16,6 +16,7 @@ import {
   type PromotionDocument,
 } from "../promotion/promotion.schema";
 import { buildUniqueSlug } from "../common/slug";
+import { City, type CityDocument } from "../city/city.schema";
 
 type Actor = {
   id: string;
@@ -31,6 +32,8 @@ export class BusinessService {
     private readonly promotionModel: Model<PromotionDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    @InjectModel(City.name)
+    private readonly cityModel: Model<CityDocument>,
     private readonly emailService: EmailService,
   ) {}
 
@@ -128,6 +131,20 @@ export class BusinessService {
     }
 
     if (approved && !business.approved) {
+      const cityName = business.city?.trim();
+      if (cityName) {
+        await this.cityModel.updateOne(
+          { name: cityName, countryCode: "CO" },
+          {
+            $setOnInsert: {
+              name: cityName,
+              countryCode: "CO",
+              createdAt: new Date(),
+            },
+          },
+          { upsert: true },
+        );
+      }
       const owner = await this.userModel
         .findById(business.ownerId)
         .select("+pendingPassword")

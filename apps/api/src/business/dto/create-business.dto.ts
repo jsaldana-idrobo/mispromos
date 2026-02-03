@@ -14,6 +14,10 @@ export class CreateBusinessDto {
   name!: string;
 
   @IsString()
+  @MinLength(1)
+  city!: string;
+
+  @IsString()
   @IsOptional()
   @MinLength(1)
   slug?: string;

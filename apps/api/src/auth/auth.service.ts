@@ -46,6 +46,7 @@ export class AuthService {
       );
       await this.businessModel.create({
         name: dto.name,
+        city: dto.city,
         slug,
         type: dto.type,
         categories: dto.categories ?? [],

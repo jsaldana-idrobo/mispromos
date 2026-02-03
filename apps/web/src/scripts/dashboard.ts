@@ -16,6 +16,7 @@ type User = {
 type Business = {
   _id: string;
   name: string;
+  city: string;
   slug: string;
   type: string;
   categories?: string[];
@@ -73,6 +74,24 @@ const isMobileDevice = () =>
 
 const compareLabels = (left: string, right: string) =>
   left.localeCompare(right, "es", { sensitivity: "base" });
+
+const escapeHtml = (value: string) =>
+  value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+const highlightMatch = (label: string, query: string) => {
+  if (!query) return escapeHtml(label);
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(escapedQuery, "ig");
+  return escapeHtml(label).replace(
+    regex,
+    (match) => `<mark class="rounded bg-sand-200/80 px-1">${match}</mark>`,
+  );
+};
 
 const userCard = document.querySelector<HTMLElement>("[data-user-card]");
 const businessList = document.querySelector<HTMLElement>(
@@ -178,6 +197,9 @@ const branchSearchInput = document.querySelector<HTMLInputElement>(
 const branchCityFilter = document.querySelector<HTMLSelectElement>(
   "[data-branch-city-filter]",
 );
+const businessCitySelect = document.querySelector<HTMLSelectElement>(
+  "[data-business-city-select]",
+);
 const branchBusinessFilter = document.querySelector<HTMLSelectElement>(
   "[data-branch-business-filter]",
 );
@@ -258,6 +280,9 @@ const ownerBusinessType = document.querySelector<HTMLElement>(
 const ownerBusinessSlug = document.querySelector<HTMLElement>(
   "[data-owner-business-slug]",
 );
+const ownerBusinessCity = document.querySelector<HTMLElement>(
+  "[data-owner-business-city]",
+);
 const ownerBusinessCategories = document.querySelector<HTMLElement>(
   "[data-owner-business-categories]",
 );
@@ -331,6 +356,24 @@ const categoryKpiLast = document.querySelector<HTMLElement>(
 );
 const categorySuggestions = document.querySelector<HTMLSelectElement>(
   "[data-business-category-select]",
+);
+const businessCategorySearch = document.querySelector<HTMLInputElement>(
+  "[data-business-category-search]",
+);
+const businessCategoryChips = document.querySelector<HTMLElement>(
+  "[data-business-category-chips]",
+);
+const businessCategorySelectAll = document.querySelector<HTMLButtonElement>(
+  "[data-business-category-select-all]",
+);
+const businessCategoryClear = document.querySelector<HTMLButtonElement>(
+  "[data-business-category-clear]",
+);
+const businessCategoryCount = document.querySelector<HTMLElement>(
+  "[data-business-category-count]",
+);
+const businessCategoryResults = document.querySelector<HTMLElement>(
+  "[data-business-category-results]",
 );
 const ownerSections = Array.from(
   document.querySelectorAll<HTMLElement>("[data-owner-only]"),
@@ -692,6 +735,17 @@ const setBusinessForm = (
         option.selected = false;
       });
     }
+    if (businessCategorySearch) {
+      businessCategorySearch.value = "";
+      Array.from(categorySuggestions?.options ?? []).forEach((option) => {
+        option.hidden = false;
+      });
+      if (categorySuggestions) {
+        categorySuggestions.hidden = false;
+      }
+    }
+    renderBusinessCategoryChips();
+    renderBusinessCategoryResults("");
     return;
   }
   const mode = options.mode ?? "edit";
@@ -707,6 +761,7 @@ const setBusinessForm = (
     }
   }
   setInputValue(businessForm, "name", business.name);
+  setInputValue(businessForm, "city", business.city ?? "");
   setInputValue(businessForm, "type", business.type);
   if (categorySuggestions) {
     const selected = new Set(business.categories ?? []);
@@ -714,6 +769,17 @@ const setBusinessForm = (
       option.selected = selected.has(option.value);
     });
   }
+  if (businessCategorySearch) {
+    businessCategorySearch.value = "";
+    Array.from(categorySuggestions?.options ?? []).forEach((option) => {
+      option.hidden = false;
+    });
+    if (categorySuggestions) {
+      categorySuggestions.hidden = false;
+    }
+  }
+  renderBusinessCategoryChips();
+  renderBusinessCategoryResults("");
   setInputValue(businessForm, "description", business.description ?? "");
   setInputValue(businessForm, "website", business.website ?? "");
   setInputValue(businessForm, "instagram", business.instagram ?? "");
@@ -1053,6 +1119,9 @@ const renderOwnerBusinessDetails = () => {
   if (ownerBusinessSlug) {
     ownerBusinessSlug.textContent = business.slug;
   }
+  if (ownerBusinessCity) {
+    ownerBusinessCity.textContent = business.city ?? "-";
+  }
   if (ownerBusinessCategories) {
     ownerBusinessCategories.textContent =
       (business.categories ?? []).join(", ") || "-";
@@ -1389,18 +1458,18 @@ const renderUser = () => {
   }
 };
 
-const getBusinessCities = (businessId: string) => {
-  return Array.from(
-    new Set(
-      branches
-        .filter((branch) => branch.businessId === businessId)
-        .map((branch) => branch.city),
-    ),
-  ).sort(compareLabels);
+const getBusinessCities = (business: Business) => {
+  const branchCities = branches
+    .filter((branch) => branch.businessId === business._id)
+    .map((branch) => branch.city);
+  const fallbackCity = business.city?.trim() ? [business.city.trim()] : [];
+  return Array.from(new Set(branchCities.length > 0 ? branchCities : fallbackCity)).sort(
+    compareLabels,
+  );
 };
 
-const formatBusinessCities = (businessId: string) => {
-  const list = getBusinessCities(businessId);
+const formatBusinessCities = (business: Business) => {
+  const list = getBusinessCities(business);
   if (list.length === 0) return "Sin sedes";
   if (list.length <= 2) return list.join(", ");
   return `${list.slice(0, 2).join(", ")} +${list.length - 2}`;
@@ -1426,7 +1495,7 @@ const getFilteredBusinesses = (source: Business[]) => {
     const categoryMatch =
       businessFilters.category === "all" ||
       (business.categories ?? []).includes(businessFilters.category);
-    const businessCities = getBusinessCities(business._id);
+    const businessCities = getBusinessCities(business);
     const cityMatch =
       businessFilters.city === "all" ||
       businessCities.includes(businessFilters.city);
@@ -1451,7 +1520,12 @@ const updateBusinessCityFilterOptions = () => {
   if (businessCityFilters.length === 0) return;
   const selected = businessCityFilters[0]?.value || "all";
   const cities = Array.from(
-    new Set(branches.map((branch) => branch.city)),
+    new Set([
+      ...branches.map((branch) => branch.city),
+      ...businesses
+        .map((business) => business.city?.trim())
+        .filter(Boolean),
+    ]),
   ).sort(compareLabels);
   const optionsHtml = `
     <option value="all">Todas</option>
@@ -1557,7 +1631,7 @@ const renderBusinessList = (
                     ${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type}
                   </td>
                   <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
-                    ${formatBusinessCities(business._id)}
+                    ${formatBusinessCities(business)}
                   </td>
                   <td class="border-y border-l border-ink-900/10 bg-white/90 px-4 py-3 text-xs text-ink-900/70">
                     ${formatBusinessCategories(business)}
@@ -1599,7 +1673,7 @@ const renderBusinessList = (
                   <p class="text-xs text-ink-900/60">${business.slug}</p>
                   <p class="text-xs text-ink-900/60">
                     ${businessTypeLabels[business.type as keyof typeof businessTypeLabels] ?? business.type} ·
-                    ${formatBusinessCities(business._id)}
+                    ${formatBusinessCities(business)}
                   </p>
                   <p class="text-xs text-ink-900/60 truncate">${formatBusinessCategories(business)}</p>
                 </div>
@@ -2563,6 +2637,7 @@ const updateCategoryPagination = (total: number) => {
 const loadCities = async () => {
   renderLoadingMessage(cityList, "Cargando ciudades...");
   setSelectLoading(branchCitySelect, "Cargando ciudades...");
+  setSelectLoading(businessCitySelect, "Cargando ciudades...");
   cities = await apiFetch<City[]>("/cities");
   adminCityPage = 1;
   renderCities();
@@ -2577,11 +2652,154 @@ const loadCities = async () => {
       ].join(""),
     );
   }
+  if (businessCitySelect) {
+    setSelectReady(
+      businessCitySelect,
+      [
+        `<option value="">Selecciona una ciudad</option>`,
+        ...cities.map(
+          (city) => `<option value="${city.name}">${city.name}</option>`,
+        ),
+      ].join(""),
+    );
+  }
 };
+
+const wireBusinessCategorySearch = () => {
+  if (!categorySuggestions || !businessCategorySearch) return;
+  businessCategorySearch.addEventListener("input", () => {
+    const query = businessCategorySearch.value.trim().toLowerCase();
+    Array.from(categorySuggestions.options).forEach((option) => {
+      const matches = option.textContent?.toLowerCase().includes(query);
+      option.hidden = query.length >= 2 && !matches;
+    });
+    renderBusinessCategoryResults(query);
+    categorySuggestions.hidden = query.length >= 2;
+  });
+  businessCategorySearch.addEventListener("blur", () => {
+    const query = businessCategorySearch.value.trim().toLowerCase();
+    if (query.length < 2) {
+      categorySuggestions.hidden = false;
+    }
+  });
+};
+
+const renderBusinessCategoryChips = () => {
+  if (!categorySuggestions || !businessCategoryChips) return;
+  const selected = Array.from(categorySuggestions.options).filter(
+    (option) => option.selected,
+  );
+  businessCategoryChips.innerHTML =
+    selected.length === 0
+      ? '<span class="text-ink-900/50">Sin categorías seleccionadas.</span>'
+      : selected
+          .map(
+            (option) =>
+              `<button type="button" class="rounded-full border border-ink-900/10 bg-white/90 px-3 py-1" data-business-category-chip="${option.value}">${option.textContent}</button>`,
+          )
+          .join("");
+  if (businessCategoryCount) {
+    businessCategoryCount.textContent = `Seleccionadas: ${selected.length}`;
+  }
+};
+
+const renderBusinessCategoryResults = (query: string) => {
+  if (!categorySuggestions || !businessCategoryResults) return;
+  if (query.length > 0 && query.length < 2) {
+    businessCategoryResults.innerHTML =
+      '<p class="text-ink-900/60">Escribe al menos 2 letras para buscar.</p>';
+    return;
+  }
+  const matches = Array.from(categorySuggestions.options).filter((option) =>
+    option.textContent?.toLowerCase().includes(query),
+  );
+  businessCategoryResults.innerHTML =
+    matches.length === 0
+      ? '<p class="text-ink-900/60">No encontramos coincidencias.</p>'
+      : matches
+          .map((option) => {
+            const label = option.textContent ?? "";
+            const highlighted = highlightMatch(label, query);
+            const selected = option.selected;
+            return `<button type="button" class="flex items-center justify-between rounded-xl border border-ink-900/10 bg-white/90 px-3 py-2 text-left" data-business-category-result="${option.value}">
+              <span class="truncate">${highlighted}</span>
+              <span class="text-ink-900/50">${selected ? "Seleccionada" : "Agregar"}</span>
+            </button>`;
+          })
+          .join("");
+};
+
+if (categorySuggestions) {
+  categorySuggestions.addEventListener("change", () => {
+    renderBusinessCategoryChips();
+    const query = businessCategorySearch?.value.trim().toLowerCase() ?? "";
+    renderBusinessCategoryResults(query);
+  });
+}
+
+if (businessCategoryChips && categorySuggestions) {
+  businessCategoryChips.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    const value = target.dataset.businessCategoryChip;
+    if (!value) return;
+    const option = Array.from(categorySuggestions.options).find(
+      (item) => item.value === value,
+    );
+    if (option) {
+      option.selected = false;
+      categorySuggestions.dispatchEvent(new Event("change"));
+    }
+  });
+}
+
+if (businessCategoryResults && categorySuggestions) {
+  businessCategoryResults.addEventListener("click", (event) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest<HTMLElement>(
+      "[data-business-category-result]",
+    );
+    const value = button?.dataset.businessCategoryResult;
+    if (!value) return;
+    const option = Array.from(categorySuggestions.options).find(
+      (item) => item.value === value,
+    );
+    if (option) {
+      option.selected = !option.selected;
+      categorySuggestions.dispatchEvent(new Event("change"));
+    }
+  });
+}
+
+if (businessCategorySelectAll && categorySuggestions) {
+  businessCategorySelectAll.addEventListener("click", () => {
+    Array.from(categorySuggestions.options).forEach((option) => {
+      option.selected = true;
+    });
+    categorySuggestions.dispatchEvent(new Event("change"));
+  });
+}
+
+if (businessCategoryClear && categorySuggestions) {
+  businessCategoryClear.addEventListener("click", () => {
+    Array.from(categorySuggestions.options).forEach((option) => {
+      option.selected = false;
+    });
+    categorySuggestions.dispatchEvent(new Event("change"));
+  });
+}
 
 const loadCategories = async () => {
   renderLoadingMessage(categoryList, "Cargando categorías...");
   setSelectLoading(categorySuggestions, "Cargando categorías...");
+  if (businessCategorySearch) {
+    businessCategorySearch.disabled = true;
+  }
+  if (businessCategorySelectAll) {
+    businessCategorySelectAll.disabled = true;
+  }
+  if (businessCategoryClear) {
+    businessCategoryClear.disabled = true;
+  }
   categories = await apiFetch<Category[]>("/categories");
   adminCategoryPage = 1;
   renderCategories();
@@ -2591,12 +2809,23 @@ const loadCategories = async () => {
       categories
         .map(
           (category) =>
-            `<option value="${category.slug}">${category.name}</option>`,
+            `<option value="${category.slug}" data-label="${category.name}">${category.name}</option>`,
         )
         .join(""),
       false,
     );
   }
+  if (businessCategorySearch) {
+    businessCategorySearch.disabled = false;
+  }
+  if (businessCategorySelectAll) {
+    businessCategorySelectAll.disabled = false;
+  }
+  if (businessCategoryClear) {
+    businessCategoryClear.disabled = false;
+  }
+  renderBusinessCategoryChips();
+  renderBusinessCategoryResults("");
 };
 
 const wireAdminActions = () => {
@@ -2710,6 +2939,7 @@ const handleBusinessForm = () => {
       try {
         const payload: Record<string, unknown> = {
           name,
+          city: getFormString(data, "city"),
           type: getFormString(data, "type"),
           categories: categoryValues,
           description: getFormString(data, "description") || undefined,
@@ -3792,6 +4022,7 @@ const initDashboard = async () => {
     wireBusinessPagination();
     wireCityPagination();
     wireCategoryPagination();
+    wireBusinessCategorySearch();
     wireOwnerBusinessEdit();
     handleBusinessForm();
     handleBranchForm();
