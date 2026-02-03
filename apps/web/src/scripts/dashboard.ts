@@ -2320,6 +2320,11 @@ const updateBusinessFormAvailability = () => {
 
 const loadBusinessDependencies = async (isAdmin: boolean) => {
   if (businesses.length === 0) {
+    branches = [];
+    promotions = [];
+    updateBranchesView();
+    updatePromotionsView();
+    updateBusinessesView();
     return;
   }
   ensureCurrentBusiness();
