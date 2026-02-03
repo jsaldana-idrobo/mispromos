@@ -204,18 +204,7 @@ if (categoryClear && categorySelect) {
 if (categorySelect && categorySearch) {
   categorySearch.addEventListener("input", () => {
     const query = categorySearch.value.trim().toLowerCase();
-    Array.from(categorySelect.options).forEach((option) => {
-      const matches = option.textContent?.toLowerCase().includes(query);
-      option.hidden = query.length >= 2 && !matches;
-    });
     renderCategoryResults(query);
-    categorySelect.hidden = query.length >= 2;
-  });
-  categorySearch.addEventListener("blur", () => {
-    const query = categorySearch.value.trim().toLowerCase();
-    if (query.length < 2) {
-      categorySelect.hidden = false;
-    }
   });
 }
 
@@ -225,7 +214,9 @@ const loadCities = async () => {
     const cities = await apiFetch<City[]>("/cities");
     citySelect.innerHTML = [
       `<option value="">Selecciona una ciudad</option>`,
-      ...cities.map((city) => `<option value="${city.name}">${city.name}</option>`),
+      ...cities.map(
+        (city) => `<option value="${city.name}">${city.name}</option>`,
+      ),
     ].join("");
   } catch {
     citySelect.innerHTML = '<option value="">Sin ciudades disponibles</option>';

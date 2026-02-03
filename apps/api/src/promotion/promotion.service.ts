@@ -395,7 +395,17 @@ export class PromotionService {
       .lean()
       .exec();
     return new Map(
-      businesses.map((business) => [String(business._id), business]),
+      businesses.map((business) => [
+        String(business._id),
+        {
+          _id: String(business._id),
+          name: business.name,
+          slug: business.slug,
+          categories: business.categories,
+          instagram: business.instagram,
+          website: business.website,
+        },
+      ]),
     );
   }
 

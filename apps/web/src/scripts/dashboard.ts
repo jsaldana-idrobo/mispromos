@@ -1463,9 +1463,9 @@ const getBusinessCities = (business: Business) => {
     .filter((branch) => branch.businessId === business._id)
     .map((branch) => branch.city);
   const fallbackCity = business.city?.trim() ? [business.city.trim()] : [];
-  return Array.from(new Set(branchCities.length > 0 ? branchCities : fallbackCity)).sort(
-    compareLabels,
-  );
+  return Array.from(
+    new Set(branchCities.length > 0 ? branchCities : fallbackCity),
+  ).sort(compareLabels);
 };
 
 const formatBusinessCities = (business: Business) => {
@@ -1522,9 +1522,7 @@ const updateBusinessCityFilterOptions = () => {
   const cities = Array.from(
     new Set([
       ...branches.map((branch) => branch.city),
-      ...businesses
-        .map((business) => business.city?.trim())
-        .filter(Boolean),
+      ...businesses.map((business) => business.city?.trim()).filter(Boolean),
     ]),
   ).sort(compareLabels);
   const optionsHtml = `
