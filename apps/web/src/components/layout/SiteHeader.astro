@@ -48,6 +48,14 @@ const {
         Soy un negocio
       </a>
       <button
+        class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-2.5 py-1 text-center text-[0.65rem] transition hover:border-ink-900/50 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:py-2 sm:text-sm"
+        type="button"
+        data-nav-rewarded-ad
+        hidden={isAuthenticated}
+      >
+        Ver anuncio
+      </button>
+      <button
         class="inline-flex items-center justify-center rounded-full border border-ink-900/20 px-2.5 py-1 text-center text-[0.65rem] transition hover:border-ink-900/50 sm:px-4 sm:py-2 sm:text-sm"
         type="button"
         data-nav-logout

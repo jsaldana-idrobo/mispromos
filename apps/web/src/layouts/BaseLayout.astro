@@ -10,6 +10,7 @@ const containerClass = Astro.props.containerClass ?? "max-w-6xl";
 const logoSrc = Astro.props.logoSrc ?? "/logo.png";
 const logoAlt = Astro.props.logoAlt ?? "Tus promos";
 const faviconSrc = "/logo.png";
+const rewardedAdUnitPath = import.meta.env.PUBLIC_GAM_REWARDED_AD_UNIT ?? "";
 const cookieHeader = Astro.request.headers.get("cookie") ?? "";
 const hasAuthCookie = cookieHeader.includes("auth=");
 ---
@@ -28,8 +29,14 @@ const hasAuthCookie = cookieHeader.includes("auth=");
     <meta name="twitter:image" content={logoSrc} />
     <link rel="icon" href={faviconSrc} type="image/png" />
     <link rel="apple-touch-icon" href={faviconSrc} />
+    <script
+      is:inline
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2788866499355624"
+      crossorigin="anonymous"></script>
     <style>
       html[data-auth-loading="true"] [data-nav-register],
+      html[data-auth-loading="true"] [data-nav-rewarded-ad],
       html[data-auth-loading="true"] [data-nav-dashboard],
       html[data-auth-loading="true"] [data-nav-logout] {
         visibility: hidden;
@@ -72,11 +79,25 @@ const hasAuthCookie = cookieHeader.includes("auth=");
         transform: scaleX(1);
       }
     </style>
+    {
+      rewardedAdUnitPath ? (
+        <script
+          is:inline
+          async
+          src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"
+          crossorigin="anonymous"
+        />
+      ) : null
+    }
     <script>
       document.documentElement.dataset.authLoading = "true";
     </script>
   </head>
-  <body class="min-h-screen bg-white text-ink-900" data-api-base={apiBase}>
+  <body
+    class="min-h-screen bg-white text-ink-900"
+    data-api-base={apiBase}
+    data-rewarded-ad-unit={rewardedAdUnitPath}
+  >
     <div class="min-h-screen bg-white">
       <div class="net-loader" aria-hidden="true"></div>
       <SiteHeader
@@ -106,7 +127,15 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       };
       const dashboardLink = document.querySelector("[data-nav-dashboard]");
       const registerLink = document.querySelector("[data-nav-register]");
+      const rewardedAdButton = document.querySelector("[data-nav-rewarded-ad]");
       const logoutButton = document.querySelector("[data-nav-logout]");
+      const rewardedAdUnit = (
+        document.body?.dataset?.rewardedAdUnit || ""
+      ).trim();
+      const hasRewardedConfig = rewardedAdUnit.length > 0;
+      let rewardedVisible = hasRewardedConfig;
+      let latestAuthState =
+        document.documentElement.dataset.authenticated === "true";
       const setAuthLinks = (isAuthenticated) => {
         const path = window.location.pathname;
         const isRegisterPage = path.startsWith("/register");
@@ -122,12 +151,22 @@ const hasAuthCookie = cookieHeader.includes("auth=");
           registerLink.hidden = shouldHide;
           registerLink.style.display = shouldHide ? "none" : "inline-flex";
         }
+        if (rewardedAdButton) {
+          const shouldHide =
+            isAuthenticated ||
+            isRegisterPage ||
+            !isHomePage ||
+            !rewardedVisible;
+          rewardedAdButton.hidden = shouldHide;
+          rewardedAdButton.style.display = shouldHide ? "none" : "inline-flex";
+        }
         if (logoutButton) {
           logoutButton.hidden = !isAuthenticated;
           logoutButton.style.display = isAuthenticated ? "inline-flex" : "none";
         }
       };
       const setAuthState = (isAuthenticated, role) => {
+        latestAuthState = isAuthenticated;
         document.documentElement.dataset.authenticated = isAuthenticated
           ? "true"
           : "false";
@@ -158,6 +197,17 @@ const hasAuthCookie = cookieHeader.includes("auth=");
         } catch {
           // ignore storage errors
         }
+      };
+      const hideRewardedAction = () => {
+        rewardedVisible = false;
+        setAuthLinks(latestAuthState);
+      };
+      const setRewardedButtonState = (label, disabled) => {
+        if (!rewardedAdButton) {
+          return;
+        }
+        rewardedAdButton.textContent = label;
+        rewardedAdButton.disabled = disabled;
       };
       document.documentElement.dataset.authLoading = "true";
       const cookieAuth =
@@ -210,6 +260,76 @@ const hasAuthCookie = cookieHeader.includes("auth=");
           window.location.href = "/login";
           ensureNetLoading(false);
         });
+      }
+      if (rewardedAdButton) {
+        if (!hasRewardedConfig) {
+          hideRewardedAction();
+        } else {
+          const globalAny = window;
+          globalAny.googletag = globalAny.googletag || { cmd: [] };
+          let rewardedSlot = null;
+          let rewardedReadyEvent = null;
+          let rewardedLoading = false;
+
+          const requestRewarded = () => {
+            if (!rewardedSlot || rewardedLoading) {
+              return;
+            }
+            rewardedLoading = true;
+            rewardedReadyEvent = null;
+            setRewardedButtonState("Preparando anuncio...", true);
+            globalAny.googletag.cmd.push(() => {
+              try {
+                globalAny.googletag.display(rewardedSlot);
+              } catch {
+                hideRewardedAction();
+              }
+            });
+          };
+
+          globalAny.googletag.cmd.push(() => {
+            const googletag = globalAny.googletag;
+            const rewardedFormat = googletag?.enums?.OutOfPageFormat?.REWARDED;
+            if (!rewardedFormat) {
+              hideRewardedAction();
+              return;
+            }
+            rewardedSlot = googletag.defineOutOfPageSlot(
+              rewardedAdUnit,
+              rewardedFormat,
+            );
+            if (!rewardedSlot) {
+              hideRewardedAction();
+              return;
+            }
+            rewardedSlot.addService(googletag.pubads());
+            googletag
+              .pubads()
+              .addEventListener("rewardedSlotReady", (event) => {
+                rewardedLoading = false;
+                rewardedReadyEvent = event;
+                setRewardedButtonState("Ver anuncio", false);
+              });
+            googletag.pubads().addEventListener("rewardedSlotClosed", () => {
+              rewardedReadyEvent = null;
+              requestRewarded();
+            });
+            googletag.enableServices();
+            requestRewarded();
+          });
+
+          rewardedAdButton.addEventListener("click", () => {
+            if (
+              rewardedReadyEvent &&
+              typeof rewardedReadyEvent.makeRewardedVisible === "function"
+            ) {
+              setRewardedButtonState("Mostrando anuncio...", true);
+              rewardedReadyEvent.makeRewardedVisible();
+              return;
+            }
+            requestRewarded();
+          });
+        }
       }
     </script>
   </body>

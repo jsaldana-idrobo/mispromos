@@ -13,6 +13,24 @@ const at = searchParams.get("at") ?? "";
     <PromosFilters city={city} at={at} />
     <PromosResults />
   </section>
+  <section
+    class="mt-10 rounded-2xl border border-ink-900/10 bg-ink-50/60 p-5 sm:p-6"
+    aria-label="Transparencia de donaciones"
+  >
+    <p
+      class="text-xs font-semibold uppercase tracking-[0.16em] text-ink-900/70"
+    >
+      Transparencia
+    </p>
+    <h2 class="mt-2 text-lg font-display font-semibold text-ink-900">
+      Compromiso con fundaciones aliadas
+    </h2>
+    <p class="mt-2 text-sm leading-relaxed text-ink-900/80">
+      Donamos parte de los ingresos publicitarios de la plataforma a
+      fundaciones. Las donaciones se reportan por periodos y no dependen de la
+      visualización individual de un anuncio.
+    </p>
+  </section>
 
   <script>
     import "../scripts/promos.ts";
