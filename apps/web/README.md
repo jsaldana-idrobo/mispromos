@@ -29,4 +29,7 @@ Frontend Astro + Tailwind listo para comenzar el MVP público.
 - Crear un proyecto en Vercel apuntando a `apps/web` como root.
 - Variables requeridas:
   - `PUBLIC_API_BASE` (URL del API en Vercel, ej: `https://api-mispromos.vercel.app/api/v1`)
+- Variables opcionales para anuncios:
+  - `PUBLIC_OFFERWALL_URL` (si está definida, el botón "Ver anuncio" abre este Offerwall)
+  - `PUBLIC_GAM_REWARDED_AD_UNIT` (respaldo con Google Rewarded cuando no hay Offerwall URL)
 - `vercel.json` ya preparado en `apps/web/vercel.json`.

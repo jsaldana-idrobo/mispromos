@@ -11,6 +11,7 @@ const logoSrc = Astro.props.logoSrc ?? "/logo.png";
 const logoAlt = Astro.props.logoAlt ?? "Tus promos";
 const faviconSrc = "/logo.png";
 const rewardedAdUnitPath = import.meta.env.PUBLIC_GAM_REWARDED_AD_UNIT ?? "";
+const offerwallUrl = import.meta.env.PUBLIC_OFFERWALL_URL ?? "";
 const cookieHeader = Astro.request.headers.get("cookie") ?? "";
 const hasAuthCookie = cookieHeader.includes("auth=");
 ---
@@ -80,7 +81,7 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       }
     </style>
     {
-      rewardedAdUnitPath ? (
+      rewardedAdUnitPath && !offerwallUrl.trim() ? (
         <script
           is:inline
           async
@@ -97,6 +98,7 @@ const hasAuthCookie = cookieHeader.includes("auth=");
     class="min-h-screen bg-white text-ink-900"
     data-api-base={apiBase}
     data-rewarded-ad-unit={rewardedAdUnitPath}
+    data-offerwall-url={offerwallUrl}
   >
     <div class="min-h-screen bg-white">
       <div class="net-loader" aria-hidden="true"></div>
@@ -132,8 +134,12 @@ const hasAuthCookie = cookieHeader.includes("auth=");
       const rewardedAdUnit = (
         document.body?.dataset?.rewardedAdUnit || ""
       ).trim();
+      const configuredOfferwallUrl = (
+        document.body?.dataset?.offerwallUrl || ""
+      ).trim();
       const hasRewardedConfig = rewardedAdUnit.length > 0;
-      let rewardedVisible = hasRewardedConfig;
+      const hasOfferwallConfig = configuredOfferwallUrl.length > 0;
+      let rewardedVisible = hasOfferwallConfig || hasRewardedConfig;
       let latestAuthState =
         document.documentElement.dataset.authenticated === "true";
       const setAuthLinks = (isAuthenticated) => {
@@ -262,7 +268,19 @@ const hasAuthCookie = cookieHeader.includes("auth=");
         });
       }
       if (rewardedAdButton) {
-        if (!hasRewardedConfig) {
+        if (hasOfferwallConfig) {
+          setRewardedButtonState("Ver anuncio", false);
+          rewardedAdButton.addEventListener("click", () => {
+            const opened = window.open(
+              configuredOfferwallUrl,
+              "_blank",
+              "noopener,noreferrer",
+            );
+            if (!opened) {
+              window.location.href = configuredOfferwallUrl;
+            }
+          });
+        } else if (!hasRewardedConfig) {
           hideRewardedAction();
         } else {
           const globalAny = window;
